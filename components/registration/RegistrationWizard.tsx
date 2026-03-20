@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { StepIndicator } from "./StepIndicator";
-import { StepConnectWallet } from "./StepConnectWallet";
-import { StepEnterEmail } from "./StepEnterEmail";
-import { StepEncryptSign } from "./StepEncryptSign";
-import { StepSuccess } from "./StepSuccess";
-import type { RegistrationStep } from "@/types";
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { StepIndicator } from './StepIndicator';
+import { StepConnectWallet } from './StepConnectWallet';
+import { StepEnterEmail } from './StepEnterEmail';
+import { StepEncryptSign } from './StepEncryptSign';
+import { StepSuccess } from './StepSuccess';
+import type { RegistrationStep } from '@/types';
 
 const STEPS: { key: RegistrationStep; label: string }[] = [
-  { key: "connect", label: "Connect" },
-  { key: "email", label: "Email" },
-  { key: "encrypt", label: "Sign" },
-  { key: "success", label: "Done" },
+  { key: 'connect', label: 'Connect' },
+  { key: 'email', label: 'Email' },
+  { key: 'encrypt', label: 'Sign' },
+  { key: 'success', label: 'Done' },
 ];
 
 export function RegistrationWizard() {
-  const [step, setStep] = useState<RegistrationStep>("connect");
-  const [email, setEmail] = useState("");
-  const [txSignature, setTxSignature] = useState("");
-  const [walletAddress, setWalletAddress] = useState("");
+  const [step, setStep] = useState<RegistrationStep>('connect');
+  const [email, setEmail] = useState('');
+  const [txSignature, setTxSignature] = useState('');
+  const [walletAddress, setWalletAddress] = useState('');
   const [prefs, setPrefs] = useState({
     optInDefi: true,
     optInGovernance: true,
@@ -31,19 +31,46 @@ export function RegistrationWizard() {
 
   const stepIndex = STEPS.findIndex((s) => s.key === step);
 
-  const handleWalletConnected = (address: string) => {
-    setWalletAddress(address);
-    setStep("email");
+  // Handle wallet connection (just stores the address)
+  const handleWalletConnected = (address: string | undefined) => {
+    if (address) {
+      setWalletAddress(address);
+    } else {
+      setWalletAddress('');
+      // Only reset to connect if we're not already there
+      if (step !== 'connect') {
+        setStep('connect');
+      }
+    }
+  };
+
+  // Handle progression to next step
+  const handleNextStep = () => {
+    if (step === 'connect' && walletAddress) {
+      setStep('email');
+    } else if (step === 'email' && email) {
+      setStep('encrypt');
+    } else if (step === 'encrypt') {
+      // This will be handled by handleSignComplete
+    }
   };
 
   const handleEmailSubmit = (submittedEmail: string) => {
     setEmail(submittedEmail);
-    setStep("encrypt");
+    setStep('encrypt');
   };
 
   const handleSignComplete = (sig: string) => {
     setTxSignature(sig);
-    setStep("success");
+    setStep('success');
+  };
+
+  const handleBack = () => {
+    if (step === 'email') {
+      setStep('connect');
+    } else if (step === 'encrypt') {
+      setStep('email');
+    }
   };
 
   return (
@@ -69,7 +96,7 @@ export function RegistrationWizard() {
 
       {/* Step Content */}
       <AnimatePresence mode="wait">
-        {step === "connect" && (
+        {step === 'connect' && (
           <motion.div
             key="connect"
             initial={{ opacity: 0, x: 20 }}
@@ -77,11 +104,15 @@ export function RegistrationWizard() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <StepConnectWallet onConnected={handleWalletConnected} />
+            <StepConnectWallet
+              onConnected={handleWalletConnected}
+              onNext={handleNextStep}
+              showNextButton={true}
+            />
           </motion.div>
         )}
 
-        {step === "email" && (
+        {step === 'email' && (
           <motion.div
             key="email"
             initial={{ opacity: 0, x: 20 }}
@@ -91,13 +122,13 @@ export function RegistrationWizard() {
           >
             <StepEnterEmail
               email={email}
-              onBack={() => setStep("connect")}
+              onBack={() => handleBack()}
               onSubmit={handleEmailSubmit}
             />
           </motion.div>
         )}
 
-        {step === "encrypt" && (
+        {step === 'encrypt' && (
           <motion.div
             key="encrypt"
             initial={{ opacity: 0, x: 20 }}
@@ -109,13 +140,13 @@ export function RegistrationWizard() {
               email={email}
               prefs={prefs}
               onPrefsChange={setPrefs}
-              onBack={() => setStep("email")}
+              onBack={() => handleBack()}
               onComplete={handleSignComplete}
             />
           </motion.div>
         )}
 
-        {step === "success" && (
+        {step === 'success' && (
           <motion.div
             key="success"
             initial={{ opacity: 0, scale: 0.95 }}
