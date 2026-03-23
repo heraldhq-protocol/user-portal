@@ -1,7 +1,9 @@
 "use client";
 
 import { motion } from "motion/react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FaArrowLeft } from "react-icons/fa6";
 import { NotificationList } from "@/components/notifications/NotificationList";
 import { type Notification } from "@/types";
 
@@ -84,6 +86,14 @@ export default function NotificationsPage() {
 				transition={{ duration: 0.4 }}
 				className="flex flex-col h-full"
 			>
+				<Link
+					href="/"
+					className="inline-flex items-center gap-2 text-sm font-semibold text-text-muted hover:text-text-primary transition-colors mb-4 w-fit"
+				>
+					<FaArrowLeft className="w-4 h-4" />
+					Back to Dashboard
+				</Link>
+
 				<h1 className="text-[28px] font-extrabold tracking-tight mb-6 shrink-0">
 					Notification history
 				</h1>

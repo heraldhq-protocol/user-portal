@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { motion } from "motion/react";
+import Link from "next/link";
+import { useState } from "react";
+import { FaArrowLeft } from "react-icons/fa6";
+import { DeleteAccountModal } from "@/components/preferences/DeleteAccountModal";
+import { EmailUpdateModal } from "@/components/preferences/EmailUpdateModal";
+import { PreferencesForm } from "@/components/preferences/PreferencesForm";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { truncateAddress } from "@/lib/utils";
 import { useWalletRegistrationStatus } from "@/hooks/useWalletRegistrationStatus";
-import { PreferencesForm } from "@/components/preferences/PreferencesForm";
-import { EmailUpdateModal } from "@/components/preferences/EmailUpdateModal";
-import { DeleteAccountModal } from "@/components/preferences/DeleteAccountModal";
+import { truncateAddress } from "@/lib/utils";
 
 export default function PreferencesPage() {
 	const { publicKey } = useWallet();
@@ -51,6 +53,13 @@ export default function PreferencesPage() {
 				transition={{ duration: 0.4 }}
 			>
 				{/* Header */}
+				<Link
+					href="/"
+					className="inline-flex items-center gap-2 text-sm font-semibold text-text-muted hover:text-text-primary transition-colors mb-6 w-fit"
+				>
+					<FaArrowLeft className="w-4 h-4" />
+					Back to Dashboard
+				</Link>
 				<div className="mb-9">
 					<h1 className="text-[28px] font-extrabold tracking-tight mb-1.5">Preferences</h1>
 					<div className="flex items-center gap-2">
