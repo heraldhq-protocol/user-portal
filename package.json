@@ -1,76 +1,74 @@
 {
-  "name": "user-portal",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "prepare": "husky"
-  },
-  "dependencies": {
-    "@coral-xyz/anchor": "^0.32.1",
-    "@hookform/resolvers": "^5.2.2",
-    "@radix-ui/react-dialog": "^1.1.15",
-    "@radix-ui/react-dropdown-menu": "^2.1.16",
-    "@radix-ui/react-radio-group": "^1.3.8",
-    "@radix-ui/react-switch": "^1.2.6",
-    "@solana/wallet-adapter-base": "^0.9.27",
-    "@solana/wallet-adapter-react": "^0.15.39",
-    "@solana/wallet-adapter-react-ui": "^0.9.39",
-    "@solana/wallet-adapter-wallets": "^0.19.37",
-    "@solana/web3.js": "^1.98.4",
-    "@tanstack/react-query": "^5.91.3",
-    "@tanstack/react-query-devtools": "^5.95.2",
-    "@tanstack/react-virtual": "^3.13.23",
-    "@upstash/ratelimit": "^2.0.8",
-    "@upstash/redis": "^1.37.0",
-    "axios": "^1.13.6",
-    "bs58": "^6.0.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "ed2curve": "^0.3.0",
-    "immer": "^11.1.4",
-    "motion": "^12.38.0",
-    "next": "^16.2.0",
-    "postcss": "^8.5.8",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-hook-form": "^7.71.2",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "^3.5.0",
-    "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1",
-    "zod": "^4.3.6",
-    "zustand": "^5.0.12"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/ed2curve": "^0.2.4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
-    "msw": "^2.12.14",
-    "prettier": "^3.8.1",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --check"
-    ],
-    "*.{js,mjs}": [
-      "prettier --check"
-    ],
-    "*.{json,css,md}": [
-      "prettier --check"
-    ]
-  }
+	"name": "user-portal",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "eslint . --ext .ts,.tsx",
+		"lint:fix": "eslint . --ext .ts,.tsx --fix",
+		"format": "biome format . --write",
+		"format:check": "biome format .",
+		"check": "biome format . && eslint . --ext .ts,.tsx",
+		"prepare": "husky"
+	},
+	"dependencies": {
+		"@coral-xyz/anchor": "^0.32.1",
+		"@hookform/resolvers": "^5.2.2",
+		"@radix-ui/react-dialog": "^1.1.15",
+		"@radix-ui/react-dropdown-menu": "^2.1.16",
+		"@radix-ui/react-radio-group": "^1.3.8",
+		"@radix-ui/react-switch": "^1.2.6",
+		"@solana/wallet-adapter-base": "^0.9.27",
+		"@solana/wallet-adapter-react": "^0.15.39",
+		"@solana/wallet-adapter-react-ui": "^0.9.39",
+		"@solana/wallet-adapter-wallets": "^0.19.37",
+		"@solana/web3.js": "^1.98.4",
+		"@tanstack/react-query": "^5.91.3",
+		"@tanstack/react-query-devtools": "^5.95.2",
+		"@tanstack/react-virtual": "^3.13.23",
+		"@upstash/ratelimit": "^2.0.8",
+		"@upstash/redis": "^1.37.0",
+		"axios": "^1.13.6",
+		"bs58": "^6.0.0",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"date-fns": "^4.1.0",
+		"ed2curve": "^0.3.0",
+		"immer": "^11.1.4",
+		"motion": "^12.38.0",
+		"next": "^16.2.0",
+		"postcss": "^8.5.8",
+		"react": "19.2.4",
+		"react-dom": "19.2.4",
+		"react-hook-form": "^7.71.2",
+		"sonner": "^2.0.7",
+		"tailwind-merge": "^3.5.0",
+		"tweetnacl": "^1.0.3",
+		"tweetnacl-util": "^0.15.1",
+		"zod": "^4.3.6",
+		"zustand": "^5.0.12"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.8",
+		"@tailwindcss/postcss": "^4",
+		"@types/ed2curve": "^0.2.4",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"eslint": "^9",
+		"eslint-config-next": "16.2.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.4.0",
+		"msw": "^2.12.14",
+		"tailwindcss": "^4",
+		"typescript": "^5"
+	},
+	"lint-staged": {
+		"*.{ts,tsx,js,mjs,json,css,md}": [
+			"biome format --write --no-errors-on-unmatched",
+			"eslint --fix --max-warnings=0"
+		]
+	}
 }

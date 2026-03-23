@@ -44,3 +44,5 @@ next-env.d.ts
 
 # reference file
 UserPortal.jsx
+
+*.lock
