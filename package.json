@@ -10,7 +10,7 @@
 		"lint:fix": "eslint . --ext .ts,.tsx --fix",
 		"format": "biome format . --write",
 		"format:check": "biome format .",
-		"check": "biome format . && eslint . --ext .ts,.tsx",
+		"check": "biome check . --formatter-enabled=true --linter-enabled=false --assist-enabled=true",
 		"prepare": "husky"
 	},
 	"dependencies": {
@@ -66,8 +66,7 @@
 		"typescript": "^5"
 	},
 	"lint-staged": {
-		"*.{ts,tsx,js,mjs,json,css,md}": [
-			"biome format --write --no-errors-on-unmatched",
+		"*.{ts,tsx}": [
 			"eslint --fix --max-warnings=0"
 		]
 	}
