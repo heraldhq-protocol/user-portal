@@ -77,46 +77,6 @@ export function StepEncryptSign({
         Review your preferences, then sign the transaction.
       </p>
 
-      {/* Encryption progress */}
-      <div className="bg-card-2 border border-border-2 rounded-xl p-5 mb-4">
-        <div className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3">
-          Encryption progress
-        </div>
-        {ENCRYPT_STEPS.map((step, i) => {
-          const state =
-            encryptPhase > i ? 'done' : encryptPhase === i && isRegistering ? 'active' : 'pending';
-          return (
-            <div
-              key={i}
-              className={cn(
-                'flex items-center gap-3 py-2.5',
-                i < ENCRYPT_STEPS.length - 1 && 'border-b border-border',
-              )}
-            >
-              {/* Status dot */}
-              <div
-                className={cn(
-                  'w-[22px] h-[22px] rounded-full flex items-center justify-center text-xs shrink-0',
-                  state === 'done' && 'bg-teal/15 text-teal border border-teal/30',
-                  state === 'active' && 'bg-teal/8 border border-teal animate-spin',
-                  state === 'pending' && 'bg-border border border-border-2',
-                )}
-              >
-                {state === 'done' ? '✓' : state === 'active' ? '◌' : ''}
-              </div>
-              <span
-                className={cn(
-                  'text-[13px]',
-                  state === 'pending' ? 'text-text-muted' : 'text-text-secondary',
-                )}
-              >
-                {step}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
       {/* Notification preferences */}
       <div className="bg-card-2 border border-border-2 rounded-xl p-5 mb-6">
         <div className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3">
@@ -175,6 +135,46 @@ export function StepEncryptSign({
             />
           </button>
         </div>
+      </div>
+
+      {/* Encryption progress */}
+      <div className="bg-card-2 border border-border-2 rounded-xl p-5 mb-4">
+        <div className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3">
+          Encryption progress
+        </div>
+        {ENCRYPT_STEPS.map((step, i) => {
+          const state =
+            encryptPhase > i ? 'done' : encryptPhase === i && isRegistering ? 'active' : 'pending';
+          return (
+            <div
+              key={i}
+              className={cn(
+                'flex items-center gap-3 py-2.5',
+                i < ENCRYPT_STEPS.length - 1 && 'border-b border-border',
+              )}
+            >
+              {/* Status dot */}
+              <div
+                className={cn(
+                  'w-5.5 h-5.5 rounded-full flex items-center justify-center text-xs shrink-0',
+                  state === 'done' && 'bg-teal/15 text-teal border border-teal/30',
+                  state === 'active' && 'bg-teal/8 border border-teal animate-spin',
+                  state === 'pending' && 'bg-border border border-border-2',
+                )}
+              >
+                {state === 'done' ? '✓' : state === 'active' ? '◌' : ''}
+              </div>
+              <span
+                className={cn(
+                  'text-[13px]',
+                  state === 'pending' ? 'text-text-muted' : 'text-text-secondary',
+                )}
+              >
+                {step}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Actions */}

@@ -71,6 +71,8 @@ export async function buildRegisterIdentityTx(
   });
 
   tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  // MOCK: bypass network request to avoid connection errors
+  // tx.recentBlockhash = '11111111111111111111111111111111';
   tx.feePayer = publicKey;
   return tx;
 }
@@ -114,6 +116,8 @@ export async function buildUpdateIdentityTx(
   });
 
   tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  // MOCK: bypass network request to avoid connection errors
+  // tx.recentBlockhash = '11111111111111111111111111111111';
   tx.feePayer = publicKey;
   return tx;
 }
@@ -141,7 +145,10 @@ export async function buildDeleteIdentityTx(
     data: Buffer.from('mock delete_identity'),
   });
 
+  //TODO: REMOVE THIS MOCK ONCE THE IDL IS READY
   tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+  // MOCK: bypass network request to avoid connection errors
+  // tx.recentBlockhash = '11111111111111111111111111111111';
   tx.feePayer = publicKey;
   return tx;
 }

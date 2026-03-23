@@ -22,15 +22,13 @@ export function RegistrationWizard() {
   const { state, setEmail, setOptIns, setDigestMode, goToStep, register, phase, isRegistering } =
     useRegistration();
 
-  const { connected } = useWallet();
+  const { connected, disconnect } = useWallet();
 
   const stepIndex = STEPS.findIndex((s) => s.key === state.step);
 
-  // Auto-advance or fallback on wallet connection state
+  // Only handle disconnection (wallet disconnected externally), not connection
   useEffect(() => {
-    if (connected && state.step === 'connect') {
-      goToStep('email');
-    } else if (!connected && state.step !== 'connect' && state.step !== 'success') {
+    if (!connected && state.step !== 'connect' && state.step !== 'success') {
       goToStep('connect');
     }
   }, [connected, state.step, goToStep]);
@@ -54,6 +52,8 @@ export function RegistrationWizard() {
 
   const handleBack = () => {
     if (state.step === 'email') {
+      // Disconnect wallet when going back to connect step
+      disconnect();
       goToStep('connect');
     } else if (state.step === 'encrypt') {
       goToStep('email');

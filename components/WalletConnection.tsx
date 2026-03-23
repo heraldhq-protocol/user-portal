@@ -18,7 +18,7 @@ export function WalletConnection({ children }: Readonly<{ children: React.ReactN
     ],
     [],
   );
-  const DEVNET_URL = 'https://devnet.solana.com';
+  const DEVNET_URL = 'https://api.devnet.solana.com';
   return (
     <ConnectionProvider endpoint={DEVNET_URL}>
       <WalletProvider wallets={wallets}>{children}</WalletProvider>
