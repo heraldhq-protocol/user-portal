@@ -67,6 +67,7 @@
 	},
 	"lint-staged": {
 		"*.{ts,tsx}": [
+			"biome check --write --no-errors-on-unmatched --files-ignore-unknown=true",
 			"eslint --fix --max-warnings=0"
 		]
 	}
