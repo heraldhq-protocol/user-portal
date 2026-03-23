@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export function PortalHeader() {
   const pathname = usePathname();
@@ -22,8 +22,8 @@ export function PortalHeader() {
         <Link
           href="/"
           className={cn(
-            "text-sm font-medium transition-colors",
-            pathname === "/" ? "text-text-secondary" : "text-text-muted hover:text-text-secondary"
+            'text-sm font-medium transition-colors',
+            pathname === '/' ? 'text-text-secondary' : 'text-text-muted hover:text-text-secondary',
           )}
         >
           Home
@@ -31,8 +31,10 @@ export function PortalHeader() {
         <Link
           href="/how-it-works"
           className={cn(
-            "text-sm font-medium transition-colors",
-            pathname === "/how-it-works" ? "text-text-secondary" : "text-text-muted hover:text-text-secondary"
+            'text-sm font-medium transition-colors',
+            pathname === '/how-it-works'
+              ? 'text-text-secondary'
+              : 'text-text-muted hover:text-text-secondary',
           )}
         >
           How it works

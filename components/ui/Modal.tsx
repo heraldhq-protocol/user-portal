@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { motion, AnimatePresence } from "motion/react";
-import { cn } from "@/lib/utils";
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '@/lib/utils';
 
 interface ModalProps {
   open: boolean;
@@ -14,13 +14,7 @@ interface ModalProps {
   danger?: boolean;
 }
 
-export function Modal({
-  open,
-  onOpenChange,
-  children,
-  className,
-  danger = false,
-}: ModalProps) {
+export function Modal({ open, onOpenChange, children, className, danger = false }: ModalProps) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
@@ -41,12 +35,10 @@ export function Modal({
                 exit={{ scale: 0.9, opacity: 0 }}
                 transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 className={cn(
-                  "fixed left-1/2 top-1/2 z-50 w-full max-w-[420px] -translate-x-1/2 -translate-y-1/2",
-                  "rounded-2xl bg-card p-6",
-                  danger
-                    ? "border border-herald-red/30"
-                    : "border border-border",
-                  className
+                  'fixed left-1/2 top-1/2 z-50 w-full max-w-[420px] -translate-x-1/2 -translate-y-1/2',
+                  'rounded-2xl bg-card p-6',
+                  danger ? 'border border-herald-red/30' : 'border border-border',
+                  className,
                 )}
               >
                 {children}

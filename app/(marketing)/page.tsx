@@ -1,73 +1,73 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "motion/react";
+import Link from 'next/link';
+import { motion } from 'motion/react';
 
 const PROTOCOLS = [
-  "Jupiter",
-  "Drift",
-  "Marinade",
-  "Marginfi",
-  "Orca",
-  "Kamino",
-  "Solend",
-  "Raydium",
+  'Jupiter',
+  'Drift',
+  'Marinade',
+  'Marginfi',
+  'Orca',
+  'Kamino',
+  'Solend',
+  'Raydium',
 ];
 
 const trustCards = [
   {
-    icon: "🔒",
-    title: "Zero PII",
-    desc: "We never see your email address. Ever.",
+    icon: '🔒',
+    title: 'Zero PII',
+    desc: 'We never see your email address. Ever.',
   },
   {
-    icon: "⛓",
-    title: "On-chain proof",
-    desc: "Every send is verifiably recorded on Solana.",
+    icon: '⛓',
+    title: 'On-chain proof',
+    desc: 'Every send is verifiably recorded on Solana.',
   },
   {
-    icon: "📧",
-    title: "Any inbox",
-    desc: "Works with Gmail, Outlook, Proton — any email.",
+    icon: '📧',
+    title: 'Any inbox',
+    desc: 'Works with Gmail, Outlook, Proton — any email.',
   },
 ];
 
 const howSteps = [
   {
-    n: "01",
-    title: "Connect wallet",
-    desc: "Your wallet is your identity. No username needed.",
+    n: '01',
+    title: 'Connect wallet',
+    desc: 'Your wallet is your identity. No username needed.',
   },
   {
-    n: "02",
-    title: "Enter email",
-    desc: "Encrypted in your browser. We receive only ciphertext.",
+    n: '02',
+    title: 'Enter email',
+    desc: 'Encrypted in your browser. We receive only ciphertext.',
   },
   {
-    n: "03",
-    title: "Done",
-    desc: "Receive DeFi alerts from any protocol, privately.",
+    n: '03',
+    title: 'Done',
+    desc: 'Receive DeFi alerts from any protocol, privately.',
   },
 ];
 
 const demoNotifications = [
   {
-    type: "defi" as const,
-    proto: "Drift Protocol",
-    msg: "Health factor 1.05 — add collateral",
-    time: "Just now",
+    type: 'defi' as const,
+    proto: 'Drift Protocol',
+    msg: 'Health factor 1.05 — add collateral',
+    time: 'Just now',
   },
   {
-    type: "governance" as const,
-    proto: "Realms DAO",
-    msg: "Proposal #47 vote closes in 23h",
-    time: "2m ago",
+    type: 'governance' as const,
+    proto: 'Realms DAO',
+    msg: 'Proposal #47 vote closes in 23h',
+    time: '2m ago',
   },
   {
-    type: "defi" as const,
-    proto: "Marginfi",
-    msg: "Position near liquidation threshold",
-    time: "5m ago",
+    type: 'defi' as const,
+    proto: 'Marginfi',
+    msg: 'Position near liquidation threshold',
+    time: '5m ago',
   },
 ];
 
@@ -109,9 +109,8 @@ export default function LandingPage() {
               variants={item}
               className="text-[17px] text-text-secondary leading-[1.7] mb-9 max-w-[420px]"
             >
-              Receive DeFi alerts directly to your inbox — without sharing your
-              email with any protocol. Herald never stores your email in
-              plaintext.
+              Receive DeFi alerts directly to your inbox — without sharing your email with any
+              protocol. Herald never stores your email in plaintext.
             </motion.p>
 
             <motion.div variants={item} className="flex gap-3">
@@ -152,16 +151,16 @@ export default function LandingPage() {
                   transition={{ delay: 0.5 + i * 0.15 }}
                 >
                   <div
-                    className={`flex gap-3.5 items-start p-4 rounded-xl border border-border bg-card transition-colors hover:border-border-2 ${i < 2 ? "mb-2.5" : ""}`}
+                    className={`flex gap-3.5 items-start p-4 rounded-xl border border-border bg-card transition-colors hover:border-border-2 ${i < 2 ? 'mb-2.5' : ''}`}
                   >
                     <div
                       className="w-2 h-2 rounded-full mt-1.5 shrink-0 glow-dot"
                       style={{
                         background:
-                          n.type === "governance"
-                            ? "var(--color-herald-purple)"
-                            : "var(--color-teal)",
-                        boxShadow: `0 0 0 3px ${n.type === "governance" ? "rgba(91,53,213,0.25)" : "rgba(0,200,150,0.25)"}`,
+                          n.type === 'governance'
+                            ? 'var(--color-herald-purple)'
+                            : 'var(--color-teal)',
+                        boxShadow: `0 0 0 3px ${n.type === 'governance' ? 'rgba(91,53,213,0.25)' : 'rgba(0,200,150,0.25)'}`,
                       }}
                     />
                     <div className="flex-1 min-w-0">
@@ -169,21 +168,14 @@ export default function LandingPage() {
                         <span
                           className="text-xs font-bold"
                           style={{
-                            color:
-                              n.type === "governance"
-                                ? "#A78BFA"
-                                : "var(--color-teal)",
+                            color: n.type === 'governance' ? '#A78BFA' : 'var(--color-teal)',
                           }}
                         >
                           {n.proto}
                         </span>
-                        <span className="text-[11px] text-text-muted">
-                          {n.time}
-                        </span>
+                        <span className="text-[11px] text-text-muted">{n.time}</span>
                       </div>
-                      <p className="text-[13px] text-text-secondary truncate">
-                        {n.msg}
-                      </p>
+                      <p className="text-[13px] text-text-secondary truncate">{n.msg}</p>
                     </div>
                   </div>
                 </motion.div>
@@ -211,9 +203,7 @@ export default function LandingPage() {
             >
               <div className="text-[28px] mb-3">{c.icon}</div>
               <div className="font-bold text-base mb-1.5">{c.title}</div>
-              <div className="text-[13px] text-text-muted leading-relaxed">
-                {c.desc}
-              </div>
+              <div className="text-[13px] text-text-muted leading-relaxed">{c.desc}</div>
             </motion.div>
           ))}
         </div>
@@ -233,17 +223,11 @@ export default function LandingPage() {
               transition={{ delay: 0.8 + i * 0.1 }}
             >
               <div className="mb-3">
-                <span className="font-mono text-[11px] text-teal font-medium">
-                  {s.n}
-                </span>
+                <span className="font-mono text-[11px] text-teal font-medium">{s.n}</span>
               </div>
               <h3 className="text-lg font-bold mb-2">{s.title}</h3>
-              <p className="text-sm text-text-muted leading-relaxed">
-                {s.desc}
-              </p>
-              {i < 2 && (
-                <div className="mt-5 w-full h-px bg-border hidden md:block" />
-              )}
+              <p className="text-sm text-text-muted leading-relaxed">{s.desc}</p>
+              {i < 2 && <div className="mt-5 w-full h-px bg-border hidden md:block" />}
             </motion.div>
           ))}
         </div>

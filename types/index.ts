@@ -1,19 +1,10 @@
-export * from "./anchor";
+export * from './anchor';
 
 /** Notification delivery status */
-export type NotificationStatus =
-  | "queued"
-  | "processing"
-  | "delivered"
-  | "failed"
-  | "opted_out";
+export type NotificationStatus = 'queued' | 'processing' | 'delivered' | 'failed' | 'opted_out';
 
 /** Notification category */
-export type NotificationCategory =
-  | "defi"
-  | "governance"
-  | "system"
-  | "marketing";
+export type NotificationCategory = 'defi' | 'governance' | 'system' | 'marketing';
 
 /** A single notification record */
 export interface Notification {
@@ -31,7 +22,7 @@ export interface Notification {
 }
 
 /** Registration wizard step identifiers */
-export type RegistrationStep = "connect" | "email" | "encrypt" | "success";
+export type RegistrationStep = 'connect' | 'email' | 'encrypt' | 'success';
 
 /** Wallet info for display */
 export interface WalletInfo {

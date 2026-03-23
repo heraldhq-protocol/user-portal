@@ -22,7 +22,10 @@
     "@solana/wallet-adapter-wallets": "^0.19.37",
     "@solana/web3.js": "^1.98.4",
     "@tanstack/react-query": "^5.91.3",
+    "@tanstack/react-query-devtools": "^5.95.2",
     "@tanstack/react-virtual": "^3.13.23",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0",
     "axios": "^1.13.6",
     "bs58": "^6.0.0",
     "class-variance-authority": "^0.7.1",
@@ -53,6 +56,7 @@
     "eslint-config-next": "16.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
+    "msw": "^2.12.14",
     "prettier": "^3.8.1",
     "tailwindcss": "^4",
     "typescript": "^5"
@@ -60,13 +64,13 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
-      "prettier --write"
+      "prettier --check"
     ],
     "*.{js,mjs}": [
-      "prettier --write"
+      "prettier --check"
     ],
     "*.{json,css,md}": [
-      "prettier --write"
+      "prettier --check"
     ]
   }
 }

@@ -1,9 +1,9 @@
-import { RegistrationWizard } from "@/components/registration/RegistrationWizard";
-import type { Metadata } from "next";
+import { RegistrationWizard } from '@/components/registration/RegistrationWizard';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "Register — Herald",
-  description: "Register your email for privacy-preserving DeFi notifications on Solana.",
+  title: 'Register — Herald',
+  description: 'Register your email for privacy-preserving DeFi notifications on Solana.',
 };
 
 export default function RegisterPage() {

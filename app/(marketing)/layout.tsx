@@ -1,11 +1,7 @@
-import { PortalHeader } from "@/components/layout/PortalHeader";
-import { PortalFooter } from "@/components/layout/PortalFooter";
+import { PortalHeader } from '@/components/layout/PortalHeader';
+import { PortalFooter } from '@/components/layout/PortalFooter';
 
-export default function MarketingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <PortalHeader />

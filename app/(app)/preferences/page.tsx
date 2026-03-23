@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { cn } from '@/lib/utils';
+import type { Metadata } from 'next';
 
 const CATEGORIES = [
-  { key: "defi", label: "DeFi alerts", desc: "Liquidation warnings, health factor alerts" },
-  { key: "governance", label: "Governance", desc: "DAO votes, proposals, quorum alerts" },
-  { key: "system", label: "System", desc: "Security, maintenance, critical updates" },
-  { key: "marketing", label: "Marketing", desc: "Product updates, newsletters" },
+  { key: 'defi', label: 'DeFi alerts', desc: 'Liquidation warnings, health factor alerts' },
+  { key: 'governance', label: 'Governance', desc: 'DAO votes, proposals, quorum alerts' },
+  { key: 'system', label: 'System', desc: 'Security, maintenance, critical updates' },
+  { key: 'marketing', label: 'Marketing', desc: 'Product updates, newsletters' },
 ];
 
 const DELIVERY_MODES = [
-  { id: "realtime", label: "Real-time", desc: "Delivered immediately" },
-  { id: "digest", label: "Daily digest", desc: "Batched every day at 9am UTC" },
+  { id: 'realtime', label: 'Real-time', desc: 'Delivered immediately' },
+  { id: 'digest', label: 'Daily digest', desc: 'Batched every day at 9am UTC' },
 ];
 
 export default function PreferencesPage() {
@@ -48,14 +48,10 @@ export default function PreferencesPage() {
       >
         {/* Header */}
         <div className="mb-9">
-          <h1 className="text-[28px] font-extrabold tracking-tight mb-1.5">
-            Preferences
-          </h1>
+          <h1 className="text-[28px] font-extrabold tracking-tight mb-1.5">Preferences</h1>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-teal" />
-            <span className="font-mono text-[13px] text-text-muted">
-              7xR4mKp2...nQ
-            </span>
+            <span className="font-mono text-[13px] text-text-muted">7xR4mKp2...nQ</span>
           </div>
         </div>
 
@@ -70,16 +66,14 @@ export default function PreferencesPage() {
               className="flex items-center justify-between py-4 border-b border-border last:border-b-0"
             >
               <div>
-                <div className="text-sm font-semibold text-text-secondary mb-0.5">
-                  {label}
-                </div>
+                <div className="text-sm font-semibold text-text-secondary mb-0.5">{label}</div>
                 <div className="text-xs text-text-muted">{desc}</div>
               </div>
               <button
                 onClick={() => togglePref(key)}
                 className={cn(
-                  "relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 cursor-pointer",
-                  prefs[key] ? "bg-teal" : "bg-border-2"
+                  'relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 cursor-pointer',
+                  prefs[key] ? 'bg-teal' : 'bg-border-2',
                 )}
                 role="switch"
                 aria-checked={prefs[key]}
@@ -87,8 +81,8 @@ export default function PreferencesPage() {
               >
                 <span
                   className={cn(
-                    "absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform duration-200",
-                    prefs[key] && "translate-x-5"
+                    'absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform duration-200',
+                    prefs[key] && 'translate-x-5',
                   )}
                 />
               </button>
@@ -102,33 +96,26 @@ export default function PreferencesPage() {
             Delivery mode
           </h3>
           {DELIVERY_MODES.map(({ id, label, desc }) => {
-            const isActive =
-              (id === "digest") === digestMode;
+            const isActive = (id === 'digest') === digestMode;
             return (
               <div
                 key={id}
-                onClick={() => setDigestMode(id === "digest")}
+                onClick={() => setDigestMode(id === 'digest')}
                 className={cn(
-                  "flex items-center gap-3.5 px-3.5 py-3 rounded-[10px] cursor-pointer mb-2 transition-all duration-150 border",
-                  isActive
-                    ? "bg-teal/5 border-teal/20"
-                    : "bg-transparent border-border"
+                  'flex items-center gap-3.5 px-3.5 py-3 rounded-[10px] cursor-pointer mb-2 transition-all duration-150 border',
+                  isActive ? 'bg-teal/5 border-teal/20' : 'bg-transparent border-border',
                 )}
               >
                 <div
                   className={cn(
-                    "w-[18px] h-[18px] rounded-full border-2 shrink-0 flex items-center justify-center",
-                    isActive ? "border-teal" : "border-border-2"
+                    'w-[18px] h-[18px] rounded-full border-2 shrink-0 flex items-center justify-center',
+                    isActive ? 'border-teal' : 'border-border-2',
                   )}
                 >
-                  {isActive && (
-                    <div className="w-2 h-2 rounded-full bg-teal" />
-                  )}
+                  {isActive && <div className="w-2 h-2 rounded-full bg-teal" />}
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-text-secondary">
-                    {label}
-                  </div>
+                  <div className="text-sm font-semibold text-text-secondary">{label}</div>
                   <div className="text-xs text-text-muted">{desc}</div>
                 </div>
               </div>
@@ -142,9 +129,7 @@ export default function PreferencesPage() {
             Email address
           </h3>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-text-secondary blur-email">
-              alice@gmail.com
-            </span>
+            <span className="text-sm text-text-secondary blur-email">alice@gmail.com</span>
             <Button variant="secondary" size="sm">
               Update email
             </Button>
@@ -153,7 +138,7 @@ export default function PreferencesPage() {
 
         {/* Save */}
         <Button className="w-full justify-center mb-8" onClick={handleSave}>
-          {saved ? "✓ Saved" : "Save changes (requires signature)"}
+          {saved ? '✓ Saved' : 'Save changes (requires signature)'}
         </Button>
 
         {/* Danger zone */}
@@ -161,10 +146,7 @@ export default function PreferencesPage() {
           <div className="text-[11px] font-bold text-text-muted tracking-[2px] uppercase mb-3">
             Danger zone
           </div>
-          <Button
-            variant="danger"
-            onClick={() => setShowDelete(true)}
-          >
+          <Button variant="danger" onClick={() => setShowDelete(true)}>
             Delete account
           </Button>
         </div>
@@ -184,13 +166,11 @@ export default function PreferencesPage() {
                 exit={{ scale: 0.9, opacity: 0 }}
                 className="bg-card border border-herald-red/30 rounded-2xl p-6 max-w-[420px] w-full"
               >
-                <div className="text-xl font-extrabold mb-2.5">
-                  Delete account?
-                </div>
+                <div className="text-xl font-extrabold mb-2.5">Delete account?</div>
                 <p className="text-sm text-text-muted leading-relaxed mb-6">
-                  This permanently removes your on-chain IdentityAccount and
-                  returns the rent to your wallet. All future notifications to
-                  this wallet will be silently dropped. This cannot be undone.
+                  This permanently removes your on-chain IdentityAccount and returns the rent to
+                  your wallet. All future notifications to this wallet will be silently dropped.
+                  This cannot be undone.
                 </p>
                 <div className="flex gap-3">
                   <Button

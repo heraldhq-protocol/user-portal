@@ -3,6 +3,7 @@ import { Syne, JetBrains_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import './globals.css';
 import { WalletConnection } from '@/components/WalletConnection';
+import { QueryProvider } from '@/components/QueryProvider';
 const syne = Syne({
   variable: '--font-syne',
   subsets: ['latin'],
@@ -61,7 +62,9 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        <WalletConnection>{children}</WalletConnection>
+        <WalletConnection>
+          <QueryProvider>{children}</QueryProvider>
+        </WalletConnection>
 
         <Toaster
           position="bottom-right"

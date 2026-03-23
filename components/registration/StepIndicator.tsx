@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
 interface Step {
   key: string;
@@ -21,22 +21,19 @@ export function StepIndicator({ steps, currentIndex }: StepIndicatorProps) {
             {/* Dot */}
             <div
               className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0 transition-all duration-200",
-                i < currentIndex &&
-                  "bg-teal text-navy",
-                i === currentIndex &&
-                  "bg-transparent border-2 border-teal text-teal",
-                i > currentIndex &&
-                  "bg-transparent border-2 border-border-2 text-text-muted"
+                'w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0 transition-all duration-200',
+                i < currentIndex && 'bg-teal text-navy',
+                i === currentIndex && 'bg-transparent border-2 border-teal text-teal',
+                i > currentIndex && 'bg-transparent border-2 border-border-2 text-text-muted',
               )}
             >
-              {i < currentIndex ? "✓" : i + 1}
+              {i < currentIndex ? '✓' : i + 1}
             </div>
             {/* Label */}
             <span
               className={cn(
-                "text-[10px] font-semibold",
-                i === currentIndex ? "text-teal" : "text-text-muted"
+                'text-[10px] font-semibold',
+                i === currentIndex ? 'text-teal' : 'text-text-muted',
               )}
             >
               {s.label}
@@ -46,8 +43,8 @@ export function StepIndicator({ steps, currentIndex }: StepIndicatorProps) {
           {i < steps.length - 1 && (
             <div
               className={cn(
-                "w-7 h-px mx-1 mb-[18px] transition-colors duration-200",
-                i < currentIndex ? "bg-teal" : "bg-border-2"
+                'w-7 h-px mx-1 mb-[18px] transition-colors duration-200',
+                i < currentIndex ? 'bg-teal' : 'bg-border-2',
               )}
             />
           )}

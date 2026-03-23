@@ -1,31 +1,31 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "motion/react";
+import Link from 'next/link';
+import { motion } from 'motion/react';
 
 const steps = [
   {
-    n: "01",
-    title: "User registers",
-    color: "var(--color-teal)",
-    desc: "A wallet holder visits notify.herald.xyz, connects their wallet, and enters their email address. The email is encrypted in the browser using TweetNaCl.js — plaintext never leaves the device.",
+    n: '01',
+    title: 'User registers',
+    color: 'var(--color-teal)',
+    desc: 'A wallet holder visits notify.herald.xyz, connects their wallet, and enters their email address. The email is encrypted in the browser using TweetNaCl.js — plaintext never leaves the device.',
   },
   {
-    n: "02",
-    title: "On-chain storage",
-    color: "var(--color-herald-purple)",
-    desc: "A Solana transaction calls register_identity() on the Herald Anchor program. The IdentityAccount PDA stores the encrypted email blob, nonce, SHA-256 hash, and opt-in flags.",
+    n: '02',
+    title: 'On-chain storage',
+    color: 'var(--color-herald-purple)',
+    desc: 'A Solana transaction calls register_identity() on the Herald Anchor program. The IdentityAccount PDA stores the encrypted email blob, nonce, SHA-256 hash, and opt-in flags.',
   },
   {
-    n: "03",
-    title: "Protocol sends alert",
-    color: "var(--color-herald-gold)",
-    desc: "A DeFi protocol calls POST /v1/notify with a wallet address and message. Herald looks up the IdentityAccount on-chain, decrypts the email inside a Nitro Enclave (TEE), and dispatches via AWS SES.",
+    n: '03',
+    title: 'Protocol sends alert',
+    color: 'var(--color-herald-gold)',
+    desc: 'A DeFi protocol calls POST /v1/notify with a wallet address and message. Herald looks up the IdentityAccount on-chain, decrypts the email inside a Nitro Enclave (TEE), and dispatches via AWS SES.',
   },
   {
-    n: "04",
-    title: "ZK receipt written",
-    color: "var(--color-teal)",
+    n: '04',
+    title: 'ZK receipt written',
+    color: 'var(--color-teal)',
     desc: "After confirmed delivery, Herald writes a ZK-compressed receipt leaf to Solana via Light Protocol. Cost: ~$0.0001. The protocol never learns the user's email at any point.",
   },
 ];
@@ -40,12 +40,10 @@ export default function HowItWorksPage() {
       >
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-4xl font-extrabold tracking-tight mb-3">
-            How Herald works
-          </h1>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-3">How Herald works</h1>
           <p className="text-base text-text-muted leading-[1.7] max-w-[540px]">
-            A privacy-preserving notification layer for Solana DeFi — from
-            wallet to inbox, with zero PII exposure.
+            A privacy-preserving notification layer for Solana DeFi — from wallet to inbox, with
+            zero PII exposure.
           </p>
         </div>
 
@@ -69,15 +67,10 @@ export default function HowItWorksPage() {
               >
                 {s.n}
               </div>
-              {i < steps.length - 1 && (
-                <div className="w-px flex-1 bg-border mt-2" />
-              )}
+              {i < steps.length - 1 && <div className="w-px flex-1 bg-border mt-2" />}
             </div>
-            <div className={i < steps.length - 1 ? "pb-6" : ""}>
-              <h3
-                className="text-lg font-bold mb-2"
-                style={{ color: s.color }}
-              >
+            <div className={i < steps.length - 1 ? 'pb-6' : ''}>
+              <h3 className="text-lg font-bold mb-2" style={{ color: s.color }}>
                 {s.title}
               </h3>
               <p className="text-sm text-text-muted leading-[1.7]">{s.desc}</p>
