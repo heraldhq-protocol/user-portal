@@ -50,3 +50,5 @@ __tests__/
 
 test_output.json
 test_output.txt
+vitest.setup.ts
+vitest.config.ts
