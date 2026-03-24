@@ -68,9 +68,9 @@ export function RegistrationWizard() {
 			className="w-full max-w-130"
 		>
 			{/* Header */}
-			<div className="flex items-center justify-between mb-10">
+			<div className="flex flex-col items-center justify-between mb-3 lg:mb-10 lg:flex lg:flex-row">
 				{/* Logo */}
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-2 mb-4 lg:mb-0">
 					<div className="w-7 h-7 bg-teal rounded-lg flex items-center justify-center text-sm font-extrabold text-navy">
 						◈
 					</div>

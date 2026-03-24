@@ -67,9 +67,9 @@
 		"typescript": "^5"
 	},
 	"lint-staged": {
-		"*.{ts,tsx}": [
-			"biome check --write --no-errors-on-unmatched --files-ignore-unknown=true",
-			"eslint --fix --max-warnings=0"
-		]
-	}
+    "*.{ts,tsx}": [
+      "biome format --write --no-errors-on-unmatched",
+      "eslint --fix --max-warnings=0"
+    ]
+  }
 }

@@ -63,9 +63,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 		<div className="flex-1 flex flex-col min-h-screen">
 			{/* Top Navigation Bar for authenticated portal */}
 			<header className="sticky top-0 z-40 bg-navy/85 backdrop-blur-md border-b border-border">
-				<div className="max-w-[1100px] mx-auto px-6 h-16 flex items-center justify-between">
-					<div className="flex items-center gap-8">
-						<Link href="/notifications" className="font-extrabold text-xl text-white tracking-tight">
+				<div className="max-w-[1100px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+					<div className="flex items-center gap-4 sm:gap-8">
+						<Link href="/notifications" className="font-extrabold text-lg sm:text-xl text-white tracking-tight">
 							Herald.
 						</Link>
 						

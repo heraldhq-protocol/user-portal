@@ -90,15 +90,15 @@ export default function LandingPage() {
 			<div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-teal/10 blur-[140px] rounded-full pointer-events-none opacity-70 animate-pulse" style={{ animationDuration: '8s' }} />
 
 			{/* ───── Hero ───── */}
-			<section className="relative z-10 px-8 pt-24 pb-20 max-w-[1100px] mx-auto">
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+			<section className="relative z-10 px-4 sm:px-8 pt-16 sm:pt-24 pb-16 sm:pb-20 max-w-[1100px] mx-auto">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 					{/* Left: Copy */}
 					<motion.div variants={container} initial="hidden" animate="show">
 						<motion.div variants={item}>
-							<span className="inline-flex items-center gap-2.5 bg-card border border-teal/20 shadow-[0_0_15px_rgba(0,200,150,0.15)] rounded-full px-4 py-1.5 text-[13px] font-bold text-teal mb-8 tracking-wide">
-								<span className="relative flex h-2 w-2">
+							<span className="inline-flex items-center gap-2.5 bg-card border border-teal/20 shadow-[0_0_15px_rgba(0,200,150,0.15)] rounded-full px-4 py-1.5 text-[12px] sm:text-[13px] font-bold text-teal mb-6 sm:mb-8 tracking-wide overflow-hidden break-words text-center sm:text-left">
+								<span className="relative flex h-2 w-2 shrink-0">
 								  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal opacity-75"></span>
-								  <span className="relative inline-flex rounded-full h-2 w-2 bg-teal"></span>
+								  <span className="relative inline-flex rounded-full h-2 w-2 bg-teal shrink-0"></span>
 								</span>
 								Privacy-preserving · On-chain verified
 							</span>
@@ -106,7 +106,7 @@ export default function LandingPage() {
 
 						<motion.h1
 							variants={item}
-							className="text-5xl lg:text-[64px] font-extrabold leading-[1.05] tracking-tight mb-6"
+							className="text-4xl sm:text-5xl lg:text-[64px] font-extrabold leading-[1.1] tracking-tight mb-4 sm:mb-6"
 						>
 							Your wallet
 							<br />
@@ -213,7 +213,7 @@ export default function LandingPage() {
 			</section>
 
 			{/* ───── Trust Cards ───── */}
-			<section className="relative z-10 px-8 pb-20 pt-10 max-w-[1100px] mx-auto">
+			<section className="relative z-10 px-4 sm:px-8 pb-16 sm:pb-20 pt-10 max-w-[1100px] mx-auto">
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 					{trustCards.map((c, i) => (
 						<motion.div
@@ -222,7 +222,7 @@ export default function LandingPage() {
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true, margin: "-50px" }}
 							transition={{ delay: 0.1 * i, duration: 0.5 }}
-							className="group relative bg-card border border-border rounded-2xl p-8 hover:bg-card-2 transition-colors duration-300"
+							className="group relative bg-card border border-border rounded-2xl p-6 sm:p-8 hover:bg-card-2 transition-colors duration-300"
 						>
 							{/* Hover glow line at top */}
 							<div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-teal to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-2xl" />
@@ -236,15 +236,15 @@ export default function LandingPage() {
 			</section>
 
 			{/* ───── How It Works ───── */}
-			<section className="relative px-8 pb-24 pt-10 max-w-[1100px] mx-auto">
-				<div className="text-center mb-14">
-					<h2 className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-card border border-border text-[13px] font-extrabold tracking-[2px] text-text-secondary uppercase mb-6">
+			<section className="relative px-4 sm:px-8 pb-16 sm:pb-24 pt-10 max-w-[1100px] mx-auto">
+				<div className="text-center mb-10 sm:mb-14">
+					<h2 className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-card border border-border text-[12px] sm:text-[13px] font-extrabold tracking-[2px] text-text-secondary uppercase mb-4 sm:mb-6">
 						How it works
 					</h2>
 					<h3 className="text-3xl md:text-4xl font-extrabold text-white">Three steps to private alerts</h3>
 				</div>
 				
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+				<div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 relative">
 					{/* Connecting line for desktop */}
 					<div className="absolute top-[28px] left-[15%] right-[15%] h-px bg-border hidden md:block" />
 					
@@ -257,11 +257,11 @@ export default function LandingPage() {
 							transition={{ delay: 0.1 * i, duration: 0.5 }}
 							className="relative flex flex-col items-center text-center"
 						>
-							<div className="w-14 h-14 rounded-full bg-navy border-2 border-border flex items-center justify-center z-10 mb-6 shadow-xl">
+							<div className="w-14 h-14 rounded-full bg-navy border-2 border-border flex items-center justify-center z-10 mb-4 sm:mb-6 shadow-xl">
 								<span className="font-mono text-sm text-teal font-bold">{s.n}</span>
 							</div>
-							<h3 className="text-[20px] font-extrabold mb-3 text-white">{s.title}</h3>
-							<p className="text-[15px] font-medium text-text-muted leading-relaxed max-w-[260px] mx-auto">{s.desc}</p>
+							<h3 className="text-[18px] sm:text-[20px] font-extrabold mb-2 sm:mb-3 text-white">{s.title}</h3>
+							<p className="text-[14px] sm:text-[15px] font-medium text-text-muted leading-relaxed max-w-[260px] mx-auto">{s.desc}</p>
 						</motion.div>
 					))}
 				</div>

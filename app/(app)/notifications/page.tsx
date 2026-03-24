@@ -79,7 +79,7 @@ export default function NotificationsPage() {
 	}, []);
 
 	return (
-		<div className="max-w-[700px] mx-auto px-6 py-12 h-[calc(100vh-80px)] font-sans">
+		<div className="max-w-[700px] mx-auto px-4 sm:px-6 py-8 sm:py-12 h-[calc(100vh-80px)] font-sans">
 			<motion.div
 				initial={{ opacity: 0, y: 16 }}
 				animate={{ opacity: 1, y: 0 }}

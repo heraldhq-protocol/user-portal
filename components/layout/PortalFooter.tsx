@@ -2,10 +2,10 @@ import Link from "next/link";
 
 export function PortalFooter() {
 	return (
-		<footer className="border-t border-border px-8 py-8 mt-auto">
-			<div className="max-w-[1100px] mx-auto flex items-center justify-between">
+		<footer className="border-t border-border px-4 md:px-8 py-8 mt-auto">
+			<div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6 md:gap-0">
 				{/* Left: Logo + copyright */}
-				<div className="flex items-center gap-6">
+				<div className="flex flex-col md:flex-row items-center gap-2 md:gap-6 text-center md:text-left">
 					<div className="flex items-center gap-2">
 						<div className="w-6 h-6 bg-teal rounded-md flex items-center justify-center text-xs font-extrabold text-navy">
 							◈
@@ -18,7 +18,7 @@ export function PortalFooter() {
 				</div>
 
 				{/* Right: Links */}
-				<div className="flex items-center gap-6">
+				<div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
 					<Link
 						href="/privacy"
 						className="text-xs text-text-muted hover:text-text-secondary transition-colors"
