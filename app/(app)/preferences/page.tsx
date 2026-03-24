@@ -31,15 +31,6 @@ export default function PreferencesPage() {
 
 	return (
 		<div className="max-w-[640px] mx-auto px-6 py-12">
-			{/* Shared Header */}
-			<Link
-				href="/"
-				className="inline-flex items-center gap-2 text-sm font-semibold text-text-muted hover:text-text-primary transition-colors mb-6 w-fit"
-			>
-				<FaArrowLeft className="w-4 h-4" />
-				Back to Dashboard
-			</Link>
-
 			{isLoading ? (
 				<div className="text-center text-text-muted py-12">Loading preferences...</div>
 			) : !status?.registered ? (

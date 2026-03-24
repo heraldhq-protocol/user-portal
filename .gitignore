@@ -46,3 +46,7 @@ next-env.d.ts
 UserPortal.jsx
 
 *.lock
+__tests__/
+
+test_output.json
+test_output.txt

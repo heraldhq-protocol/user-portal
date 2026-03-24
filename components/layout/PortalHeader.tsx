@@ -8,7 +8,7 @@ export function PortalHeader() {
 	const pathname = usePathname();
 
 	return (
-		<nav className="sticky top-0 z-10 flex items-center justify-between px-8 py-4 border-b border-border bg-navy/92 backdrop-blur-xl">
+		<nav className="sticky top-0 z-99 flex items-center justify-between px-8 py-4 border-b border-border bg-navy/92 backdrop-blur-xl">
 			{/* Logo */}
 			<Link href="/" className="flex items-center gap-2 group">
 				<div className="w-7 h-7 bg-teal rounded-lg flex items-center justify-center text-sm font-extrabold text-navy">
