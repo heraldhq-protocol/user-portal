@@ -4,7 +4,7 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { apiFetch } from "@/lib/api";
-import { UserClient, encryptEmail, hashEmail } from "@herald-protocol/sdk";
+import { SolanaCluster, UserClient, encryptEmail, hashEmail } from "@herald-protocol/sdk";
 import { Transaction } from "@solana/web3.js";
 import type { RegistrationStep } from "@/types";
 
@@ -143,7 +143,7 @@ export function useRegistration(): UseRegistrationReturn {
 
 		// Phase 2 — build the Solana instruction
 		const userClient = new UserClient({
-			cluster: "devnet",
+			cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
 			rpcUrl: connection.rpcEndpoint,
 		});
 		const ix = await userClient.registerIdentity({

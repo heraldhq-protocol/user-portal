@@ -1,7 +1,7 @@
 "use client";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useQuery } from "@tanstack/react-query";
-import { deriveIdentityPDA } from "@/lib/anchor";
+import { findIdentityPda, HERALD_PROGRAM_ID } from "@herald-protocol/sdk";
 
 export function useWalletRegistrationStatus() {
 	const { publicKey } = useWallet();
@@ -14,7 +14,7 @@ export function useWalletRegistrationStatus() {
 				return { registered: false, account: null };
 			}
 			try {
-				const [pda] = deriveIdentityPDA(publicKey);
+				const [pda] = findIdentityPda(publicKey, HERALD_PROGRAM_ID);
 				const accountInfo = await connection.getAccountInfo(pda);
 
 				if (!accountInfo) {

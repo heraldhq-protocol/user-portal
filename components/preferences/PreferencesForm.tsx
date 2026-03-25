@@ -10,16 +10,17 @@ import { Card } from "@/components/ui/Card";
 import { preferencesSchema, type PreferencesFormData } from "@/lib/schemas";
 import { CategoryToggle } from "./CategoryToggle";
 import { DeliveryModeSelect } from "./DeliveryModeSelect";
-import { buildUpdateIdentityTx } from "@/lib/anchor";
+import { UserClient, type SolanaCluster } from "@herald-protocol/sdk";
+import { Transaction } from "@solana/web3.js";
 
 interface PreferencesFormProps {
 	initialValues: PreferencesFormData;
 }
 
 const CATEGORIES = [
+	{ key: "optInAll", label: "All notifications", desc: "Subscribe to every category" },
 	{ key: "optInDefi", label: "DeFi alerts", desc: "Liquidation warnings, health factor alerts" },
 	{ key: "optInGovernance", label: "Governance", desc: "DAO votes, proposals, quorum alerts" },
-	{ key: "optInSystem", label: "System", desc: "Security, maintenance, critical updates" },
 	{ key: "optInMarketing", label: "Marketing", desc: "Product updates, newsletters" },
 ] as const;
 
@@ -46,15 +47,24 @@ export function PreferencesForm({ initialValues }: PreferencesFormProps) {
 
 		setIsSaving(true);
 		try {
-			const tx = await buildUpdateIdentityTx(connection, walletContext, {
+			const userClient = new UserClient({
+				cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
+				rpcUrl: connection.rpcEndpoint,
+			});
+			const ix = await userClient.updateIdentity({
+				owner: walletContext.publicKey,
 				optIns: {
-					defi: data.optInDefi,
-					governance: data.optInGovernance,
-					system: data.optInSystem,
-					marketing: data.optInMarketing,
+					optInAll: data.optInAll,
+					optInDefi: data.optInDefi,
+					optInGovernance: data.optInGovernance,
+					optInMarketing: data.optInMarketing,
 				},
 				digestMode: data.digestMode,
 			});
+
+			const tx = new Transaction().add(ix);
+			tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+			tx.feePayer = walletContext.publicKey;
 
 			const signedTx = await walletContext.signTransaction(tx);
 			const signature = await connection.sendRawTransaction(signedTx.serialize());

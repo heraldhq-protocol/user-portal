@@ -36,9 +36,9 @@ export type EmailFormData = z.infer<typeof emailSchema>;
  * Notification preference toggles + delivery mode.
  */
 export const preferencesSchema = z.object({
+	optInAll: z.boolean(),
 	optInDefi: z.boolean(),
 	optInGovernance: z.boolean(),
-	optInSystem: z.boolean(),
 	optInMarketing: z.boolean(),
 	digestMode: z.boolean(),
 });

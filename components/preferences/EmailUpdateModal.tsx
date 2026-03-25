@@ -9,8 +9,8 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { emailUpdateSchema, type EmailUpdateFormData } from "@/lib/schemas";
-import { encryptEmailForWallet } from "@/lib/encryption";
-import { buildUpdateIdentityTx } from "@/lib/anchor";
+import { encryptEmail, UserClient, hashEmail, type SolanaCluster } from "@herald-protocol/sdk";
+import { Transaction } from "@solana/web3.js";
 
 interface EmailUpdateModalProps {
 	isOpen: boolean;
@@ -39,16 +39,24 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 			setIsSubmitting(true);
 			setIsEncrypting(true);
 
-			const { encryptedEmail, nonce } = encryptEmailForWallet(
-				data.newEmail,
-				walletContext.publicKey.toBytes()
-			);
+			const { encryptedEmail, nonce } = encryptEmail(data.newEmail, walletContext.publicKey);
+			const emailHash = await hashEmail(data.newEmail);
 			setIsEncrypting(false);
 
-			const tx = await buildUpdateIdentityTx(connection, walletContext, {
+			const userClient = new UserClient({
+				cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
+				rpcUrl: connection.rpcEndpoint,
+			});
+			const ix = await userClient.updateIdentity({
+				owner: walletContext.publicKey,
 				encryptedEmail,
+				emailHash,
 				nonce,
 			});
+
+			const tx = new Transaction().add(ix);
+			tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+			tx.feePayer = walletContext.publicKey;
 
 			const signedTx = await walletContext.signTransaction(tx);
 			const signature = await connection.sendRawTransaction(signedTx.serialize());

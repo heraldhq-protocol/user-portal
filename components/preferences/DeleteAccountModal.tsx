@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { toast } from "sonner";
-import { buildDeleteIdentityTx } from "@/lib/anchor";
+import { UserClient, type SolanaCluster } from "@herald-protocol/sdk";
+import { Transaction } from "@solana/web3.js";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 
@@ -28,7 +29,15 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 
 		setIsDeleting(true);
 		try {
-			const tx = await buildDeleteIdentityTx(connection, walletContext);
+			const userClient = new UserClient({
+				cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
+				rpcUrl: connection.rpcEndpoint,
+			});
+			const ix = await userClient.deleteIdentity({ owner: walletContext.publicKey });
+			const tx = new Transaction().add(ix);
+			tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+			tx.feePayer = walletContext.publicKey;
+
 			const signedTx = await walletContext.signTransaction(tx);
 			const signature = await connection.sendRawTransaction(signedTx.serialize());
 
