@@ -13,7 +13,7 @@ type RegistrationPhase = 0 | 1 | 2 | 3 | 4 | 5;
 type RegistrationState = {
 	step: RegistrationStep;
 	email: string;
-	optIns: { defi: boolean; governance: boolean; system: boolean; marketing: boolean };
+	optIns: { optInAll: boolean; defi: boolean; governance: boolean; marketing: boolean };
 	digestMode: boolean;
 	txSignature: string | null;
 	error: string | null;
@@ -42,7 +42,7 @@ export function useRegistration(): UseRegistrationReturn {
 	const [state, setState] = useState<RegistrationState>({
 		step: "connect",
 		email: "",
-		optIns: { defi: true, governance: true, system: true, marketing: false },
+		optIns: { optInAll: true, defi: true, governance: true, marketing: false },
 		digestMode: false,
 		txSignature: null,
 		error: null,
@@ -152,11 +152,7 @@ export function useRegistration(): UseRegistrationReturn {
 			emailHash: emailHashBytes,
 			nonce,
 			optIns: {
-				optInAll:
-					state.optIns.defi &&
-					state.optIns.governance &&
-					state.optIns.system &&
-					state.optIns.marketing,
+				optInAll: state.optIns.optInAll,
 				optInDefi: state.optIns.defi,
 				optInGovernance: state.optIns.governance,
 				optInMarketing: state.optIns.marketing,

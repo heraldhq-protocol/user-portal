@@ -1,5 +1,3 @@
-export * from "./anchor";
-
 /** Notification delivery status */
 export type NotificationStatus = "queued" | "processing" | "delivered" | "failed" | "opted_out";
 

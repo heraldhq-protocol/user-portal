@@ -142,17 +142,17 @@ export function RegistrationWizard() {
 						<StepEncryptSign
 							email={state.email}
 							prefs={{
+								optInAll: state.optIns.optInAll,
 								optInDefi: state.optIns.defi,
 								optInGovernance: state.optIns.governance,
-								optInSystem: state.optIns.system,
 								optInMarketing: state.optIns.marketing,
 								digestMode: state.digestMode,
 							}}
 							onPrefsChange={(newPrefs) => {
 								setOptIns({
+									optInAll: newPrefs.optInAll,
 									defi: newPrefs.optInDefi,
 									governance: newPrefs.optInGovernance,
-									system: newPrefs.optInSystem,
 									marketing: newPrefs.optInMarketing,
 								});
 								setDigestMode(newPrefs.digestMode);

@@ -20,9 +20,9 @@ export default function PreferencesPage() {
 
 	// Fallback defaults until dynamic decoding is added
 	const initialPrefs = {
+		optInAll: true,
 		optInDefi: true,
 		optInGovernance: true,
-		optInSystem: true,
 		optInMarketing: false,
 		digestMode: false,
 	};

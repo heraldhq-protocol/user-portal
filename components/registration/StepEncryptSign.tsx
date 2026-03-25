@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
 interface Prefs {
+	optInAll: boolean;
 	optInDefi: boolean;
 	optInGovernance: boolean;
-	optInSystem: boolean;
 	optInMarketing: boolean;
 	digestMode: boolean;
 }
@@ -31,9 +31,9 @@ const ENCRYPT_STEPS = [
 ];
 
 const CATEGORIES = [
+	{ key: "optInAll" as const, label: "All notifications", desc: "Subscribe to every category" },
 	{ key: "optInDefi" as const, label: "DeFi alerts", desc: "Liquidations, health factor" },
 	{ key: "optInGovernance" as const, label: "Governance", desc: "DAO votes, proposals" },
-	{ key: "optInSystem" as const, label: "System", desc: "Security, maintenance" },
 	{ key: "optInMarketing" as const, label: "Marketing", desc: "Product updates" },
 ];
 
