@@ -23,18 +23,20 @@ export function Toggle({
 	const toggleId = id || label?.toLowerCase().replace(/\s+/g, "-");
 
 	return (
-		<div className="flex items-center justify-between py-4 border-b border-border last:border-b-0">
+		<div className="flex items-center justify-between py-4 border-b border-slate-200 dark:border-border last:border-b-0">
 			{(label || description) && (
 				<div className="flex-1 mr-4">
 					{label && (
 						<label
 							htmlFor={toggleId}
-							className="text-sm font-semibold text-text-secondary cursor-pointer"
+							className="text-sm font-semibold text-slate-700 dark:text-text-secondary cursor-pointer"
 						>
 							{label}
 						</label>
 					)}
-					{description && <p className="text-xs text-text-muted mt-0.5">{description}</p>}
+					{description && (
+						<p className="text-xs text-slate-500 dark:text-text-muted mt-0.5">{description}</p>
+					)}
 				</div>
 			)}
 			<SwitchPrimitive.Root

@@ -1,20 +1,59 @@
 @import 'tailwindcss';
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─── Herald Theme Variables ─────────────────────────────── */
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-2: #f1f5f9;
+  --border-main: #e2e8f0;
+  --border-alt: #cbd5e1;
+  --text-main: #0f172a;
+  --text-dim: #334155;
+  --text-muted: #64748b;
+  --app-glow: radial-gradient(circle at 15% 50%, rgba(0, 200, 150, 0.08), transparent 35%),
+              radial-gradient(circle at 85% 30%, rgba(91, 53, 213, 0.08), transparent 35%);
+}
+
+.dark {
+  --bg-primary: #060d18;
+  --bg-secondary: #0a1628;
+  --bg-card: #0d1f35;
+  --bg-card-2: #112240;
+  --border-main: #0e2a3d;
+  --border-alt: #1a3a52;
+  --text-main: #ffffff;
+  --text-dim: #cbd5e1;
+  --text-muted: #64748b;
+  --app-glow: radial-gradient(circle at 15% 50%, rgba(0, 200, 150, 0.04), transparent 35%),
+              radial-gradient(circle at 85% 30%, rgba(91, 53, 213, 0.04), transparent 35%);
+}
 
 /* ─── Herald Design System ─────────────────────────────── */
 
 @theme {
-  --color-navy: #060d18;
-  --color-navy-2: #0a1628;
-  --color-card: #0d1f35;
-  --color-card-2: #112240;
-  --color-border: #0e2a3d;
-  --color-border-2: #1a3a52;
+  --color-primary: #00c896;
+  --color-secondary: #0a1628;
+
+  --color-navy: var(--bg-primary);
+  --color-navy-2: var(--bg-secondary);
+  --color-card: var(--bg-card);
+  --color-card-2: var(--bg-card-2);
+  --color-border: var(--border-main);
+  --color-border-2: var(--border-alt);
+  
   --color-teal: #00c896;
   --color-teal-2: #00e5a8;
   --color-teal-dim: #007a5c;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #cbd5e1;
-  --color-text-muted: #64748b;
+  
+  --color-text-primary: var(--text-main);
+  --color-text-secondary: var(--text-dim);
+  --color-text-muted: var(--text-muted);
+  
   --color-herald-red: #d63031;
   --color-herald-green: #27ae60;
   --color-herald-gold: #e8920a;
@@ -48,9 +87,7 @@ body {
   font-family: var(--font-sans);
   min-height: 100vh;
   /* Premium subtle ambient glow for the entire app */
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(0, 200, 150, 0.04), transparent 35%),
-    radial-gradient(circle at 85% 30%, rgba(91, 53, 213, 0.04), transparent 35%);
+  background-image: var(--app-glow);
   background-attachment: fixed;
 }
 

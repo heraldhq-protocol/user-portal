@@ -11,8 +11,8 @@ export function Card({ className, elevated = false, ...props }: CardProps) {
 			className={cn(
 				"rounded-2xl p-6",
 				elevated
-					? "bg-card-2 border border-border-2 rounded-xl p-5"
-					: "bg-card border border-border",
+					? "bg-slate-50 dark:bg-card-2 border border-slate-300 dark:border-border-2 rounded-xl p-5"
+					: "bg-white dark:bg-card border border-slate-200 dark:border-border",
 				className
 			)}
 			{...props}

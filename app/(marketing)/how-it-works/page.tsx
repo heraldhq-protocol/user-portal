@@ -41,7 +41,7 @@ export default function HowItWorksPage() {
 				{/* Header */}
 				<div className="mb-12">
 					<h1 className="text-4xl font-extrabold tracking-tight mb-3">How Herald works</h1>
-					<p className="text-base text-text-muted leading-[1.7] max-w-[540px]">
+					<p className="text-base text-slate-500 dark:text-text-muted leading-[1.7] max-w-[540px]">
 						A privacy-preserving notification layer for Solana DeFi — from wallet to inbox, with
 						zero PII exposure.
 					</p>
@@ -73,7 +73,7 @@ export default function HowItWorksPage() {
 							<h3 className="text-lg font-bold mb-2" style={{ color: s.color }}>
 								{s.title}
 							</h3>
-							<p className="text-sm text-text-muted leading-[1.7]">{s.desc}</p>
+							<p className="text-sm text-slate-500 dark:text-text-muted leading-[1.7]">{s.desc}</p>
 						</div>
 					</motion.div>
 				))}

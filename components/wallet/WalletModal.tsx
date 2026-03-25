@@ -25,7 +25,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
 		<Modal open={isOpen} onOpenChange={onClose}>
 			<div className="mb-6">
 				<ModalTitle className="text-xl font-extrabold mb-2">Connect Wallet</ModalTitle>
-				<ModalDescription className="text-sm text-text-muted">
+				<ModalDescription className="text-sm text-slate-500 dark:text-text-muted">
 					Select a Solana wallet account structure to authenticate and manage your Herald settings.
 				</ModalDescription>
 			</div>
@@ -39,7 +39,7 @@ export function WalletModal({ isOpen, onClose }: WalletModalProps) {
 							key={wallet.adapter.name}
 							onClick={() => handleWalletClick(wallet.adapter.name)}
 							disabled={connecting}
-							className="flex items-center gap-4 p-4 rounded-xl border border-border bg-navy/50 hover:border-teal/50 hover:bg-card-2 transition-all text-left"
+							className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-border bg-white dark:bg-navy/50 hover:border-teal/50 hover:bg-slate-50 dark:bg-card-2 transition-all text-left"
 						>
 							{/* Next.js Image component not strictly required here since adapter gives standard URL */}
 							<Image

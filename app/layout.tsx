@@ -4,6 +4,11 @@ import { Toaster } from "sonner";
 import "./globals.css";
 import { WalletConnection } from "@/components/WalletConnection";
 import { QueryProvider } from "@/components/QueryProvider";
+import { cn } from "@/lib/utils";
+
+import { AuthProvider } from "@/hooks/useAuth";
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 const syne = Syne({
 	variable: "--font-syne",
 	subsets: ["latin"],
@@ -52,31 +57,39 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" className={`${syne.variable} ${jetbrainsMono.variable} h-full antialiased`}>
-			<body className="min-h-full flex flex-col font-sans bg-navy text-text-primary">
-				{/* Skip to main content — accessibility requirement */}
-				<a
-					href="#main-content"
-					className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-teal focus:text-navy focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
-				>
-					Skip to main content
-				</a>
+		<html
+			lang="en"
+			suppressHydrationWarning
+			className={cn("h-full", "antialiased", syne.variable, jetbrainsMono.variable, "font-sans")}
+		>
+			<body className="min-h-full flex flex-col font-sans bg-white dark:bg-navy text-slate-900 dark:text-text-primary">
+				<ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+					{/* Skip to main content — accessibility requirement */}
+					<a
+						href="#main-content"
+						className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-teal focus:text-navy focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold"
+					>
+						Skip to main content
+					</a>
 
-				<WalletConnection>
-					<QueryProvider>{children}</QueryProvider>
-				</WalletConnection>
+					<WalletConnection>
+						<AuthProvider>
+							<QueryProvider>{children}</QueryProvider>
+						</AuthProvider>
+					</WalletConnection>
 
-				<Toaster
-					position="bottom-right"
-					toastOptions={{
-						style: {
-							background: "#0D1F35",
-							border: "1px solid #0E2A3D",
-							color: "#FFFFFF",
-							fontFamily: "var(--font-syne)",
-						},
-					}}
-				/>
+					<Toaster
+						position="bottom-right"
+						toastOptions={{
+							style: {
+								background: "#0D1F35",
+								border: "1px solid #0E2A3D",
+								color: "#FFFFFF",
+								fontFamily: "var(--font-syne)",
+							},
+						}}
+					/>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

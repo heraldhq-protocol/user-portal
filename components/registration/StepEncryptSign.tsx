@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +38,6 @@ const CATEGORIES = [
 ];
 
 export function StepEncryptSign({
-	email,
 	prefs,
 	onPrefsChange,
 	onBack,

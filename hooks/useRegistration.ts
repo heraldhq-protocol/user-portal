@@ -1,9 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useQuery } from "@tanstack/react-query";
-// import { deriveIdentityPDA, buildRegisterIdentityTx } from '@/lib/anchor';
-// import { encryptEmailForWallet } from '@/lib/encryption';
+import { useAuth } from "@/hooks/useAuth";
+import { apiFetch } from "@/lib/api";
+import { UserClient, encryptEmail, hashEmail } from "@herald-protocol/sdk";
+import { Transaction } from "@solana/web3.js";
 import type { RegistrationStep } from "@/types";
 
 type RegistrationPhase = 0 | 1 | 2 | 3 | 4 | 5;
@@ -21,6 +23,7 @@ type UseRegistrationReturn = {
 	state: RegistrationState;
 	isRegistering: boolean;
 	isRegistered: boolean;
+	isCheckingStatus: boolean;
 	setEmail: (email: string) => void;
 	setOptIns: (optIns: RegistrationState["optIns"]) => void;
 	setDigestMode: (v: boolean) => void;
@@ -29,15 +32,12 @@ type UseRegistrationReturn = {
 	phase: number;
 };
 
-// MOCK MODE: Set to false when ready for real blockchain
-const MOCK_MODE = true;
-
 export function useRegistration(): UseRegistrationReturn {
 	const wallet = useWallet();
 	const [phase, setPhase] = useState<RegistrationPhase>(0);
-	const { publicKey } = wallet;
-	// const { publicKey, signTransaction } = wallet;
-	// const { connection } = useConnection();
+	const { publicKey, signMessage, signTransaction } = wallet;
+	const { token, login } = useAuth();
+	const { connection } = useConnection();
 
 	const [state, setState] = useState<RegistrationState>({
 		step: "connect",
@@ -50,32 +50,54 @@ export function useRegistration(): UseRegistrationReturn {
 
 	const [isRegistering, setIsRegistering] = useState(false);
 
-	// Check if wallet is already registered
-	const { data: isRegistered = false } = useQuery({
+	// ─── Check if wallet is already registered on-chain ───────────────────────
+	// Uses the public GET /portal/identity/:wallet endpoint (no JWT required).
+	const { data: registrationStatus, isLoading: isCheckingStatus } = useQuery({
 		queryKey: ["registrationStatus", publicKey?.toBase58()],
 		queryFn: async () => {
-			if (!publicKey) return false;
+			if (!publicKey) return { registered: false };
 
-			// MOCK: Always return false
-			return false;
-
-			/* REAL IMPLEMENTATION:
-      const [pda] = deriveIdentityPDA(publicKey);
-      const account = await connection.getAccountInfo(pda);
-      return account !== null;
-      */
+			try {
+				const response = await apiFetch(`/portal/identity/${publicKey.toBase58()}`, {
+					method: "GET",
+				});
+				if (response.ok) {
+					const data = await response.json();
+					return { registered: data.registered === true };
+				}
+				return { registered: false };
+			} catch (e) {
+				console.error("Failed to fetch registration status", e);
+				return { registered: false };
+			}
 		},
 		enabled: !!publicKey,
-		staleTime: 30000,
+		staleTime: 30_000,
 	});
 
+	const isRegistered = registrationStatus?.registered ?? false;
+
+	// ─── Skip-if-registered ────────────────────────────────────────────────────
+	// When the wallet is already on-chain, fast-forward to the success screen.
+	useEffect(() => {
+		if (isRegistered && (state.step === "connect" || state.step === "email")) {
+			setState((s) => ({
+				...s,
+				step: "success",
+				txSignature: "already-registered",
+			}));
+		}
+	}, [isRegistered, state.step]);
+
+	// ─── State helpers ─────────────────────────────────────────────────────────
 	const setEmail = (email: string) => setState((s) => ({ ...s, email }));
 	const setOptIns = (optIns: RegistrationState["optIns"]) => setState((s) => ({ ...s, optIns }));
 	const setDigestMode = (v: boolean) => setState((s) => ({ ...s, digestMode: v }));
 	const goToStep = (step: RegistrationStep) => setState((s) => ({ ...s, step, error: null }));
 
+	// ─── Registration entry point ──────────────────────────────────────────────
 	const register = async () => {
-		if (!publicKey) {
+		if (!publicKey || !signTransaction) {
 			setState((s) => ({
 				...s,
 				error: "Wallet not connected. Please connect your wallet.",
@@ -89,12 +111,18 @@ export function useRegistration(): UseRegistrationReturn {
 		setPhase(0);
 
 		try {
-			// MOCK MODE (Active)
-			await runMockRegistration();
+			// Ensure we have a portal JWT before we start.
+			// If not, trigger the sign-in message prompt first.
+			if (!token) {
+				if (!signMessage) {
+					throw new Error(
+						"Wallet does not support message signing. Please use a different wallet."
+					);
+				}
+				await login();
+			}
 
-			/* REAL IMPLEMENTATION (Commented out):
-      await runRealRegistration();
-      */
+			await runRegistration();
 		} catch (err: unknown) {
 			handleRegistrationError(err);
 		} finally {
@@ -102,82 +130,93 @@ export function useRegistration(): UseRegistrationReturn {
 		}
 	};
 
-	// MOCK REGISTRATION (Active)
-	async function runMockRegistration() {
-		const steps = [
-			{ phase: 1, delay: 400, message: "Encrypting email..." },
-			{ phase: 2, delay: 600, message: "Building transaction..." },
-			{ phase: 3, delay: 800, message: "Awaiting signature..." },
-			{ phase: 4, delay: 1200, message: "Recording on-chain..." },
-			{ phase: 5, delay: 600, message: "Finalizing..." },
-		];
-
-		for (const step of steps) {
-			await delay(step.delay);
-			setPhase(step.phase as RegistrationPhase);
+	// ─── Real on-chain registration ────────────────────────────────────────────
+	async function runRegistration() {
+		if (!publicKey || !signTransaction) {
+			throw new Error("Wallet not connected or does not support signing");
 		}
 
-		const mockSignature = generateMockSignature();
-		setState((s) => ({
-			...s,
-			txSignature: mockSignature,
-			step: "success",
-		}));
+		// Phase 1 — encrypt email (happens in-browser)
+		const { encryptedEmail, nonce } = await Promise.resolve(encryptEmail(state.email, publicKey));
+		const emailHashBytes = await Promise.resolve(hashEmail(state.email));
+		setPhase(1);
+
+		// Phase 2 — build the Solana instruction
+		const userClient = new UserClient({
+			cluster: "devnet",
+			rpcUrl: connection.rpcEndpoint,
+		});
+		const ix = await userClient.registerIdentity({
+			owner: publicKey,
+			encryptedEmail,
+			emailHash: emailHashBytes,
+			nonce,
+			optIns: {
+				optInAll:
+					state.optIns.defi &&
+					state.optIns.governance &&
+					state.optIns.system &&
+					state.optIns.marketing,
+				optInDefi: state.optIns.defi,
+				optInGovernance: state.optIns.governance,
+				optInMarketing: state.optIns.marketing,
+			},
+			digestMode: state.digestMode,
+		});
+
+		const latestBlockhash = await connection.getLatestBlockhash("confirmed");
+		const tx = new Transaction({
+			feePayer: publicKey,
+			blockhash: latestBlockhash.blockhash,
+			lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+		}).add(ix);
+		setPhase(2);
+
+		// Phase 3 — wallet signs the transaction
+		const signedTx = await signTransaction(tx);
+		setPhase(3);
+
+		// Phase 4 — broadcast to the network
+		const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+			skipPreflight: false,
+			preflightCommitment: "confirmed",
+		});
+		setPhase(4);
+
+		// Phase 5 — wait for confirmation
+		await connection.confirmTransaction(
+			{
+				signature,
+				blockhash: latestBlockhash.blockhash,
+				lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+			},
+			"confirmed"
+		);
+		setPhase(5);
+
+		setState((s) => ({ ...s, txSignature: signature, step: "success" }));
 	}
 
-	/* REAL REGISTRATION (Commented out):
-  async function runRealRegistration() {
-    // 1. Encrypt email
-    const { encryptedEmail, nonce } = encryptEmailForWallet(state.email, publicKey!.toBytes());
-    setPhase(1);
-
-    // 2. Build transaction
-    const tx = await buildRegisterIdentityTx(
-      connection,
-      wallet,
-      encryptedEmail,
-      nonce,
-      state.optIns,
-      state.digestMode,
-    );
-    setPhase(2);
-
-    // 3. Sign transaction
-    const signedTx = await signTransaction!(tx);
-    setPhase(3);
-
-    // 4. Send raw transaction
-    const signature = await connection.sendRawTransaction(signedTx.serialize());
-    setPhase(4);
-
-    // 5. Confirm transaction
-    const latestBlockhash = await connection.getLatestBlockhash();
-    await connection.confirmTransaction(
-      {
-        signature,
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-      },
-      'confirmed',
-    );
-    setPhase(5);
-
-    setState((s) => ({ ...s, txSignature: signature, step: 'success' }));
-  }
-  */
-
+	// ─── Error handler ─────────────────────────────────────────────────────────
 	function handleRegistrationError(err: unknown) {
 		console.error("Registration error:", err);
 		let errorMsg = "An unexpected error occurred. Please try again.";
 
 		if (err instanceof Error) {
-			if (
-				err.message.includes("User rejected the request") ||
-				err.name === "WalletSignTransactionError"
-			) {
+			if (err.message.includes("User rejected") || err.name === "WalletSignTransactionError") {
 				errorMsg = "You rejected the transaction. Please try again.";
 			} else if (err.message.includes("timeout")) {
 				errorMsg = "Transaction timed out. Please try again.";
+			} else if (err.message.includes("message signing")) {
+				errorMsg = err.message;
+			} else if (err.message.includes("already in use")) {
+				// PDA already exists — wallet is already registered.
+				setState((s) => ({
+					...s,
+					txSignature: "already-registered",
+					step: "success",
+				}));
+				return;
 			}
 		}
 
@@ -188,6 +227,7 @@ export function useRegistration(): UseRegistrationReturn {
 		state,
 		isRegistering,
 		isRegistered,
+		isCheckingStatus,
 		setEmail,
 		setOptIns,
 		setDigestMode,
@@ -195,18 +235,4 @@ export function useRegistration(): UseRegistrationReturn {
 		register,
 		phase,
 	};
-}
-
-// Helper functions
-function delay(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function generateMockSignature(): string {
-	const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	let result = "mock_";
-	for (let i = 0; i < 44; i++) {
-		result += chars.charAt(Math.floor(Math.random() * chars.length));
-	}
-	return result;
 }

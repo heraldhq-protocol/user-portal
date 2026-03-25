@@ -1,9 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FaArrowLeft } from "react-icons/fa6";
 import { NotificationList } from "@/components/notifications/NotificationList";
 import { type Notification } from "@/types";
 

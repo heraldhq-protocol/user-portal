@@ -6,10 +6,10 @@ export function NotificationCard({ notification }: { notification: Notification 
 	const tx = notification.receiptTx || notification.id;
 
 	return (
-		<div className="group relative flex gap-4 items-start p-5 rounded-2xl border border-border bg-card/40 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-card-2 hover:shadow-[0_10px_40px_rgba(0,0,0,0.2)] hover:border-teal/30 h-full overflow-hidden">
+		<div className="group relative flex gap-4 items-start p-5 rounded-2xl border border-slate-200 dark:border-border bg-white dark:bg-card/40 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-slate-50 dark:bg-card-2 hover:shadow-[0_10px_40px_rgba(0,0,0,0.2)] hover:border-teal/30 h-full overflow-hidden">
 			{/* Subtle shine effect on hover */}
 			<div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 pointer-events-none" />
-			
+
 			<div
 				className={cn(
 					"w-2.5 h-2.5 rounded-full mt-1.5 shrink-0 transition-transform duration-300 group-hover:scale-125",
@@ -32,10 +32,10 @@ export function NotificationCard({ notification }: { notification: Notification 
 					>
 						{notification.category}
 					</Badge>
-					<span className="text-[13px] font-bold text-text-secondary truncate tracking-tight">
+					<span className="text-[13px] font-bold text-slate-700 dark:text-text-secondary truncate tracking-tight">
 						{notification.protocolId}
 					</span>
-					<span className="text-[11px] font-medium text-text-muted ml-auto shrink-0">
+					<span className="text-[11px] font-medium text-slate-500 dark:text-text-muted ml-auto shrink-0">
 						{relativeTime(notification.deliveredAt || notification.queuedAt)}
 					</span>
 				</div>
@@ -46,7 +46,7 @@ export function NotificationCard({ notification }: { notification: Notification 
 				</div>
 
 				{/* Receipt link */}
-				<div className="flex items-center gap-2 mt-auto pt-2 border-t border-border/50">
+				<div className="flex items-center gap-2 mt-auto pt-2 border-t border-slate-200 dark:border-border/50">
 					<span className="font-mono text-[11px] font-medium text-teal-dim bg-teal/5 px-2 py-0.5 rounded-md border border-teal/10">
 						{truncateAddress(tx, 4)}
 					</span>
@@ -60,7 +60,9 @@ export function NotificationCard({ notification }: { notification: Notification 
 							Verify on-chain <span className="text-[14px]">↗</span>
 						</a>
 					) : (
-						<span className="text-[11px] text-text-muted font-medium italic">Processing receipt...</span>
+						<span className="text-[11px] text-slate-500 dark:text-text-muted font-medium italic">
+							Processing receipt...
+						</span>
 					)}
 				</div>
 			</div>

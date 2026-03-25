@@ -184,7 +184,7 @@ export function StepConnectWallet({
 			<h2 className="text-[26px] font-extrabold tracking-tight">
 				{isConnected ? "Wallet Connected" : "Connect your wallet"}
 			</h2>
-			<p className="text-text-muted text-sm mb-7 leading-relaxed">
+			<p className="text-slate-500 dark:text-text-muted text-sm mb-7 leading-relaxed">
 				{isConnected
 					? `Connected to ${connectedWallet?.name || "wallet"}: ${publicKey?.toString().slice(0, 6)}...${publicKey?.toString().slice(-4)}`
 					: "Your wallet is your identity. No username or password needed."}
@@ -204,7 +204,7 @@ export function StepConnectWallet({
 							/>
 							<div>
 								<p className="font-semibold text-sm">{connectedWallet.name}</p>
-								<p className="text-xs text-text-muted font-mono">
+								<p className="text-xs text-slate-500 dark:text-text-muted font-mono">
 									{publicKey?.toString().slice(0, 8)}...
 									{publicKey?.toString().slice(-8)}
 								</p>
@@ -239,7 +239,7 @@ export function StepConnectWallet({
 								"flex items-center gap-2.5 border rounded-xl p-4 cursor-pointer transition-all duration-150",
 								isCurrentWallet
 									? "bg-emerald-500/20 border-emerald-500/50 cursor-default"
-									: "bg-card border-border hover:border-border-2 hover:bg-card/80",
+									: "bg-white dark:bg-card border-slate-200 dark:border-border hover:border-slate-300 dark:border-border-2 hover:bg-white dark:bg-card/80",
 								isConnecting && "opacity-50 cursor-not-allowed"
 							)}
 						>
@@ -260,7 +260,9 @@ export function StepConnectWallet({
 								{adapter.name[0]}
 							</div>
 							<div className="flex flex-col items-start">
-								<span className="font-semibold text-sm text-text-secondary">{adapter.name}</span>
+								<span className="font-semibold text-sm text-slate-700 dark:text-text-secondary">
+									{adapter.name}
+								</span>
 								{isCurrentWallet && <span className="text-xs text-emerald-500">Connected</span>}
 							</div>
 						</motion.button>
@@ -269,7 +271,7 @@ export function StepConnectWallet({
 			</div>
 
 			{/* Helper text */}
-			<div className="mb-4 text-xs text-text-muted text-center">
+			<div className="mb-4 text-xs text-slate-500 dark:text-text-muted text-center">
 				{isConnected
 					? "Click on a different wallet to switch, or click Disconnect above"
 					: "Select a wallet to connect"}

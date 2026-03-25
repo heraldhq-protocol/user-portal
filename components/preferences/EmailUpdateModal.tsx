@@ -80,7 +80,7 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 			<div className="text-xl font-extrabold mb-4">Update Email Address</div>
 			<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 				<div>
-					<label className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-1.5 block">
+					<label className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-1.5 block">
 						New Email
 					</label>
 					<Input {...register("newEmail")} placeholder="alice@example.com" />
@@ -89,7 +89,7 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 					)}
 				</div>
 				<div>
-					<label className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-1.5 block">
+					<label className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-1.5 block">
 						Confirm Email
 					</label>
 					<Input {...register("confirmEmail")} placeholder="alice@example.com" />

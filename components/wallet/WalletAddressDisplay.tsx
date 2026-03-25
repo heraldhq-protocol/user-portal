@@ -23,17 +23,17 @@ export function WalletAddressDisplay({ address, className, chars = 4 }: WalletAd
 			onClick={handleCopy}
 			title="Copy address"
 			className={cn(
-				"group inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-navy border border-border-2 hover:border-teal/50 hover:bg-card-2 transition-all duration-200",
+				"group inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white dark:bg-navy border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:bg-slate-50 dark:bg-card-2 transition-all duration-200",
 				className
 			)}
 		>
-			<span className="font-mono text-sm font-semibold text-text-primary tracking-wide">
+			<span className="font-mono text-sm font-semibold text-slate-900 dark:text-text-primary tracking-wide">
 				{truncateAddress(address, chars)}
 			</span>
 			{copied ? (
 				<FaCheck className="w-3.5 h-3.5 text-teal" />
 			) : (
-				<FaCopy className="w-3.5 h-3.5 text-text-muted group-hover:text-teal/70 transition-colors" />
+				<FaCopy className="w-3.5 h-3.5 text-slate-500 dark:text-text-muted group-hover:text-teal/70 transition-colors" />
 			)}
 		</button>
 	);

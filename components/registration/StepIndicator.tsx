@@ -24,7 +24,8 @@ export function StepIndicator({ steps, currentIndex }: StepIndicatorProps) {
 								"w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0 transition-all duration-200",
 								i < currentIndex && "bg-teal text-navy",
 								i === currentIndex && "bg-transparent border-2 border-teal text-teal",
-								i > currentIndex && "bg-transparent border-2 border-border-2 text-text-muted"
+								i > currentIndex &&
+									"bg-transparent border-2 border-slate-300 dark:border-border-2 text-slate-500 dark:text-text-muted"
 							)}
 						>
 							{i < currentIndex ? "✓" : i + 1}
@@ -33,7 +34,7 @@ export function StepIndicator({ steps, currentIndex }: StepIndicatorProps) {
 						<span
 							className={cn(
 								"text-[10px] font-semibold",
-								i === currentIndex ? "text-teal" : "text-text-muted"
+								i === currentIndex ? "text-teal" : "text-slate-500 dark:text-text-muted"
 							)}
 						>
 							{s.label}

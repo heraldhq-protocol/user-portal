@@ -25,7 +25,7 @@ export function Modal({ open, onOpenChange, children, className, danger = false 
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
-								className="fixed inset-0 z-50 bg-navy/80 backdrop-blur-md"
+								className="fixed inset-0 z-50 bg-white dark:bg-navy/80 backdrop-blur-md"
 							/>
 						</DialogPrimitive.Overlay>
 						<DialogPrimitive.Content asChild>
@@ -36,8 +36,10 @@ export function Modal({ open, onOpenChange, children, className, danger = false 
 								transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
 								className={cn(
 									"fixed left-1/2 top-1/2 z-50 w-full max-w-[440px] -translate-x-1/2 -translate-y-1/2",
-									"rounded-[24px] bg-card/70 backdrop-blur-2xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.4)]",
-									danger ? "border border-herald-red/40" : "border border-border/60",
+									"rounded-[24px] bg-white dark:bg-card/70 backdrop-blur-2xl p-8 shadow-[0_20px_60px_rgba(0,0,0,0.4)]",
+									danger
+										? "border border-herald-red/40"
+										: "border border-slate-200 dark:border-border/60",
 									className
 								)}
 							>

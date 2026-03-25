@@ -47,7 +47,7 @@ export default function PrivacyPage() {
 		<div className="max-w-[700px] mx-auto px-6 py-16">
 			<div className="mb-12">
 				<h1 className="text-4xl font-extrabold tracking-tight mb-3">Privacy at Herald</h1>
-				<p className="text-base text-text-muted leading-[1.7] max-w-[540px]">
+				<p className="text-base text-slate-500 dark:text-text-muted leading-[1.7] max-w-[540px]">
 					Herald was designed from the ground up to ensure your email address is never exposed to
 					Herald&rsquo;s servers, notification protocols, or any third party.
 				</p>
@@ -55,15 +55,22 @@ export default function PrivacyPage() {
 
 			<div className="space-y-8">
 				{sections.map((s, i) => (
-					<div key={i} className="bg-card border border-border rounded-2xl p-6">
+					<div
+						key={i}
+						className="bg-white dark:bg-card border border-slate-200 dark:border-border rounded-2xl p-6"
+					>
 						<h2 className="text-lg font-bold mb-3">{s.title}</h2>
-						{s.content && <p className="text-sm text-text-muted leading-[1.7]">{s.content}</p>}
+						{s.content && (
+							<p className="text-sm text-slate-500 dark:text-text-muted leading-[1.7]">
+								{s.content}
+							</p>
+						)}
 						{s.items && (
 							<ul className="space-y-2 mt-1">
 								{s.items.map((item, j) => (
 									<li
 										key={j}
-										className="flex items-start gap-2 text-sm text-text-muted leading-[1.6]"
+										className="flex items-start gap-2 text-sm text-slate-500 dark:text-text-muted leading-[1.6]"
 									>
 										<span className="text-herald-red mt-0.5 shrink-0">✗</span>
 										{item}

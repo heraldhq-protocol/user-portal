@@ -54,7 +54,7 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 	return (
 		<div className="flex flex-col h-full">
 			{/* Filter bar */}
-			<div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+			<div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200 dark:border-border">
 				<div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
 					{CATEGORIES.map((c) => (
 						<button
@@ -64,21 +64,21 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 								"px-3.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 border whitespace-nowrap",
 								category === c.value
 									? "bg-teal text-navy border-teal"
-									: "bg-transparent text-text-muted border-border-2 hover:border-teal/50"
+									: "bg-transparent text-slate-500 dark:text-text-muted border-slate-300 dark:border-border-2 hover:border-teal/50"
 							)}
 						>
 							{c.label}
 						</button>
 					))}
 				</div>
-				<div className="flex items-center gap-2 bg-navy-2 p-1 rounded-lg border border-border shrink-0 ml-4 hidden sm:flex">
+				<div className="flex items-center gap-2 bg-slate-50 dark:bg-navy-2 p-1 rounded-lg border border-slate-200 dark:border-border shrink-0 ml-4 hidden sm:flex">
 					<button
 						onClick={() => setTimeRange("all")}
 						className={cn(
 							"px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
 							timeRange === "all"
-								? "bg-card border border-border text-white"
-								: "text-text-muted border border-transparent hover:text-text-secondary"
+								? "bg-white dark:bg-card border border-slate-200 dark:border-border text-white"
+								: "text-slate-500 dark:text-text-muted border border-transparent hover:text-slate-700 dark:text-text-secondary"
 						)}
 					>
 						All time
@@ -88,8 +88,8 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 						className={cn(
 							"px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
 							timeRange === "30d"
-								? "bg-card border border-border text-white"
-								: "text-text-muted border border-transparent hover:text-text-secondary"
+								? "bg-white dark:bg-card border border-slate-200 dark:border-border text-white"
+								: "text-slate-500 dark:text-text-muted border border-transparent hover:text-slate-700 dark:text-text-secondary"
 						)}
 					>
 						Last 30 days
@@ -120,7 +120,7 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 									paddingBottom: "10px",
 								}}
 							>
-								<div className="animate-pulse flex gap-3.5 items-start p-4 rounded-xl border border-border bg-card h-full">
+								<div className="animate-pulse flex gap-3.5 items-start p-4 rounded-xl border border-slate-200 dark:border-border bg-white dark:bg-card h-full">
 									<div className="w-2 h-2 rounded-full bg-border-2 mt-1.5 shrink-0" />
 									<div className="flex-1 space-y-3 min-w-0">
 										<div className="flex gap-2 justify-between">
@@ -137,7 +137,7 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 				) : filtered.length === 0 ? (
 					<div className="text-center py-16">
 						<div className="text-[32px] mb-3">📭</div>
-						<p className="text-text-muted text-sm px-4">
+						<p className="text-slate-500 dark:text-text-muted text-sm px-4">
 							No notifications yet. You&apos;ll see them here once protocols start sending.
 						</p>
 					</div>

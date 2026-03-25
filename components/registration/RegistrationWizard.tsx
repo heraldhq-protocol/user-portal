@@ -10,6 +10,7 @@ import { StepEncryptSign } from "./StepEncryptSign";
 import { StepSuccess } from "./StepSuccess";
 import { useRegistration } from "@/hooks/useRegistration";
 import type { RegistrationStep } from "@/types";
+import Image from "next/image";
 
 const STEPS: { key: RegistrationStep; label: string }[] = [
 	{ key: "connect", label: "Connect" },
@@ -19,8 +20,17 @@ const STEPS: { key: RegistrationStep; label: string }[] = [
 ];
 
 export function RegistrationWizard() {
-	const { state, setEmail, setOptIns, setDigestMode, goToStep, register, phase, isRegistering } =
-		useRegistration();
+	const {
+		state,
+		setEmail,
+		setOptIns,
+		setDigestMode,
+		goToStep,
+		register,
+		phase,
+		isRegistering,
+		isRegistered,
+	} = useRegistration();
 
 	const { connected, disconnect } = useWallet();
 
@@ -35,6 +45,12 @@ export function RegistrationWizard() {
 
 	const handleNextStep = () => {
 		if (state.step === "connect" && connected) {
+			// If already on-chain, the useEffect in useRegistration will handle the redirect;
+			// but also guard here in case the effect hasn't fired yet.
+			if (isRegistered) {
+				goToStep("success");
+				return;
+			}
 			goToStep("email");
 		} else if (state.step === "email" && state.email) {
 			goToStep("encrypt");
@@ -71,9 +87,7 @@ export function RegistrationWizard() {
 			<div className="flex flex-col items-center justify-between mb-3 lg:mb-10 lg:flex lg:flex-row">
 				{/* Logo */}
 				<div className="flex items-center gap-2 mb-4 lg:mb-0">
-					<div className="w-7 h-7 bg-teal rounded-lg flex items-center justify-center text-sm font-extrabold text-navy">
-						◈
-					</div>
+					<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
 					<span className="font-extrabold text-lg tracking-tight">Herald</span>
 				</div>
 

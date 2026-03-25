@@ -2,9 +2,7 @@
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import { motion } from "motion/react";
-import Link from "next/link";
 import { useState } from "react";
-import { FaArrowLeft } from "react-icons/fa6";
 import { DeleteAccountModal } from "@/components/preferences/DeleteAccountModal";
 import { EmailUpdateModal } from "@/components/preferences/EmailUpdateModal";
 import { PreferencesForm } from "@/components/preferences/PreferencesForm";
@@ -55,7 +53,7 @@ export default function PreferencesPage() {
 
 					{/* Categories & Delivery Mode Form */}
 					<PreferencesForm initialValues={initialPrefs} />
-					
+
 					{/* Email */}
 					<Card className="mb-6">
 						<h3 className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-3.5">
@@ -70,7 +68,7 @@ export default function PreferencesPage() {
 							</Button>
 						</div>
 					</Card>
-					
+
 					{/* Danger zone */}
 					<div className="border-t border-border pt-6">
 						<div className="text-[11px] font-bold text-text-muted tracking-[2px] uppercase mb-3">

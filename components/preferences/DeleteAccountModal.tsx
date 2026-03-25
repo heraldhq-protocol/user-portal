@@ -60,7 +60,7 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 			</div>
 			{step === 1 ? (
 				<>
-					<p className="text-sm text-text-muted leading-relaxed mb-6">
+					<p className="text-sm text-slate-500 dark:text-text-muted leading-relaxed mb-6">
 						This permanently removes your on-chain IdentityAccount and returns the rent to your
 						wallet. All future notifications to this wallet will be silently dropped. This action
 						cannot be undone.
@@ -79,12 +79,12 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 				</>
 			) : (
 				<>
-					<p className="text-sm text-text-muted leading-relaxed mb-4">
+					<p className="text-sm text-slate-500 dark:text-text-muted leading-relaxed mb-4">
 						Type <strong>DELETE</strong> below to confirm permanent deletion.
 					</p>
 					<input
 						type="text"
-						className="w-full bg-navy border border-border rounded-lg px-4 py-3 text-white mb-6 outline-none focus:border-red"
+						className="w-full bg-white dark:bg-navy border border-slate-200 dark:border-border rounded-lg px-4 py-3 text-white mb-6 outline-none focus:border-red"
 						placeholder="DELETE"
 						value={confirmText}
 						onChange={(e) => setConfirmText(e.target.value)}

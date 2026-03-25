@@ -9,6 +9,7 @@ interface StepSuccessProps {
 }
 
 export function StepSuccess({ txSignature }: StepSuccessProps) {
+	const alreadyRegistered = txSignature === "already-registered";
 	return (
 		<div className="text-center">
 			{/* Checkmark */}
@@ -21,27 +22,36 @@ export function StepSuccess({ txSignature }: StepSuccessProps) {
 				✓
 			</motion.div>
 
-			<h2 className="text-[28px] font-extrabold tracking-tight mb-2.5">You&rsquo;re registered!</h2>
-			<p className="text-text-muted text-sm leading-relaxed mb-7 max-w-[360px] mx-auto">
-				You&rsquo;ll now receive DeFi alerts from Herald-integrated protocols directly to your inbox
-				— without sharing your email with any of them.
+			<h2 className="text-[28px] font-extrabold tracking-tight mb-2.5">
+				{alreadyRegistered ? "Already registered!" : "You're registered!"}
+			</h2>
+			<p className="text-slate-500 dark:text-text-muted text-sm leading-relaxed mb-7 max-w-[360px] mx-auto">
+				{alreadyRegistered
+					? "Your wallet is already registered on Herald. You'll receive DeFi alerts directly to your encrypted inbox."
+					: "You'll now receive DeFi alerts from Herald-integrated protocols directly to your inbox\u00a0— without sharing your email with any of them."}
 			</p>
 
-			{/* Transaction card */}
-			<div className="bg-card-2 border border-border-2 rounded-xl p-5 text-left mb-6">
-				<div className="text-[11px] text-text-muted font-semibold mb-1.5">Transaction</div>
-				<div className="flex items-center justify-between">
-					<span className="font-mono text-[13px] text-text-secondary">{txSignature}</span>
-					<a
-						href={`https://solscan.io/tx/${txSignature}`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-xs text-teal font-semibold hover:text-teal-2 transition-colors"
-					>
-						View on Solscan ↗
-					</a>
+			{/* Transaction card — only shown for fresh registrations */}
+			{!alreadyRegistered && (
+				<div className="bg-slate-50 dark:bg-card-2 border border-slate-300 dark:border-border-2 rounded-xl p-5 text-left mb-6">
+					<div className="text-[11px] text-slate-500 dark:text-text-muted font-semibold mb-1.5">
+						Transaction:
+					</div>
+					<div className="flex flex-col flex-1 items-center justify-between gap-4">
+						<div className="font-mono text-[13px] text-slate-700 dark:text-text-secondary truncate w-full">
+							{txSignature}
+						</div>
+						<Link
+							href={`https://solscan.io/tx/${txSignature}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-xs text-teal font-semibold hover:text-teal-2 transition-colors"
+						>
+							View on Solscan ↗
+						</Link>
+					</div>
 				</div>
-			</div>
+			)}
 
 			{/* Share buttons */}
 			<div className="flex gap-3 mb-4">
@@ -49,13 +59,13 @@ export function StepSuccess({ txSignature }: StepSuccessProps) {
 					href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just registered for privacy-preserving DeFi notifications with @herald_xyz 🔒⛓️\n\nMy email is encrypted — no protocol ever sees it.\n\nnotify.herald.xyz")}`}
 					target="_blank"
 					rel="noopener noreferrer"
-					className="flex-1 inline-flex items-center justify-center gap-2 bg-card text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-border-2 hover:border-teal/50 hover:text-text-primary transition-all duration-150"
+					className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 dark:text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
 				>
 					Share on 𝕏
 				</a>
 				<button
 					onClick={() => navigator.clipboard.writeText("https://notify.herald.xyz")}
-					className="flex-1 inline-flex items-center justify-center gap-2 bg-card text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-border-2 hover:border-teal/50 hover:text-text-primary transition-all duration-150"
+					className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 dark:text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
 				>
 					Copy link
 				</button>
