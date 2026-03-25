@@ -52,7 +52,7 @@ export function NotificationCard({ notification }: { notification: Notification 
 					</span>
 					{notification.receiptTx ? (
 						<a
-							href={`https://solscan.io/tx/${notification.receiptTx}`}
+							href={`https://solscan.io/tx/${notification.receiptTx}${process.env.NEXT_PUBLIC_RPC_CLUSTER !== "mainnet-beta" ? `?cluster=${process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet"}` : ""}`}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="text-[11px] text-teal font-bold hover:text-teal-2 transition-colors inline-flex items-center gap-1"

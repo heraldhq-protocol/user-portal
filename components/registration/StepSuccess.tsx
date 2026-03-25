@@ -42,7 +42,7 @@ export function StepSuccess({ txSignature }: StepSuccessProps) {
 							{txSignature}
 						</div>
 						<Link
-							href={`https://solscan.io/tx/${txSignature}`}
+							href={`https://solscan.io/tx/${txSignature}${process.env.NEXT_PUBLIC_RPC_CLUSTER !== "mainnet-beta" ? `?cluster=${process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet"}` : ""}`}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="text-xs text-teal font-semibold hover:text-teal-2 transition-colors"
