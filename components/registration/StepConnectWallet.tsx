@@ -28,7 +28,6 @@ export function StepConnectWallet({
 	const [selectedWalletName, setSelectedWalletName] = useState<string | null>(null);
 	const [isConnecting, setIsConnecting] = useState(false);
 	const connectionAttemptRef = useRef<string | null>(null);
-	const shouldConnectRef = useRef<boolean>(false);
 
 	const {
 		select,
@@ -71,25 +70,6 @@ export function StepConnectWallet({
 		isConnecting,
 	]);
 
-	// Handle automated connection after selection
-	useEffect(() => {
-		if (
-			shouldConnectRef.current &&
-			wallet &&
-			!connected &&
-			!walletConnecting &&
-			wallet.adapter.name === connectionAttemptRef.current
-		) {
-			shouldConnectRef.current = false;
-			console.log(`Triggering connect for ${wallet.adapter.name}`);
-			connect().catch((err) => {
-				console.error("Auto-connect error:", err);
-				setIsConnecting(false);
-				connectionAttemptRef.current = null;
-			});
-		}
-	}, [wallet, connected, walletConnecting, connect]);
-
 	const handleConnect = useCallback(
 		async (walletName: WalletName) => {
 			const targetWallet = wallets.find((w) => w.adapter.name === walletName);
@@ -125,11 +105,15 @@ export function StepConnectWallet({
 
 				// Select the wallet
 				console.log(`Selecting wallet: ${walletName}`);
-				shouldConnectRef.current = true;
 				select(walletName);
 
-				// The connection will be picked up by the useEffect above
-				// which monitors the 'wallet' state change.
+				// Small delay to allow the provider state to catch up
+				// This prevents WalletNotSelectedError while still being in the user-click context
+				await new Promise((resolve) => setTimeout(resolve, 150));
+
+				// Attempt to connect directly via the adapter
+				console.log(`Connecting to ${walletName} via adapter...`);
+				await targetWallet.adapter.connect();
 			} catch (error: unknown) {
 				console.error("Connection error:", error);
 				setSelectedWalletName(null);
@@ -165,7 +149,8 @@ export function StepConnectWallet({
 				setIsConnecting(false);
 			}
 		},
-		[select, disconnect, connected, connectedWallet, wallets, isConnecting]
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[select, connect, disconnect, connected, connectedWallet, wallets, isConnecting]
 	);
 
 	const handleDisconnect = useCallback(async () => {
@@ -262,16 +247,10 @@ export function StepConnectWallet({
 								alt={adapter.name}
 								width={32}
 								height={32}
-								className="rounded-lg"
-								onError={(e) => {
-									// Fallback to colored circle with initial
-									const target = e.currentTarget;
-									target.style.display = "none";
-									target.parentElement?.querySelector(".fallback-icon")?.classList.remove("hidden");
-								}}
+								className="rounded-lg shrink-0"
 							/>
-							<div className="flex flex-col items-start">
-								<span className="font-semibold text-sm text-slate-700 dark:text-text-secondary">
+							<div className="flex flex-col items-start min-w-0">
+								<span className="font-semibold text-sm text-slate-700 dark:text-text-secondary truncate w-full">
 									{adapter.name}
 								</span>
 								{isCurrentWallet && <span className="text-xs text-emerald-500">Connected</span>}

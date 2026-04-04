@@ -42,7 +42,7 @@ const RegistrationInfographic = () => {
 						</div>
 
 						{/* Arrow */}
-						<div className="flex justify-center lg:justify-start lg:pl-6">
+						<div className="flex justify-center lg:justify-start lg:pl-6 animate-bounce duration-6000!">
 							<svg
 								className="w-6 h-6 text-[#00C896] rotate-0"
 								fill="none"
@@ -76,7 +76,7 @@ const RegistrationInfographic = () => {
 						</div>
 
 						{/* Arrow */}
-						<div className="flex justify-center lg:justify-start lg:pl-6">
+						<div className="flex justify-center lg:justify-start lg:pl-6 animate-bounce duration-6000!">
 							<svg
 								className="w-6 h-6 text-[#E8920A] rotate-0"
 								fill="none"
@@ -121,7 +121,7 @@ const RegistrationInfographic = () => {
 						</div>
 
 						{/* Arrow */}
-						<div className="flex justify-center lg:justify-start lg:pl-6">
+						<div className="flex justify-center lg:justify-start lg:pl-6 animate-bounce duration-6000!">
 							<svg
 								className="w-6 h-6 text-[#5B35D5] rotate-0"
 								fill="none"

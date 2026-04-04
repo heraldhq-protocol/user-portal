@@ -7,10 +7,18 @@ import { Button } from "@/components/ui/Button";
 interface StepSuccessProps {
 	txSignature: string;
 	isAlreadyRegistered?: boolean;
+	onConnectWallet: () => void;
 }
 
-export function StepSuccess({ txSignature, isAlreadyRegistered }: StepSuccessProps) {
+export function StepSuccess({
+	txSignature,
+	isAlreadyRegistered,
+	onConnectWallet,
+}: StepSuccessProps) {
 	const alreadyRegistered = isAlreadyRegistered || txSignature === "already-registered";
+
+	const rpcCluster = process.env.NEXT_PUBLIC_RPC_CLUSTER?.replace(/['"]+/g, "").trim() || "devnet";
+	const cluster = rpcCluster === "localnet" ? "custom&customUrl=http://127.0.0.1:8899" : rpcCluster;
 	return (
 		<div className="text-center">
 			{/* Checkmark */}
@@ -43,7 +51,7 @@ export function StepSuccess({ txSignature, isAlreadyRegistered }: StepSuccessPro
 							{txSignature}
 						</div>
 						<a
-							href={`https://solscan.io/tx/${txSignature}${process.env.NEXT_PUBLIC_RPC_CLUSTER !== "mainnet-beta" ? `?cluster=${process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet"}` : ""}`}
+							href={`https://solscan.io/tx/${txSignature}${rpcCluster !== "mainnet-beta" ? `?cluster=${cluster}` : ""}`}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="text-xs text-teal font-semibold hover:text-teal-2 transition-colors"
@@ -63,13 +71,13 @@ export function StepSuccess({ txSignature, isAlreadyRegistered }: StepSuccessPro
 						href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just registered for privacy-preserving DeFi notifications with @herald_xyz 🔒⛓️\n\nMy email is encrypted — no protocol ever sees it.\n\nnotify.herald.xyz")}`}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 dark:text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
+						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
 					>
 						Share on 𝕏
 					</a>
 					<button
 						onClick={() => navigator.clipboard.writeText("https://notify.herald.xyz")}
-						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 dark:text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
+						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
 					>
 						Copy link
 					</button>
@@ -77,20 +85,31 @@ export function StepSuccess({ txSignature, isAlreadyRegistered }: StepSuccessPro
 			)}
 
 			{/* CTAs */}
-			<div className="flex flex-col gap-3">
-				<Link href="/notifications" className="w-full">
-					<Button className="w-full justify-center h-[52px] text-base font-bold shadow-lg shadow-teal/10">
-						View notification history →
-					</Button>
-				</Link>
-				{alreadyRegistered && (
-					<Link href="/preferences" className="w-full">
-						<button className="w-full py-3 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-text-muted dark:hover:text-text-secondary transition-colors underline underline-offset-4 decoration-slate-300 hover:decoration-teal/50">
-							Update notification preferences
-						</button>
+			{alreadyRegistered ? (
+				<div className="flex flex-col gap-3">
+					<Link href="/notifications" className="w-full">
+						<Button className="w-full justify-center h-[52px] text-base font-bold shadow-lg shadow-teal/10">
+							View notification history →
+						</Button>
 					</Link>
-				)}
-			</div>
+					{alreadyRegistered && (
+						<Link href="/preferences" className="w-full">
+							<button className="w-full py-3 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-text-muted dark:hover:text-text-secondary transition-colors underline underline-offset-4 decoration-slate-300 hover:decoration-teal/50">
+								Update notification preferences
+							</button>
+						</Link>
+					)}
+				</div>
+			) : (
+				<div className="flex flex-col gap-3">
+					<Button
+						onClick={onConnectWallet}
+						className="w-full justify-center h-[52px] text-base font-bold shadow-lg shadow-teal/10"
+					>
+						Log into Herald Portal
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 }

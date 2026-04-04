@@ -12,6 +12,7 @@ import { StepLogin } from "./StepLogin";
 import { useRegistration } from "@/hooks/useRegistration";
 import type { RegistrationStep } from "@/types";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const STEPS_NEW: { key: RegistrationStep; label: string }[] = [
 	{ key: "connect", label: "Connect" },
@@ -41,6 +42,7 @@ export function RegistrationWizard() {
 	} = useRegistration();
 
 	const { connected, disconnect } = useWallet();
+	const router = useRouter();
 
 	// Smoothly transition to login step if already registered
 	useEffect(() => {
@@ -99,6 +101,12 @@ export function RegistrationWizard() {
 
 	const handleLoginComplete = () => {
 		goToStep("success");
+	};
+
+	const handleSuccessClick = () => {
+		disconnect();
+		goToStep("connect");
+		router.refresh();
 	};
 
 	return (
@@ -219,7 +227,11 @@ export function RegistrationWizard() {
 							ease: [0.22, 1, 0.36, 1],
 						}}
 					>
-						<StepSuccess txSignature={state.txSignature || ""} isAlreadyRegistered={isRegistered} />
+						<StepSuccess
+							txSignature={state.txSignature || ""}
+							isAlreadyRegistered={isRegistered}
+							onConnectWallet={handleSuccessClick}
+						/>
 					</motion.div>
 				)}
 			</AnimatePresence>

@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { toast } from "sonner";
-import { UserClient, type SolanaCluster } from "@herald-protocol/sdk";
 import { Transaction } from "@solana/web3.js";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { fetchApi } from "@/lib/api";
 
 interface DeleteAccountModalProps {
 	isOpen: boolean;
@@ -29,15 +29,16 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 
 		setIsDeleting(true);
 		try {
-			const userClient = new UserClient({
-				cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
-				rpcUrl: connection.rpcEndpoint,
-			});
-			const ix = await userClient.deleteIdentity({ owner: walletContext.publicKey });
-			const tx = new Transaction().add(ix);
-			tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-			tx.feePayer = walletContext.publicKey;
+			// 1. Build transaction in backend
+			const { serializedTransaction } = await fetchApi<{ serializedTransaction: string }>(
+				"/portal/delete/transaction",
+				{
+					method: "POST",
+				}
+			);
 
+			// 2. Sign and send
+			const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
 			const signedTx = await walletContext.signTransaction(tx);
 			const signature = await connection.sendRawTransaction(signedTx.serialize());
 
@@ -51,7 +52,14 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 				"confirmed"
 			);
 
+			// 3. Cleanup off-chain data
+			await fetchApi("/portal/account", { method: "DELETE" });
+
 			toast.success("Account permanently deleted");
+
+			// Clear session
+			localStorage.removeItem("herald_portal_token");
+
 			onClose();
 			window.location.href = "/";
 		} catch (err: unknown) {
@@ -63,7 +71,11 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 	};
 
 	return (
-		<Modal open={isOpen} onOpenChange={(val) => !val && onClose()}>
+		<Modal
+			open={isOpen}
+			onOpenChange={(val) => !val && onClose()}
+			className="bg-red-100 border-red-500"
+		>
 			<div className="text-xl font-extrabold mb-2.5">
 				{step === 1 ? "Delete account?" : "Confirm Deletion"}
 			</div>
@@ -75,11 +87,12 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 						cannot be undone.
 					</p>
 					<div className="flex gap-3">
-						<Button variant="secondary" className="flex-1 justify-center" onClick={onClose}>
+						<Button variant="secondary" className="text-sm flex-1 justify-center" onClick={onClose}>
 							Cancel
 						</Button>
 						<Button
-							className="flex-1 justify-center bg-red bg-opacity-70 hover:bg-opacity-100 border border-red text-white"
+							variant={"danger"}
+							className="text-sm flex-1 justify-center"
 							onClick={() => setStep(2)}
 						>
 							I understand, continue →
@@ -107,9 +120,10 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 							Back
 						</Button>
 						<Button
+							variant={"danger"}
 							disabled={confirmText !== "DELETE" || isDeleting}
 							onClick={handleDelete}
-							className="flex-1 justify-center bg-red bg-opacity-70 hover:bg-opacity-100 border border-red text-white disabled:opacity-50"
+							className="text-sm flex-1 justify-center"
 						>
 							{isDeleting ? "Deleting..." : "Delete My Account"}
 						</Button>
