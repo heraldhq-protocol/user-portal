@@ -1,4 +1,5 @@
 "use client";
+
 import { WalletProvider, ConnectionProvider } from "@solana/wallet-adapter-react";
 import {
 	CoinbaseWalletAdapter,
@@ -7,6 +8,8 @@ import {
 	SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { useMemo } from "react";
+import { clusterApiUrl } from "@solana/web3.js";
+import { type SolanaCluster } from "@herald-protocol/sdk";
 
 export function WalletConnection({ children }: Readonly<{ children: React.ReactNode }>) {
 	const wallets = useMemo(
@@ -18,9 +21,18 @@ export function WalletConnection({ children }: Readonly<{ children: React.ReactN
 		],
 		[]
 	);
-	const DEVNET_URL = "https://api.devnet.solana.com";
+
+	// Clean the environment variable (handle quotes or extra whitespace)
+	const rawCluster = process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet";
+	const cluster = rawCluster.replace(/['"]+/g, "").trim() as SolanaCluster;
+
+	const endpoint = useMemo(() => {
+		if (cluster === "localnet") return "http://127.0.0.1:8899";
+		return clusterApiUrl(cluster as "devnet" | "mainnet-beta" | "testnet");
+	}, [cluster]);
+
 	return (
-		<ConnectionProvider endpoint={DEVNET_URL}>
+		<ConnectionProvider endpoint={endpoint}>
 			<WalletProvider wallets={wallets}>{children}</WalletProvider>
 		</ConnectionProvider>
 	);

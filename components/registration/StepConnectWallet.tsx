@@ -270,9 +270,6 @@ export function StepConnectWallet({
 									target.parentElement?.querySelector(".fallback-icon")?.classList.remove("hidden");
 								}}
 							/>
-							<div className="fallback-icon hidden w-8 h-8 rounded-lg md:flex items-center justify-center text-sm font-extrabold text-white bg-gray-500">
-								{adapter.name[0]}
-							</div>
 							<div className="flex flex-col items-start">
 								<span className="font-semibold text-sm text-slate-700 dark:text-text-secondary">
 									{adapter.name}
