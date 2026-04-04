@@ -23,19 +23,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	useEffect(() => {
-		if (!mounted) return;
+		if (!mounted || connecting || isLoading) return;
 
 		const isRegisterPage = pathname.startsWith("/register");
 
-		if (!connected && !connecting && !isRegisterPage) {
+		// 1. If not connected, redirect to landing (root)
+		if (!connected && !isRegisterPage) {
 			router.replace("/");
+			return;
 		}
 
-		// 2. Connected but status resolved
-		if (connected && !isLoading && status) {
+		// 2. If connected, check registration status
+		if (connected && status) {
 			if (!status.registered && !isRegisterPage) {
+				// Connected but not registered on-chain -> go to register
 				router.replace("/register");
 			} else if (status.registered && isRegisterPage) {
+				// Already registered but on register page -> go to notifications
 				router.replace("/notifications");
 			}
 		}

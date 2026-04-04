@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
+import RegistrationInfographic from "@/components/marketing/RegistrationInfographic";
 
 const steps = [
 	{
@@ -32,14 +33,14 @@ const steps = [
 
 export default function HowItWorksPage() {
 	return (
-		<div className="max-w-[700px] mx-auto px-6 py-16">
+		<div className="max-w-7xl mx-auto px-6 py-16">
 			<motion.div
 				initial={{ opacity: 0, y: 16 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.4 }}
 			>
 				{/* Header */}
-				<div className="mb-12">
+				<div className="mb-12 max-w-[700px] mx-auto">
 					<h1 className="text-4xl font-extrabold tracking-tight mb-3">How Herald works</h1>
 					<p className="text-base text-slate-500 dark:text-text-muted leading-[1.7] max-w-[540px]">
 						A privacy-preserving notification layer for Solana DeFi — from wallet to inbox, with
@@ -47,44 +48,55 @@ export default function HowItWorksPage() {
 					</p>
 				</div>
 
-				{/* Steps */}
-				{steps.map((s, i) => (
-					<motion.div
-						key={i}
-						initial={{ opacity: 0, x: -16 }}
-						animate={{ opacity: 1, x: 0 }}
-						transition={{ delay: i * 0.1, duration: 0.4 }}
-						className="flex gap-6 mb-10"
-					>
-						<div className="flex flex-col items-center">
-							<div
-								className="w-11 h-11 rounded-xl flex items-center justify-center font-mono text-[13px] font-semibold shrink-0"
-								style={{
-									background: `${s.color}18`,
-									border: `1px solid ${s.color}40`,
-									color: s.color,
-								}}
-							>
-								{s.n}
-							</div>
-							{i < steps.length - 1 && <div className="w-px flex-1 bg-border mt-2" />}
-						</div>
-						<div className={i < steps.length - 1 ? "pb-6" : ""}>
-							<h3 className="text-lg font-bold mb-2" style={{ color: s.color }}>
-								{s.title}
-							</h3>
-							<p className="text-sm text-slate-500 dark:text-text-muted leading-[1.7]">{s.desc}</p>
-						</div>
-					</motion.div>
-				))}
+				<div className="grid grid-cols-1 md:grid-cols-5 gap-16">
+					{/* Registration Infographic - Simplified Visual Flow */}
+					<div className="mb-16 md:col-span-3">
+						<RegistrationInfographic />
+					</div>
 
-				{/* CTA */}
-				<Link
-					href="/register"
-					className="inline-flex items-center gap-2 bg-teal text-navy font-bold text-[15px] px-7 py-3 rounded-[10px] hover:bg-teal-2 active:scale-[0.97] transition-all duration-150"
-				>
-					Get started →
-				</Link>
+					<div className="flex flex-col gap-3 md:col-span-2">
+						{/* Steps */}
+						{steps.map((s, i) => (
+							<motion.div
+								key={i}
+								initial={{ opacity: 0, x: -16 }}
+								animate={{ opacity: 1, x: 0 }}
+								transition={{ delay: i * 0.1, duration: 0.4 }}
+								className="flex gap-6 mb-10"
+							>
+								<div className="flex flex-col items-center">
+									<div
+										className="w-11 h-11 rounded-xl flex items-center justify-center font-mono text-[13px] font-semibold shrink-0"
+										style={{
+											background: `${s.color}18`,
+											border: `1px solid ${s.color}40`,
+											color: s.color,
+										}}
+									>
+										{s.n}
+									</div>
+									{i < steps.length - 1 && <div className="w-px flex-1 bg-border mt-2" />}
+								</div>
+								<div className={i < steps.length - 1 ? "pb-6" : ""}>
+									<h3 className="text-lg font-bold mb-2" style={{ color: s.color }}>
+										{s.title}
+									</h3>
+									<p className="text-sm text-slate-500 dark:text-text-muted leading-[1.7]">
+										{s.desc}
+									</p>
+								</div>
+							</motion.div>
+						))}
+
+						{/* CTA */}
+						<Link
+							href="/register"
+							className="inline-flex w-full md:w-fit items-center gap-2 bg-teal text-navy font-bold text-[15px] px-7 py-3 rounded-[10px] hover:bg-teal-2 active:scale-[0.97] transition-all duration-150"
+						>
+							Get started →
+						</Link>
+					</div>
+				</div>
 			</motion.div>
 		</div>
 	);

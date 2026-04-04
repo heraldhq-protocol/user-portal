@@ -223,7 +223,7 @@ export function StepConnectWallet({
 
 			{/* Wallet grid - always visible */}
 			<div className="grid grid-cols-2 gap-3 mb-5">
-				{wallets.map((w) => {
+				{Array.from(new Map(wallets.map((w) => [w.adapter.name, w])).values()).map((w) => {
 					const adapter = w.adapter;
 					const isCurrentWallet = isConnected && connectedWallet?.name === adapter.name;
 					const isDisabled = isConnecting || (isConnected && isCurrentWallet);
@@ -239,7 +239,7 @@ export function StepConnectWallet({
 								"flex items-center gap-2.5 border rounded-xl p-4 cursor-pointer transition-all duration-150",
 								isCurrentWallet
 									? "bg-emerald-500/20 border-emerald-500/50 cursor-default"
-									: "bg-white dark:bg-card border-slate-200 dark:border-border hover:border-slate-300 dark:border-border-2 hover:bg-white dark:bg-card/80",
+									: "bg-white dark:bg-card border-slate-200 dark:border-border hover:border-slate-300 hover:bg-white/90 dark:hover:bg-card/80",
 								isConnecting && "opacity-50 cursor-not-allowed"
 							)}
 						>

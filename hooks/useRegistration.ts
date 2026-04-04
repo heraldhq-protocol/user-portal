@@ -1,12 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { apiFetch } from "@/lib/api";
 import { SolanaCluster, UserClient, encryptEmail, hashEmail } from "@herald-protocol/sdk";
 import { Transaction } from "@solana/web3.js";
 import type { RegistrationStep } from "@/types";
+import { useWalletRegistrationStatus } from "./useWalletRegistrationStatus";
 
 type RegistrationPhase = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -50,30 +49,7 @@ export function useRegistration(): UseRegistrationReturn {
 
 	const [isRegistering, setIsRegistering] = useState(false);
 
-	// ─── Check if wallet is already registered on-chain ───────────────────────
-	// Uses the public GET /portal/identity/:wallet endpoint (no JWT required).
-	const { data: registrationStatus, isLoading: isCheckingStatus } = useQuery({
-		queryKey: ["registrationStatus", publicKey?.toBase58()],
-		queryFn: async () => {
-			if (!publicKey) return { registered: false };
-
-			try {
-				const response = await apiFetch(`/portal/identity/${publicKey.toBase58()}`, {
-					method: "GET",
-				});
-				if (response.ok) {
-					const data = await response.json();
-					return { registered: data.registered === true };
-				}
-				return { registered: false };
-			} catch (e) {
-				console.error("Failed to fetch registration status", e);
-				return { registered: false };
-			}
-		},
-		enabled: !!publicKey,
-		staleTime: 30_000,
-	});
+	const { data: registrationStatus, isLoading: isCheckingStatus } = useWalletRegistrationStatus();
 
 	const isRegistered = registrationStatus?.registered ?? false;
 
