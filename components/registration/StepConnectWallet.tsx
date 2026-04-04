@@ -28,6 +28,7 @@ export function StepConnectWallet({
 	const [selectedWalletName, setSelectedWalletName] = useState<string | null>(null);
 	const [isConnecting, setIsConnecting] = useState(false);
 	const connectionAttemptRef = useRef<string | null>(null);
+	const shouldConnectRef = useRef<boolean>(false);
 
 	const {
 		select,
@@ -70,6 +71,25 @@ export function StepConnectWallet({
 		isConnecting,
 	]);
 
+	// Handle automated connection after selection
+	useEffect(() => {
+		if (
+			shouldConnectRef.current &&
+			wallet &&
+			!connected &&
+			!walletConnecting &&
+			wallet.adapter.name === connectionAttemptRef.current
+		) {
+			shouldConnectRef.current = false;
+			console.log(`Triggering connect for ${wallet.adapter.name}`);
+			connect().catch((err) => {
+				console.error("Auto-connect error:", err);
+				setIsConnecting(false);
+				connectionAttemptRef.current = null;
+			});
+		}
+	}, [wallet, connected, walletConnecting, connect]);
+
 	const handleConnect = useCallback(
 		async (walletName: WalletName) => {
 			const targetWallet = wallets.find((w) => w.adapter.name === walletName);
@@ -105,17 +125,11 @@ export function StepConnectWallet({
 
 				// Select the wallet
 				console.log(`Selecting wallet: ${walletName}`);
+				shouldConnectRef.current = true;
 				select(walletName);
 
-				// Small delay to ensure wallet is selected
-				await new Promise((resolve) => setTimeout(resolve, 100));
-
-				// Attempt to connect
-				console.log(`Connecting to ${walletName}...`);
-				await connect();
-
-				// Success - toast will be shown by useEffect when connected state updates
-				toast.success(`${walletName} connected successfully`);
+				// The connection will be picked up by the useEffect above
+				// which monitors the 'wallet' state change.
 			} catch (error: unknown) {
 				console.error("Connection error:", error);
 				setSelectedWalletName(null);
@@ -151,7 +165,7 @@ export function StepConnectWallet({
 				setIsConnecting(false);
 			}
 		},
-		[select, connect, disconnect, connected, connectedWallet, wallets, isConnecting]
+		[select, disconnect, connected, connectedWallet, wallets, isConnecting]
 	);
 
 	const handleDisconnect = useCallback(async () => {
@@ -256,7 +270,7 @@ export function StepConnectWallet({
 									target.parentElement?.querySelector(".fallback-icon")?.classList.remove("hidden");
 								}}
 							/>
-							<div className="fallback-icon hidden w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold text-white bg-gray-500">
+							<div className="fallback-icon hidden w-8 h-8 rounded-lg md:flex items-center justify-center text-sm font-extrabold text-white bg-gray-500">
 								{adapter.name[0]}
 							</div>
 							<div className="flex flex-col items-start">

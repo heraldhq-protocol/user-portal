@@ -5,6 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletRegistrationStatus } from "@/hooks/useWalletRegistrationStatus";
 import { WalletAddressDisplay } from "@/components/wallet/WalletAddressDisplay";
 import { WalletStatusBadge } from "@/components/wallet/WalletStatusBadge";
+import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import Image from "next/image";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
@@ -15,6 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const pathname = usePathname();
 	const { connected, connecting, publicKey, disconnect } = useWallet();
 	const { data: status, isLoading } = useWalletRegistrationStatus();
+	const { isAuthenticated } = useAuth();
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -38,12 +40,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 			if (!status.registered && !isRegisterPage) {
 				// Connected but not registered on-chain -> go to register
 				router.replace("/register");
-			} else if (status.registered && isRegisterPage) {
-				// Already registered but on register page -> go to notifications
-				router.replace("/notifications");
 			}
 		}
-	}, [mounted, connected, connecting, isLoading, status, pathname, router]);
+	}, [mounted, connected, connecting, isLoading, status, pathname, router, isAuthenticated]);
 
 	// Show loading state while resolving
 	if (!mounted || connecting || isLoading) {

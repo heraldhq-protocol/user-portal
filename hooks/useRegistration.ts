@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { useAuth } from "@/hooks/useAuth";
 import { SolanaCluster, UserClient, encryptEmail, hashEmail } from "@herald-protocol/sdk";
@@ -53,17 +53,7 @@ export function useRegistration(): UseRegistrationReturn {
 
 	const isRegistered = registrationStatus?.registered ?? false;
 
-	// ─── Skip-if-registered ────────────────────────────────────────────────────
-	// When the wallet is already on-chain, fast-forward to the success screen.
-	useEffect(() => {
-		if (isRegistered && (state.step === "connect" || state.step === "email")) {
-			setState((s) => ({
-				...s,
-				step: "success",
-				txSignature: "already-registered",
-			}));
-		}
-	}, [isRegistered, state.step]);
+	// ─── Skip-if-registered (REMOVED: Handled in Wizard for better transitions) ─────────────────
 
 	// ─── State helpers ─────────────────────────────────────────────────────────
 	const setEmail = (email: string) => setState((s) => ({ ...s, email }));

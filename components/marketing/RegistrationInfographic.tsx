@@ -225,13 +225,13 @@ const RegistrationInfographic = () => {
 								User Controls (Wallet-signed)
 							</div>
 							<div className="flex flex-wrap gap-2">
-								<span className="px-2 py-1 dark:bg-[#0D1F35] bg-white border dark:border-[#1A3A52] border-[#5B35D5] rounded text-[10px] text-[#64748B] border border-[#1A3A52]">
+								<span className="px-2 py-1 dark:bg-[#0D1F35] bg-white dark:border-[#1A3A52] rounded text-[10px] text-[#64748B] border border-[#1A3A52]">
 									update_identity()
 								</span>
-								<span className="px-2 py-1 dark:bg-[#0D1F35] bg-white border dark:border-[#1A3A52] border-[#5B35D5] rounded text-[10px] text-[#64748B] border border-[#1A3A52]">
+								<span className="px-2 py-1 dark:bg-[#0D1F35] bg-white dark:border-[#1A3A52] rounded text-[10px] text-[#64748B] border border-[#1A3A52]">
 									toggle_opt_in()
 								</span>
-								<span className="px-2 py-1 dark:bg-[#0D1F35] bg-white border dark:border-[#1A3A52] border-[#5B35D5] rounded text-[10px] text-[#D63031] border border-[#D63031]/30">
+								<span className="px-2 py-1 dark:bg-[#0D1F35] bg-white dark:border-[#1A3A52] rounded text-[10px] text-[#D63031] border border-[#D63031]/30">
 									delete_identity()
 								</span>
 							</div>

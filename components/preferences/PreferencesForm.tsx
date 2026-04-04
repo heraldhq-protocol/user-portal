@@ -12,6 +12,7 @@ import { CategoryToggle } from "./CategoryToggle";
 import { DeliveryModeSelect } from "./DeliveryModeSelect";
 import { UserClient, type SolanaCluster } from "@herald-protocol/sdk";
 import { Transaction } from "@solana/web3.js";
+import { fetchApi } from "@/lib/api";
 
 interface PreferencesFormProps {
 	initialValues: PreferencesFormData;
@@ -79,7 +80,13 @@ export function PreferencesForm({ initialValues }: PreferencesFormProps) {
 				"confirmed"
 			);
 
-			toast.success("Preferences saved successfully");
+			// Step 2: Sync to backend database (off-chain)
+			await fetchApi("/portal/preferences", {
+				method: "PATCH",
+				body: JSON.stringify(data),
+			});
+
+			toast.success("Preferences saved on-chain and synced to dashboard");
 			reset(data); // reset isDirty
 		} catch (err: unknown) {
 			console.error("Save preferences error:", err);

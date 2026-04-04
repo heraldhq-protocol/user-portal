@@ -8,14 +8,21 @@ import { StepConnectWallet } from "./StepConnectWallet";
 import { StepEnterEmail } from "./StepEnterEmail";
 import { StepEncryptSign } from "./StepEncryptSign";
 import { StepSuccess } from "./StepSuccess";
+import { StepLogin } from "./StepLogin";
 import { useRegistration } from "@/hooks/useRegistration";
 import type { RegistrationStep } from "@/types";
 import Image from "next/image";
 
-const STEPS: { key: RegistrationStep; label: string }[] = [
+const STEPS_NEW: { key: RegistrationStep; label: string }[] = [
 	{ key: "connect", label: "Connect" },
 	{ key: "email", label: "Email" },
 	{ key: "encrypt", label: "Sign" },
+	{ key: "success", label: "Done" },
+];
+
+const STEPS_REGISTERED: { key: RegistrationStep; label: string }[] = [
+	{ key: "connect", label: "Connect" },
+	{ key: "login", label: "Sign In" },
 	{ key: "success", label: "Done" },
 ];
 
@@ -30,11 +37,22 @@ export function RegistrationWizard() {
 		phase,
 		isRegistering,
 		isRegistered,
+		isCheckingStatus,
 	} = useRegistration();
 
 	const { connected, disconnect } = useWallet();
 
-	const stepIndex = STEPS.findIndex((s) => s.key === state.step);
+	// Smoothly transition to login step if already registered
+	useEffect(() => {
+		if (connected && isRegistered && !isCheckingStatus && state.step === "connect") {
+			// Delay slightly for visual comfort
+			const timer = setTimeout(() => goToStep("login"), 600);
+			return () => clearTimeout(timer);
+		}
+	}, [connected, isRegistered, isCheckingStatus, state.step, goToStep]);
+
+	const steps = isRegistered ? STEPS_REGISTERED : STEPS_NEW;
+	const stepIndex = steps.findIndex((s) => s.key === state.step);
 
 	// Only handle disconnection (wallet disconnected externally), not connection
 	useEffect(() => {
@@ -48,7 +66,7 @@ export function RegistrationWizard() {
 			// If already on-chain, the useEffect in useRegistration will handle the redirect;
 			// but also guard here in case the effect hasn't fired yet.
 			if (isRegistered) {
-				goToStep("success");
+				goToStep("login");
 				return;
 			}
 			goToStep("email");
@@ -73,7 +91,14 @@ export function RegistrationWizard() {
 			goToStep("connect");
 		} else if (state.step === "encrypt") {
 			goToStep("email");
+		} else if (state.step === "login") {
+			disconnect();
+			goToStep("connect");
 		}
+	};
+
+	const handleLoginComplete = () => {
+		goToStep("success");
 	};
 
 	return (
@@ -92,7 +117,7 @@ export function RegistrationWizard() {
 				</div>
 
 				{/* Step Indicator */}
-				<StepIndicator steps={STEPS} currentIndex={stepIndex} />
+				<StepIndicator steps={steps} currentIndex={stepIndex} />
 			</div>
 
 			{state.error && (
@@ -111,11 +136,18 @@ export function RegistrationWizard() {
 						exit={{ opacity: 0, x: -20 }}
 						transition={{ duration: 0.3 }}
 					>
-						<StepConnectWallet
-							onConnected={() => handleNextStep()}
-							onNext={handleNextStep}
-							showNextButton={true}
-						/>
+						{isCheckingStatus && connected ? (
+							<div className="flex flex-col items-center justify-center py-12 gap-4">
+								<div className="w-10 h-10 border-2 border-teal border-t-transparent rounded-full animate-spin" />
+								<p className="text-sm font-bold text-text-muted">Checking registration...</p>
+							</div>
+						) : (
+							<StepConnectWallet
+								onConnected={() => handleNextStep()}
+								onNext={handleNextStep}
+								showNextButton={true}
+							/>
+						)}
 					</motion.div>
 				)}
 
@@ -165,6 +197,18 @@ export function RegistrationWizard() {
 					</motion.div>
 				)}
 
+				{state.step === "login" && (
+					<motion.div
+						key="login"
+						initial={{ opacity: 0, x: 20 }}
+						animate={{ opacity: 1, x: 0 }}
+						exit={{ opacity: 0, x: -20 }}
+						transition={{ duration: 0.3 }}
+					>
+						<StepLogin onBack={handleBack} onComplete={handleLoginComplete} />
+					</motion.div>
+				)}
+
 				{state.step === "success" && (
 					<motion.div
 						key="success"
@@ -175,7 +219,7 @@ export function RegistrationWizard() {
 							ease: [0.22, 1, 0.36, 1],
 						}}
 					>
-						<StepSuccess txSignature={state.txSignature || ""} />
+						<StepSuccess txSignature={state.txSignature || ""} isAlreadyRegistered={isRegistered} />
 					</motion.div>
 				)}
 			</AnimatePresence>

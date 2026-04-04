@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/Button";
 
 interface StepSuccessProps {
 	txSignature: string;
+	isAlreadyRegistered?: boolean;
 }
 
-export function StepSuccess({ txSignature }: StepSuccessProps) {
-	const alreadyRegistered = txSignature === "already-registered";
+export function StepSuccess({ txSignature, isAlreadyRegistered }: StepSuccessProps) {
+	const alreadyRegistered = isAlreadyRegistered || txSignature === "already-registered";
 	return (
 		<div className="text-center">
 			{/* Checkmark */}
@@ -23,11 +24,11 @@ export function StepSuccess({ txSignature }: StepSuccessProps) {
 			</motion.div>
 
 			<h2 className="text-[28px] font-extrabold tracking-tight mb-2.5">
-				{alreadyRegistered ? "Already registered!" : "You're registered!"}
+				{alreadyRegistered ? "Welcome back!" : "You're registered!"}
 			</h2>
 			<p className="text-slate-500 dark:text-text-muted text-sm leading-relaxed mb-7 max-w-[360px] mx-auto">
 				{alreadyRegistered
-					? "Your wallet is already registered on Herald. You'll receive DeFi alerts directly to your encrypted inbox."
+					? "You've successfully signed back in. Manage your alerts or view your notification history below."
 					: "You'll now receive DeFi alerts from Herald-integrated protocols directly to your inbox\u00a0— without sharing your email with any of them."}
 			</p>
 
@@ -41,40 +42,55 @@ export function StepSuccess({ txSignature }: StepSuccessProps) {
 						<div className="font-mono text-[13px] text-slate-700 dark:text-text-secondary truncate w-full">
 							{txSignature}
 						</div>
-						<Link
+						<a
 							href={`https://solscan.io/tx/${txSignature}${process.env.NEXT_PUBLIC_RPC_CLUSTER !== "mainnet-beta" ? `?cluster=${process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet"}` : ""}`}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="text-xs text-teal font-semibold hover:text-teal-2 transition-colors"
 						>
 							View on Solscan ↗
-						</Link>
+						</a>
 					</div>
 				</div>
 			)}
 
-			{/* Share buttons */}
-			<div className="flex gap-3 mb-4">
-				<a
-					href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just registered for privacy-preserving DeFi notifications with @herald_xyz 🔒⛓️\n\nMy email is encrypted — no protocol ever sees it.\n\nnotify.herald.xyz")}`}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 dark:text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
-				>
-					Share on 𝕏
-				</a>
-				<button
-					onClick={() => navigator.clipboard.writeText("https://notify.herald.xyz")}
-					className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 dark:text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
-				>
-					Copy link
-				</button>
-			</div>
+			{/* Share buttons — only shown for fresh registrations or always? 
+			    User asked specifically for options for history and preference. 
+				I'll hide share buttons for returning users to reduce clutter as requested. */}
+			{!alreadyRegistered && (
+				<div className="flex gap-3 mb-6">
+					<a
+						href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just registered for privacy-preserving DeFi notifications with @herald_xyz 🔒⛓️\n\nMy email is encrypted — no protocol ever sees it.\n\nnotify.herald.xyz")}`}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 dark:text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
+					>
+						Share on 𝕏
+					</a>
+					<button
+						onClick={() => navigator.clipboard.writeText("https://notify.herald.xyz")}
+						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 dark:text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
+					>
+						Copy link
+					</button>
+				</div>
+			)}
 
-			{/* CTA */}
-			<Link href="/preferences">
-				<Button className="w-full justify-center">Manage preferences →</Button>
-			</Link>
+			{/* CTAs */}
+			<div className="flex flex-col gap-3">
+				<Link href="/notifications" className="w-full">
+					<Button className="w-full justify-center h-[52px] text-base font-bold shadow-lg shadow-teal/10">
+						View notification history →
+					</Button>
+				</Link>
+				{alreadyRegistered && (
+					<Link href="/preferences" className="w-full">
+						<button className="w-full py-3 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-text-muted dark:hover:text-text-secondary transition-colors underline underline-offset-4 decoration-slate-300 hover:decoration-teal/50">
+							Update notification preferences
+						</button>
+					</Link>
+				)}
+			</div>
 		</div>
 	);
 }

@@ -2,30 +2,57 @@
 
 import { useWallet } from "@solana/wallet-adapter-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DeleteAccountModal } from "@/components/preferences/DeleteAccountModal";
 import { EmailUpdateModal } from "@/components/preferences/EmailUpdateModal";
 import { PreferencesForm } from "@/components/preferences/PreferencesForm";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { useWalletRegistrationStatus } from "@/hooks/useWalletRegistrationStatus";
 import { truncateAddress } from "@/lib/utils";
+import { fetchApi } from "@/lib/api";
+import { type IdentityStatus } from "@/types";
 
 export default function PreferencesPage() {
 	const { publicKey } = useWallet();
-	const { data: status, isLoading } = useWalletRegistrationStatus();
+	const [status, setStatus] = useState<IdentityStatus | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
 
 	const [showEmailModal, setShowEmailModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-	// Fallback defaults until dynamic decoding is added
-	const initialPrefs = {
-		optInAll: true,
-		optInDefi: true,
-		optInGovernance: true,
-		optInMarketing: false,
-		digestMode: false,
-	};
+	useEffect(() => {
+		async function loadIdentity() {
+			try {
+				const data = await fetchApi<IdentityStatus>("/portal/identity");
+				setStatus(data);
+			} catch (err) {
+				console.error("Failed to load identity:", err);
+			} finally {
+				setIsLoading(false);
+			}
+		}
+
+		if (publicKey) {
+			loadIdentity();
+		}
+	}, [publicKey]);
+
+	// Fallback defaults or actual preferences
+	const initialPrefs = status?.optIns
+		? {
+				optInAll: status.optIns.all,
+				optInDefi: status.optIns.defi,
+				optInGovernance: status.optIns.governance,
+				optInMarketing: status.optIns.marketing,
+				digestMode: status.digestMode,
+			}
+		: {
+				optInAll: true,
+				optInDefi: true,
+				optInGovernance: true,
+				optInMarketing: false,
+				digestMode: false,
+			};
 
 	return (
 		<div className="max-w-[640px] mx-auto px-4 sm:px-6 py-8 sm:py-12">

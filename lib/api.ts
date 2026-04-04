@@ -1,29 +1,32 @@
 /**
- * Helper to make authenticated API requests using the stored JWT token.
+ * Herald User Portal API client helper
  */
-export async function apiFetch(
-	endpoint: string,
-	options: RequestInit = {},
-	token?: string | null
-): Promise<Response> {
-	const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-	const url = `${apiUrl}${endpoint}`;
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/v1";
+
+export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+	const token = typeof window !== "undefined" ? localStorage.getItem("herald_portal_token") : null;
 
 	const headers = new Headers(options.headers);
-
 	if (token) {
 		headers.set("Authorization", `Bearer ${token}`);
 	}
-
-	// Default to application/json if not explicitly set and we have a body
-	if (options.body && !headers.has("Content-Type")) {
+	if (!headers.has("Content-Type")) {
 		headers.set("Content-Type", "application/json");
 	}
 
-	const response = await fetch(url, {
-		...options,
-		headers,
-	});
+	const response = await fetch(
+		`${API_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`,
+		{
+			...options,
+			headers,
+		}
+	);
 
-	return response;
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({}));
+		throw new Error(errorData.message || `API error: ${response.status} ${response.statusText}`);
+	}
+
+	return response.json() as Promise<T>;
 }

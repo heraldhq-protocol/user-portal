@@ -20,10 +20,22 @@ export interface Notification {
 }
 
 /** Registration wizard step identifiers */
-export type RegistrationStep = "connect" | "email" | "encrypt" | "success";
+export type RegistrationStep = "connect" | "email" | "encrypt" | "login" | "success";
 
 /** Wallet info for display */
 export interface WalletInfo {
 	name: string;
 	color: string;
+}
+
+export interface IdentityStatus {
+	registered: boolean;
+	optIns?: {
+		all: boolean;
+		defi: boolean;
+		governance: boolean;
+		marketing: boolean;
+	} | null;
+	digestMode: boolean;
+	registeredAt?: string | null;
 }
