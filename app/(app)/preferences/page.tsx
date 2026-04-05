@@ -8,6 +8,7 @@ import { EmailUpdateModal } from "@/components/preferences/EmailUpdateModal";
 import { PreferencesForm } from "@/components/preferences/PreferencesForm";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Loader } from "@/components/ui/Loader";
 import { truncateAddress } from "@/lib/utils";
 import { fetchApi } from "@/lib/api";
 import { type IdentityStatus } from "@/types";
@@ -63,7 +64,7 @@ export default function PreferencesPage() {
 	return (
 		<div className="max-w-160 mx-auto px-4 sm:px-6 py-8 sm:py-12">
 			{isLoading ? (
-				<div className="text-center text-text-muted py-12">Loading preferences...</div>
+				<Loader message="Loading preferences..." />
 			) : !registerStatus?.registered ? (
 				<div className="text-center text-text-muted py-12">
 					No Herald identity found for this wallet. Please register first.
@@ -101,7 +102,7 @@ export default function PreferencesPage() {
 							</Button>
 						</div>
 					</Card>
-
+					
 					{/* Danger zone */}
 					<div className="border-t border-border pt-6">
 						<div className="text-[11px] font-bold text-text-muted tracking-[2px] uppercase mb-3">

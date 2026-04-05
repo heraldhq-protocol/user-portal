@@ -10,6 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Loader } from "@/components/ui/Loader";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
@@ -47,11 +48,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	// Show loading state while resolving
 	if (!mounted || connecting || isLoading) {
 		return (
-			<div className="flex-1 flex items-center justify-center p-12 text-slate-500 dark:text-text-muted">
-				<div className="flex flex-col items-center gap-4">
-					<div className="w-8 h-8 border-2 border-teal border-t-transparent rounded-full animate-spin" />
-					<p className="font-semibold text-sm">Authenticating your wallet...</p>
-				</div>
+			<div className="flex-1 flex items-center justify-center p-12">
+				<Loader message="Authenticating your wallet..." size="lg" />
 			</div>
 		);
 	}

@@ -275,7 +275,6 @@ export default function LandingPage() {
 						Three steps to private alerts
 					</h3>
 				</div>
-
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 relative">
 					{/* Connecting line for desktop */}
 					<div className="absolute top-[28px] left-[15%] right-[15%] h-px bg-border hidden md:block" />
