@@ -11,11 +11,13 @@ import { Card } from "@/components/ui/Card";
 import { truncateAddress } from "@/lib/utils";
 import { fetchApi } from "@/lib/api";
 import { type IdentityStatus } from "@/types";
+import { useWalletRegistrationStatus } from "@/hooks/useWalletRegistrationStatus";
 
 export default function PreferencesPage() {
 	const { publicKey } = useWallet();
 	const [status, setStatus] = useState<IdentityStatus | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isIdentityLoading, setIsIdentityLoading] = useState(true);
+	const { data: registerStatus, isLoading: isRegisterLoading } = useWalletRegistrationStatus();
 
 	const [showEmailModal, setShowEmailModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -28,14 +30,18 @@ export default function PreferencesPage() {
 			} catch (err) {
 				console.error("Failed to load identity:", err);
 			} finally {
-				setIsLoading(false);
+				setIsIdentityLoading(false);
 			}
 		}
 
 		if (publicKey) {
 			loadIdentity();
+		} else {
+			setIsIdentityLoading(false);
 		}
 	}, [publicKey]);
+
+	const isLoading = isIdentityLoading || isRegisterLoading;
 
 	// Fallback defaults or actual preferences
 	const initialPrefs = status?.optIns
@@ -55,10 +61,10 @@ export default function PreferencesPage() {
 			};
 
 	return (
-		<div className="max-w-[640px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
+		<div className="max-w-160 mx-auto px-4 sm:px-6 py-8 sm:py-12">
 			{isLoading ? (
 				<div className="text-center text-text-muted py-12">Loading preferences...</div>
-			) : !status?.registered ? (
+			) : !registerStatus?.registered ? (
 				<div className="text-center text-text-muted py-12">
 					No Herald identity found for this wallet. Please register first.
 				</div>
