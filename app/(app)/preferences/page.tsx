@@ -5,9 +5,11 @@ import { motion } from "motion/react";
 import { useState, useEffect } from "react";
 import { DeleteAccountModal } from "@/components/preferences/DeleteAccountModal";
 import { EmailUpdateModal } from "@/components/preferences/EmailUpdateModal";
+import { ChannelStatusCard } from "@/components/preferences/ChannelStatusCard";
+import { Mail, MessageCircle, Smartphone } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { PreferencesForm } from "@/components/preferences/PreferencesForm";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { Loader } from "@/components/ui/Loader";
 import { truncateAddress } from "@/lib/utils";
 import { fetchApi } from "@/lib/api";
@@ -22,6 +24,7 @@ export default function PreferencesPage() {
 
 	const [showEmailModal, setShowEmailModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const router = useRouter();
 
 	useEffect(() => {
 		async function loadIdentity() {
@@ -88,21 +91,41 @@ export default function PreferencesPage() {
 					{/* Categories & Delivery Mode Form */}
 					<PreferencesForm initialValues={initialPrefs} />
 
-					{/* Email */}
-					<Card className="mb-6">
-						<h3 className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-3.5">
-							Email address
+					{/* Notification Channels */}
+					<div className="mb-8">
+						<h3 className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-4">
+							Notification channels
 						</h3>
-						<div className="flex items-center justify-between">
-							<span className="text-sm text-text-secondary blur-sm selection:blur-none transition-all hover:blur-none">
-								encrypted_data_hidden
-							</span>
-							<Button variant="secondary" size="sm" onClick={() => setShowEmailModal(true)}>
-								Update email
-							</Button>
-						</div>
-					</Card>
-					
+
+						<ChannelStatusCard
+							title="Email Address"
+							icon={Mail}
+							status={status?.channels?.email ? "connected" : "disconnected"}
+							description={
+								status?.channels?.email ? "Encrypted data hidden" : "Required for digest delivery"
+							}
+							actionText={status?.channels?.email ? "Update" : "Connect"}
+							onAction={() => setShowEmailModal(true)}
+						/>
+
+						<ChannelStatusCard
+							title="Telegram"
+							icon={MessageCircle}
+							status={status?.channels?.telegram ? "connected" : "disconnected"}
+							description="Get ultra-fast alerts directly in Telegram"
+							actionText={status?.channels?.telegram ? "Manage" : "Connect"}
+							onAction={() => router.push("/preferences/telegram")}
+						/>
+
+						<ChannelStatusCard
+							title="SMS / Text Messages"
+							icon={Smartphone}
+							status={status?.channels?.sms ? "connected" : "disconnected"}
+							description="For critical liquidation or security alerts"
+							actionText={status?.channels?.sms ? "Manage" : "Connect"}
+							onAction={() => router.push("/preferences/sms")}
+						/>
+					</div>
 					{/* Danger zone */}
 					<div className="border-t border-border pt-6">
 						<div className="text-[11px] font-bold text-text-muted tracking-[2px] uppercase mb-3">

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 /**
  * Basic JWT payload decoder.
  */
-function decodePayload(token: string): Record<string, unknown> | null {
+export function decodePayload(token: string): Record<string, never> | null {
 	try {
 		const base64Url = token.split(".")[1];
 		if (!base64Url) return null;
@@ -53,6 +53,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		setToken(null);
 		localStorage.removeItem("herald_portal_token");
 		disconnect();
+	}, [disconnect]);
+
+	useEffect(() => {
+		const handleUnauthorized = () => {
+			console.log("Unauthorized request intercepted, logging out...");
+			setToken(null);
+			localStorage.removeItem("herald_portal_token");
+			disconnect();
+			window.location.reload();
+		};
+
+		window.addEventListener("herald:unauthorized", handleUnauthorized);
+		return () => window.removeEventListener("herald:unauthorized", handleUnauthorized);
 	}, [disconnect]);
 
 	// Auto-logout if wallet changes and doesn't match the token
@@ -113,7 +126,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		} catch (error) {
 			console.error("Login failed:", error);
 			toast.error(error instanceof Error ? error.message : "Authentication failed");
-			logout();
+			setToken(null);
+			localStorage.removeItem("herald_portal_token");
+			disconnect();
 			throw error;
 		} finally {
 			setIsLoggingIn(false);

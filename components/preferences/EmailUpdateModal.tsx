@@ -12,6 +12,7 @@ import { emailUpdateSchema, type EmailUpdateFormData } from "@/lib/schemas";
 import { encryptEmail } from "@herald-protocol/sdk";
 import { Transaction } from "@solana/web3.js";
 import { fetchApi } from "@/lib/api";
+import { useSolBalance } from "@/hooks/useSolBalance";
 
 interface EmailUpdateModalProps {
 	isOpen: boolean;
@@ -21,6 +22,7 @@ interface EmailUpdateModalProps {
 export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 	const walletContext = useWallet();
 	const { connection } = useConnection();
+	const { checkAndAirdrop } = useSolBalance();
 	const [isEncrypting, setIsEncrypting] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -38,26 +40,34 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 
 		try {
 			setIsSubmitting(true);
+
+			// Check SOL balance before proceeding
+			await checkAndAirdrop(0.01);
+
 			setIsEncrypting(true);
 
 			// 1. Encrypt email in browser
 			const { encryptedEmail, nonce } = encryptEmail(data.newEmail, walletContext.publicKey);
 			setIsEncrypting(false);
 
-			// 2. Request transaction from backend
+			// 2. Convert Uint8Array to base64 strings for JSON transport
+			const encryptedEmailBase64 = Buffer.from(encryptedEmail).toString("base64");
+			const nonceBase64 = Buffer.from(nonce).toString("base64");
+
+			// 3. Request transaction from backend
 			const { serializedTransaction } = await fetchApi<{ serializedTransaction: string }>(
 				"/portal/email/transaction",
 				{
 					method: "POST",
 					body: JSON.stringify({
 						newEmail: data.newEmail, // sent for hashing in backend
-						encryptedEmail,
-						nonce,
+						encryptedEmail: encryptedEmailBase64,
+						nonce: nonceBase64,
 					}),
 				}
 			);
 
-			// 3. Sign and send
+			// 4. Sign and send
 			const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
 			const signedTx = await walletContext.signTransaction(tx);
 			const signature = await connection.sendRawTransaction(signedTx.serialize());
@@ -71,6 +81,12 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 				},
 				"confirmed"
 			);
+
+			// 5. Sync email hash to database (off-chain)
+			await fetchApi("/portal/email", {
+				method: "PATCH",
+				body: JSON.stringify({ email: data.newEmail }),
+			});
 
 			toast.success("Email updated successfully");
 			reset();

@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import { useAuth } from "@/hooks/useAuth";
 import { SolanaCluster, UserClient, encryptEmail, hashEmail } from "@herald-protocol/sdk";
 import { Transaction } from "@solana/web3.js";
 import type { RegistrationStep } from "@/types";
 import { useWalletRegistrationStatus } from "./useWalletRegistrationStatus";
+import { useSolBalance } from "./useSolBalance";
+import { fetchApi } from "@/lib/api";
 
 type RegistrationPhase = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -34,9 +35,9 @@ type UseRegistrationReturn = {
 export function useRegistration(): UseRegistrationReturn {
 	const wallet = useWallet();
 	const [phase, setPhase] = useState<RegistrationPhase>(0);
-	const { publicKey, signMessage, signTransaction } = wallet;
-	const { token, login } = useAuth();
+	const { publicKey, signTransaction } = wallet;
 	const { connection } = useConnection();
+	const { checkAndAirdrop } = useSolBalance();
 
 	const [state, setState] = useState<RegistrationState>({
 		step: "connect",
@@ -77,16 +78,8 @@ export function useRegistration(): UseRegistrationReturn {
 		setPhase(0);
 
 		try {
-			// Ensure we have a portal JWT before we start.
-			// If not, trigger the sign-in message prompt first.
-			if (!token) {
-				if (!signMessage) {
-					throw new Error(
-						"Wallet does not support message signing. Please use a different wallet."
-					);
-				}
-				await login();
-			}
+			// 2. Check SOL balance before proceeding (airdrop on testnets if needed)
+			await checkAndAirdrop(0.01);
 
 			await runRegistration();
 		} catch (err: unknown) {
@@ -155,6 +148,18 @@ export function useRegistration(): UseRegistrationReturn {
 			"confirmed"
 		);
 		setPhase(5);
+
+		// Best-effort sync email hash to backend database.
+		// May fail if user doesn't have a JWT yet — that's OK,
+		// the hash will be synced on next email update or login.
+		try {
+			await fetchApi("/portal/email", {
+				method: "PATCH",
+				body: JSON.stringify({ email: state.email }),
+			});
+		} catch {
+			// Non-critical: email hash sync will happen on next login/update
+		}
 
 		setState((s) => ({ ...s, txSignature: signature, step: "success" }));
 	}

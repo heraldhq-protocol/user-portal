@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { z } from "zod";
 import { emailSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
@@ -75,7 +76,7 @@ export function StepEnterEmail({ email: initialEmail, onBack, onSubmit }: StepEn
 
 			{/* Email input */}
 			<div className="mb-5">
-				<input
+				<Input
 					type="email"
 					placeholder="you@example.com"
 					value={email}

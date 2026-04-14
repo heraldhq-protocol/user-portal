@@ -38,4 +38,9 @@ export interface IdentityStatus {
 	} | null;
 	digestMode: boolean;
 	registeredAt?: string | null;
+	channels?: {
+		email: boolean;
+		telegram: boolean;
+		sms: boolean;
+	};
 }

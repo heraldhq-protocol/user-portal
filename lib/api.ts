@@ -24,6 +24,10 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
 	);
 
 	if (!response.ok) {
+		if (response.status === 401 && typeof window !== "undefined") {
+			window.dispatchEvent(new Event("herald:unauthorized"));
+		}
+
 		const errorData = await response.json().catch(() => ({}));
 		throw new Error(errorData.message || `API error: ${response.status} ${response.statusText}`);
 	}

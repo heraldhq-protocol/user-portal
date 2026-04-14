@@ -9,7 +9,7 @@ const steps = [
 		n: "01",
 		title: "User registers",
 		color: "var(--color-teal)",
-		desc: "A wallet holder visits notify.herald.xyz, connects their wallet, and enters their email address. The email is encrypted in the browser using TweetNaCl.js — plaintext never leaves the device.",
+		desc: "A wallet holder visits notify.useherald.xyz, connects their wallet, and enters their email address. The email is encrypted in the browser using TweetNaCl.js — plaintext never leaves the device.",
 	},
 	{
 		n: "02",

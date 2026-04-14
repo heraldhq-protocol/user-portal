@@ -12,7 +12,6 @@ import { StepLogin } from "./StepLogin";
 import { useRegistration } from "@/hooks/useRegistration";
 import type { RegistrationStep } from "@/types";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 const STEPS_NEW: { key: RegistrationStep; label: string }[] = [
 	{ key: "connect", label: "Connect" },
@@ -42,7 +41,6 @@ export function RegistrationWizard() {
 	} = useRegistration();
 
 	const { connected, disconnect } = useWallet();
-	const router = useRouter();
 
 	// Smoothly transition to login step if already registered
 	useEffect(() => {
@@ -103,10 +101,8 @@ export function RegistrationWizard() {
 		goToStep("success");
 	};
 
-	const handleSuccessClick = () => {
-		disconnect();
-		goToStep("connect");
-		router.refresh();
+	const handleSuccessClick = async () => {
+		window.location.reload();
 	};
 
 	return (

@@ -48,7 +48,7 @@ export function Toggle({
 					"relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 cursor-pointer",
 					"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal/50 focus-visible:ring-offset-2 focus-visible:ring-offset-navy",
 					"disabled:opacity-50 disabled:cursor-not-allowed",
-					checked ? "bg-teal" : "bg-border-2"
+					checked ? "bg-primary" : "bg-border-2"
 				)}
 			>
 				<SwitchPrimitive.Thumb

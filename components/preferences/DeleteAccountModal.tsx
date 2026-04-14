@@ -7,6 +7,7 @@ import { Transaction } from "@solana/web3.js";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { fetchApi } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DeleteAccountModalProps {
 	isOpen: boolean;
@@ -19,6 +20,7 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 	const [step, setStep] = useState<1 | 2>(1);
 	const [confirmText, setConfirmText] = useState("");
 	const [isDeleting, setIsDeleting] = useState(false);
+	const { logout } = useAuth();
 
 	// auto reset state on open/close
 	if (!isOpen && step !== 1) setStep(1);
@@ -57,11 +59,9 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 
 			toast.success("Account permanently deleted");
 
-			// Clear session
-			localStorage.removeItem("herald_portal_token");
-
+			logout();
 			onClose();
-			window.location.href = "/";
+			window.location.replace("/");
 		} catch (err: unknown) {
 			console.error("Delete error:", err);
 			toast.error((err as { message?: string }).message || "Failed to delete account");

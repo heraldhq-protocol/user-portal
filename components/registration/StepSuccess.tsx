@@ -68,7 +68,7 @@ export function StepSuccess({
 			{!alreadyRegistered && (
 				<div className="flex gap-3 mb-6">
 					<a
-						href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just registered for privacy-preserving DeFi notifications with @herald_xyz 🔒⛓️\n\nMy email is encrypted — no protocol ever sees it.\n\nnotify.herald.xyz")}`}
+						href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Just registered for privacy-preserving DeFi notifications with @herald_xyz 🔒⛓️\n\nMy email is encrypted — no protocol ever sees it.\n\nnotify.useherald.xyz")}`}
 						target="_blank"
 						rel="noopener noreferrer"
 						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
@@ -76,7 +76,7 @@ export function StepSuccess({
 						Share on 𝕏
 					</a>
 					<button
-						onClick={() => navigator.clipboard.writeText("https://notify.herald.xyz")}
+						onClick={() => navigator.clipboard.writeText("https://notify.useherald.xyz")}
 						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
 					>
 						Copy link

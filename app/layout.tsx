@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 		title: "Herald — Privacy-Preserving Notifications for Solana",
 		description:
 			"Receive DeFi alerts without sharing your email. Encrypted in your browser, stored on-chain.",
-		url: "https://notify.herald.xyz",
+		url: "https://notify.useherald.xyz",
 		siteName: "Herald",
 		type: "website",
 	},

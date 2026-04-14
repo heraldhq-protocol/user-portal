@@ -10,9 +10,9 @@ import { Card } from "@/components/ui/Card";
 import { preferencesSchema, type PreferencesFormData } from "@/lib/schemas";
 import { CategoryToggle } from "./CategoryToggle";
 import { DeliveryModeSelect } from "./DeliveryModeSelect";
-import { UserClient, type SolanaCluster } from "@herald-protocol/sdk";
 import { Transaction } from "@solana/web3.js";
 import { fetchApi } from "@/lib/api";
+import { useSolBalance } from "@/hooks/useSolBalance";
 
 interface PreferencesFormProps {
 	initialValues: PreferencesFormData;
@@ -28,6 +28,7 @@ const CATEGORIES = [
 export function PreferencesForm({ initialValues }: PreferencesFormProps) {
 	const walletContext = useWallet();
 	const { connection } = useConnection();
+	const { checkAndAirdrop } = useSolBalance();
 	const [isSaving, setIsSaving] = useState(false);
 
 	const {
@@ -48,25 +49,20 @@ export function PreferencesForm({ initialValues }: PreferencesFormProps) {
 
 		setIsSaving(true);
 		try {
-			const userClient = new UserClient({
-				cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
-				rpcUrl: connection.rpcEndpoint,
-			});
-			const ix = await userClient.updateIdentity({
-				owner: walletContext.publicKey,
-				optIns: {
-					optInAll: data.optInAll,
-					optInDefi: data.optInDefi,
-					optInGovernance: data.optInGovernance,
-					optInMarketing: data.optInMarketing,
-				},
-				digestMode: data.digestMode,
-			});
+			// Check SOL balance before proceeding
+			await checkAndAirdrop(0.01);
 
-			const tx = new Transaction().add(ix);
-			tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-			tx.feePayer = walletContext.publicKey;
+			// Step 1: Request pre-built transaction from backend
+			const { serializedTransaction } = await fetchApi<{ serializedTransaction: string }>(
+				"/portal/preferences/transaction",
+				{
+					method: "POST",
+					body: JSON.stringify(data),
+				}
+			);
 
+			// Step 2: Deserialize, sign, and send
+			const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
 			const signedTx = await walletContext.signTransaction(tx);
 			const signature = await connection.sendRawTransaction(signedTx.serialize());
 
@@ -80,7 +76,7 @@ export function PreferencesForm({ initialValues }: PreferencesFormProps) {
 				"confirmed"
 			);
 
-			// Step 2: Sync to backend database (off-chain)
+			// Step 3: Sync to backend database (off-chain)
 			await fetchApi("/portal/preferences", {
 				method: "PATCH",
 				body: JSON.stringify(data),
