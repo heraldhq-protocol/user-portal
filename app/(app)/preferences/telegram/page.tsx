@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft, Copy, Check } from "lucide-react";
 import { FaTelegramPlane } from "react-icons/fa";
 import { fetchApi } from "@/lib/api";
 import { toast } from "sonner";
@@ -24,6 +24,7 @@ export default function TelegramSetupPage() {
 	const [nonce, setNonce] = useState<string | null>(null);
 	const [isPolling, setIsPolling] = useState(false);
 	const [isRegistering, setIsRegistering] = useState(false);
+	const [copied, setCopied] = useState(false);
 
 	// Start polling when nonce changes
 	useEffect(() => {
@@ -74,6 +75,13 @@ export default function TelegramSetupPage() {
 		} finally {
 			setIsGenerating(false);
 		}
+	};
+
+	const handleCopyLink = async () => {
+		if (!connectUrl) return;
+		await navigator.clipboard.writeText(connectUrl);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2000);
 	};
 
 	const registerOnChain = async (chatId: string) => {
@@ -178,9 +186,26 @@ export default function TelegramSetupPage() {
 									: "We're waiting for you to click Start in Telegram. This ensures we have the right account."}
 							</p>
 							{!isRegistering && (
-								<Button variant="outline" onClick={() => window.open(connectUrl, "_blank")}>
-									Re-open Telegram
-								</Button>
+								<>
+									<div className="flex items-center gap-2 mb-4 px-4 py-2 bg-slate-100 rounded-lg max-w-full">
+										<p className="text-xs text-slate-500 truncate flex-1">{connectUrl}</p>
+										<Button
+											variant="ghost"
+											size="sm"
+											className="h-7 w-7 p-0 shrink-0"
+											onClick={handleCopyLink}
+										>
+											{copied ? (
+												<Check className="h-4 w-4 text-green-500" />
+											) : (
+												<Copy className="h-4 w-4" />
+											)}
+										</Button>
+									</div>
+									<Button variant="outline" onClick={() => window.open(connectUrl, "_blank")}>
+										Open in Telegram
+									</Button>
+								</>
 							)}
 						</>
 					)}
