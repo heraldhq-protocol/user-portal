@@ -48,7 +48,7 @@ export function WalletStatusBadge({ className }: WalletStatusBadgeProps) {
 				)}
 				<span className={cn("relative inline-flex rounded-full h-2 w-2", color)} />
 			</div>
-			<span className="text-xs font-bold text-slate-900 dark:text-text-primary tracking-wide">
+			<span className="hidden xs:block text-xs font-bold text-slate-900 dark:text-text-primary tracking-wide">
 				{label}
 			</span>
 		</div>

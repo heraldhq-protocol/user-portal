@@ -11,6 +11,7 @@ import Image from "next/image";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader } from "@/components/ui/Loader";
+import { cn } from "@/lib/utils";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
@@ -66,38 +67,38 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<div className="flex-1 flex flex-col min-h-screen">
 			{/* Top Navigation Bar for authenticated portal */}
-			<header className="sticky top-0 z-40 bg-white dark:bg-navy/85 backdrop-blur-md border-b border-slate-200 dark:border-border">
-				<div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-3 sm:py-0 sm:h-16 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
-					{/* Top row on mobile, left side on desktop */}
-					<div className="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-8">
+			<header className="sticky top-0 z-40 bg-white/80 dark:bg-navy/80 backdrop-blur-xl border-b border-slate-200 dark:border-border">
+				<div className="max-w-[1100px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+					<div className="flex items-center gap-6 sm:gap-8">
 						<Link
 							href="/notifications"
 							className="flex items-center gap-2 font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight shrink-0"
 						>
 							<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
-							Herald.
+							<span className="hidden xs:inline">Herald.</span>
 						</Link>
 
-						{/* Only show nav links if fully registered */}
 						{status?.registered && (
-							<nav className="flex items-center gap-4 sm:gap-5 flex-1 sm:flex-none justify-end sm:justify-start">
+							<nav className="flex items-center gap-4 sm:gap-6">
 								<Link
 									href="/notifications"
-									className={
+									className={cn(
+										"text-xs sm:text-sm transition-all duration-200",
 										pathname.startsWith("/notifications")
-											? "text-slate-900 dark:text-white text-[13px] sm:text-sm font-bold"
-											: "text-slate-500 dark:text-text-muted hover:text-slate-900 dark:hover:text-white transition-colors text-[13px] sm:text-sm font-semibold"
-									}
+											? "text-teal font-bold"
+											: "text-slate-500 hover:text-slate-900 dark:text-text-muted dark:hover:text-white font-semibold"
+									)}
 								>
 									Notifications
 								</Link>
 								<Link
 									href="/preferences"
-									className={
+									className={cn(
+										"text-xs sm:text-sm transition-all duration-200",
 										pathname.startsWith("/preferences")
-											? "text-slate-900 dark:text-white text-[13px] sm:text-sm font-bold"
-											: "text-slate-500 dark:text-text-muted hover:text-slate-900 dark:hover:text-white transition-colors text-[13px] sm:text-sm font-semibold"
-									}
+											? "text-teal font-bold"
+											: "text-slate-500 hover:text-slate-900 dark:text-text-muted dark:hover:text-white font-semibold"
+									)}
 								>
 									Preferences
 								</Link>
@@ -105,22 +106,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 						)}
 					</div>
 
-					{/* Bottom row on mobile, right side on desktop */}
-					<div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
+					<div className="flex items-center gap-2 sm:gap-4">
 						<WalletStatusBadge />
+
 						{publicKey && (
-							<div className="hidden sm:block">
+							<div className="hidden lg:block">
 								<WalletAddressDisplay address={publicKey.toBase58()} />
 							</div>
 						)}
-						<div className="flex items-center gap-2">
+
+						<div className="flex items-center gap-1 sm:gap-2">
 							<ThemeToggle />
 							<button
 								onClick={() => disconnect()}
 								title="Disconnect"
-								className="p-1.5 sm:p-2 rounded-lg text-slate-500 dark:text-text-muted hover:text-red hover:bg-red/10 transition-colors"
+								className="p-2 rounded-xl text-slate-400 dark:text-text-muted hover:text-red hover:bg-red/10 transition-colors"
 							>
-								<FaArrowRightFromBracket className="w-4 h-4 sm:w-4 sm:h-4" />
+								<FaArrowRightFromBracket className="w-4 h-4" />
 							</button>
 						</div>
 					</div>
