@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { toast } from "sonner";
-import { Modal } from "@/components/ui/Modal";
+import { Modal, ModalTitle } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { emailUpdateSchema, type EmailUpdateFormData } from "@/lib/schemas";
@@ -102,7 +102,7 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 
 	return (
 		<Modal open={isOpen} onOpenChange={(val) => !val && onClose()}>
-			<div className="text-xl font-extrabold mb-4">Update Email Address</div>
+			<ModalTitle className="text-xl font-extrabold mb-4">Update Email Address</ModalTitle>
 			<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 				<div>
 					<label className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-1.5 block">

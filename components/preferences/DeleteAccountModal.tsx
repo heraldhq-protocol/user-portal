@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { toast } from "sonner";
 import { Transaction } from "@solana/web3.js";
-import { Modal } from "@/components/ui/Modal";
+import { Modal, ModalTitle } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { fetchApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -76,9 +76,9 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 			onOpenChange={(val) => !val && onClose()}
 			className="bg-red-100 border-red-500"
 		>
-			<div className="text-xl font-extrabold mb-2.5">
+			<ModalTitle className="text-xl font-extrabold mb-2.5">
 				{step === 1 ? "Delete account?" : "Confirm Deletion"}
-			</div>
+			</ModalTitle>
 			{step === 1 ? (
 				<>
 					<p className="text-sm text-slate-500 dark:text-text-muted leading-relaxed mb-6">

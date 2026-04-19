@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { IconType } from "react-icons";
+import { cn } from "@/lib/utils";
 
 interface ChannelStatusCardProps {
 	title: string;
@@ -13,6 +14,7 @@ interface ChannelStatusCardProps {
 	actionText: string;
 	onAction: () => void;
 	actionVariant?: "primary" | "secondary" | "outline";
+	comingSoon?: boolean;
 }
 
 export function ChannelStatusCard({
@@ -23,16 +25,19 @@ export function ChannelStatusCard({
 	actionText,
 	onAction,
 	actionVariant = "secondary",
+	comingSoon = false,
 }: ChannelStatusCardProps) {
 	return (
-		<Card className="mb-4">
+		<Card className={cn("mb-4 group", status === "connected" && "group-hover:border-teal/50")}>
 			<div className="flex items-start justify-between">
 				<div className="flex items-center gap-3">
-					<div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-						<Icon className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+					<div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-teal/10 group-hover:dark:bg-teal/20">
+						<Icon className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-teal" />
 					</div>
 					<div>
-						<h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">{title}</h3>
+						<h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-teal">
+							{title}
+						</h3>
 						<div className="mt-1 flex items-center gap-2">
 							{status === "loading" ? (
 								<Loader2 className="h-3 w-3 animate-spin text-slate-400" />
@@ -62,13 +67,18 @@ export function ChannelStatusCard({
 					</div>
 				</div>
 				<Button
-					variant={actionVariant}
+					variant={status === "connected" ? "primary" : comingSoon ? "outline" : actionVariant}
 					size="sm"
 					onClick={onAction}
-					disabled={status === "loading"}
-					className="cursor-pointer bg-teal"
+					disabled={status === "loading" || comingSoon}
+					className={cn(
+						comingSoon &&
+							"border-dashed opacity-60 cursor-not-allowed hover:border-solid hover:bg-slate-100 hover:opacity-80",
+						!comingSoon && "hover:bg-teal/90",
+						status === "connected" && "hover:text-white"
+					)}
 				>
-					{actionText}
+					{comingSoon ? "Coming soon" : actionText}
 				</Button>
 			</div>
 		</Card>

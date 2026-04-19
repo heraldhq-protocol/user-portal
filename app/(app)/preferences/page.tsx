@@ -124,6 +124,7 @@ export default function PreferencesPage() {
 							description="For critical liquidation or security alerts"
 							actionText={status?.channels?.sms ? "Manage" : "Connect"}
 							onAction={() => router.push("/preferences/sms")}
+							comingSoon
 						/>
 					</div>
 					{/* Danger zone */}
