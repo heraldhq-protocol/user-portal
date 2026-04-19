@@ -29,12 +29,12 @@ export function ChannelStatusCard({
 }: ChannelStatusCardProps) {
 	return (
 		<Card className={cn("mb-4 group", status === "connected" && "group-hover:border-teal/50")}>
-			<div className="flex items-start justify-between">
-				<div className="flex items-center gap-3">
-					<div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-teal/10 group-hover:dark:bg-teal/20">
-						<Icon className="h-5 w-5 text-slate-600 dark:text-slate-400 group-hover:text-teal" />
+			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+				<div className="flex items-start sm:items-center gap-3 w-full sm:w-auto">
+					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-teal/10 group-hover:dark:bg-teal/20">
+						<Icon className="h-5 w-5 shrink-0 text-slate-600 dark:text-slate-400 group-hover:text-teal" />
 					</div>
-					<div>
+					<div className="flex-1">
 						<h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-teal">
 							{title}
 						</h3>
@@ -78,6 +78,7 @@ export function ChannelStatusCard({
 					onClick={onAction}
 					disabled={status === "loading" || comingSoon}
 					className={cn(
+						"w-full sm:w-auto shrink-0",
 						comingSoon &&
 							"border-dashed opacity-60 cursor-not-allowed hover:border-solid hover:bg-slate-100 hover:opacity-80",
 						!comingSoon && actionVariant !== "secondary" && "hover:bg-teal/90",

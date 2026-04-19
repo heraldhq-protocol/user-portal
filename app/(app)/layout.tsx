@@ -67,11 +67,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 		<div className="flex-1 flex flex-col min-h-screen">
 			{/* Top Navigation Bar for authenticated portal */}
 			<header className="sticky top-0 z-40 bg-white dark:bg-navy/85 backdrop-blur-md border-b border-slate-200 dark:border-border">
-				<div className="max-w-[1100px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-					<div className="flex items-center gap-4 sm:gap-8">
+				<div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-3 sm:py-0 sm:h-16 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0">
+					{/* Top row on mobile, left side on desktop */}
+					<div className="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-8">
 						<Link
 							href="/notifications"
-							className="flex items-center gap-2 font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight"
+							className="flex items-center gap-2 font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight shrink-0"
 						>
 							<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
 							Herald.
@@ -79,13 +80,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
 						{/* Only show nav links if fully registered */}
 						{status?.registered && (
-							<nav className="hidden md:flex items-center gap-5">
+							<nav className="flex items-center gap-4 sm:gap-5 flex-1 sm:flex-none justify-end sm:justify-start">
 								<Link
 									href="/notifications"
 									className={
 										pathname.startsWith("/notifications")
-											? "text-slate-900 dark:text-white text-sm font-bold"
-											: "text-slate-500 dark:text-text-muted hover:text-slate-900 dark:hover:text-white transition-colors text-sm font-semibold"
+											? "text-slate-900 dark:text-white text-[13px] sm:text-sm font-bold"
+											: "text-slate-500 dark:text-text-muted hover:text-slate-900 dark:hover:text-white transition-colors text-[13px] sm:text-sm font-semibold"
 									}
 								>
 									Notifications
@@ -94,8 +95,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 									href="/preferences"
 									className={
 										pathname.startsWith("/preferences")
-											? "text-slate-900 dark:text-white text-sm font-bold"
-											: "text-slate-500 dark:text-text-muted hover:text-slate-900 dark:hover:text-white transition-colors text-sm font-semibold"
+											? "text-slate-900 dark:text-white text-[13px] sm:text-sm font-bold"
+											: "text-slate-500 dark:text-text-muted hover:text-slate-900 dark:hover:text-white transition-colors text-[13px] sm:text-sm font-semibold"
 									}
 								>
 									Preferences
@@ -104,21 +105,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 						)}
 					</div>
 
-					<div className="flex items-center gap-3">
+					{/* Bottom row on mobile, right side on desktop */}
+					<div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3">
 						<WalletStatusBadge />
 						{publicKey && (
 							<div className="hidden sm:block">
 								<WalletAddressDisplay address={publicKey.toBase58()} />
 							</div>
 						)}
-						<ThemeToggle />
-						<button
-							onClick={() => disconnect()}
-							title="Disconnect"
-							className="p-2 ml-1 rounded-lg text-slate-500 dark:text-text-muted hover:text-red hover:bg-red/10 transition-colors"
-						>
-							<FaArrowRightFromBracket className="w-4 h-4" />
-						</button>
+						<div className="flex items-center gap-2">
+							<ThemeToggle />
+							<button
+								onClick={() => disconnect()}
+								title="Disconnect"
+								className="p-1.5 sm:p-2 rounded-lg text-slate-500 dark:text-text-muted hover:text-red hover:bg-red/10 transition-colors"
+							>
+								<FaArrowRightFromBracket className="w-4 h-4 sm:w-4 sm:h-4" />
+							</button>
+						</div>
 					</div>
 				</div>
 			</header>
