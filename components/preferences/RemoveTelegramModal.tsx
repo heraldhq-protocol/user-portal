@@ -13,9 +13,10 @@ import { ChannelUserClient, type SolanaCluster } from "@herald-protocol/sdk";
 interface RemoveTelegramModalProps {
 	isOpen: boolean;
 	onClose: () => void;
+	onSuccess?: () => void;
 }
 
-export function RemoveTelegramModal({ isOpen, onClose }: RemoveTelegramModalProps) {
+export function RemoveTelegramModal({ isOpen, onClose, onSuccess }: RemoveTelegramModalProps) {
 	const walletContext = useWallet();
 	const { connection } = useConnection();
 	const [isRemoving, setIsRemoving] = useState(false);
@@ -57,7 +58,7 @@ export function RemoveTelegramModal({ isOpen, onClose }: RemoveTelegramModalProp
 
 			toast.success("Telegram disconnected from your channels");
 			onClose();
-			window.location.reload(); // Refresh to update preference state
+			if (onSuccess) onSuccess();
 		} catch (err: any) {
 			console.error("Remove telegram error:", err);
 			toast.error(err.message || "Failed to disconnect Telegram");

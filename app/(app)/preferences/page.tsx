@@ -28,18 +28,19 @@ export default function PreferencesPage() {
 	const [showRemoveTelegramModal, setShowRemoveTelegramModal] = useState(false);
 	const router = useRouter();
 
-	useEffect(() => {
-		async function loadIdentity() {
-			try {
-				const data = await fetchApi<IdentityStatus>("/portal/identity");
-				setStatus(data);
-			} catch (err) {
-				console.error("Failed to load identity:", err);
-			} finally {
-				setIsIdentityLoading(false);
-			}
+	const loadIdentity = async () => {
+		setIsIdentityLoading(true);
+		try {
+			const data = await fetchApi<IdentityStatus>("/portal/identity");
+			setStatus(data);
+		} catch (err) {
+			console.error("Failed to load identity:", err);
+		} finally {
+			setIsIdentityLoading(false);
 		}
+	};
 
+	useEffect(() => {
 		if (publicKey) {
 			loadIdentity();
 		} else {
@@ -151,6 +152,7 @@ export default function PreferencesPage() {
 					<RemoveTelegramModal
 						isOpen={showRemoveTelegramModal}
 						onClose={() => setShowRemoveTelegramModal(false)}
+						onSuccess={loadIdentity}
 					/>
 					<DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} />
 				</motion.div>
