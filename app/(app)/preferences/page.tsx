@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { DeleteAccountModal } from "@/components/preferences/DeleteAccountModal";
 import { EmailUpdateModal } from "@/components/preferences/EmailUpdateModal";
 import { RemoveTelegramModal } from "@/components/preferences/RemoveTelegramModal";
+import { RemoveSmsModal } from "@/components/preferences/RemoveSmsModal";
 import { ChannelStatusCard } from "@/components/preferences/ChannelStatusCard";
 import { Mail, MessageCircle, Smartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -26,6 +27,7 @@ export default function PreferencesPage() {
 	const [showEmailModal, setShowEmailModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
 	const [showRemoveTelegramModal, setShowRemoveTelegramModal] = useState(false);
+	const [showRemoveSmsModal, setShowRemoveSmsModal] = useState(false);
 	const router = useRouter();
 
 	const loadIdentity = async () => {
@@ -130,9 +132,14 @@ export default function PreferencesPage() {
 							icon={Smartphone}
 							status={status?.channels?.sms ? "connected" : "disconnected"}
 							description="For critical liquidation or security alerts"
-							actionText={status?.channels?.sms ? "Manage" : "Connect"}
-							onAction={() => router.push("/preferences/sms")}
-							comingSoon
+							actionText={status?.channels?.sms ? "Remove" : "Connect"}
+							actionVariant={status?.channels?.sms ? "secondary" : "primary"}
+							onAction={() =>
+								status?.channels?.sms
+									? setShowRemoveSmsModal(true)
+									: router.push("/preferences/sms")
+							}
+							comingSoon={!status?.channels?.sms}
 						/>
 					</div>
 					{/* Danger zone */}
@@ -141,7 +148,8 @@ export default function PreferencesPage() {
 							Danger zone
 						</div>
 						<Button
-							className="bg-red bg-opacity-10 text-red border border-red border-opacity-20 hover:bg-opacity-20"
+							variant={"danger"}
+							className="bg-red-200 bg-opacity-10 text-red-700 border border-red border-opacity-20 hover:bg-opacity-20"
 							onClick={() => setShowDeleteModal(true)}
 						>
 							Delete account
@@ -152,6 +160,11 @@ export default function PreferencesPage() {
 					<RemoveTelegramModal
 						isOpen={showRemoveTelegramModal}
 						onClose={() => setShowRemoveTelegramModal(false)}
+						onSuccess={loadIdentity}
+					/>
+					<RemoveSmsModal
+						isOpen={showRemoveSmsModal}
+						onClose={() => setShowRemoveSmsModal(false)}
 						onSuccess={loadIdentity}
 					/>
 					<DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} />
