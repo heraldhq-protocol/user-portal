@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { useState, useEffect } from "react";
 import { DeleteAccountModal } from "@/components/preferences/DeleteAccountModal";
 import { EmailUpdateModal } from "@/components/preferences/EmailUpdateModal";
+import { RemoveTelegramModal } from "@/components/preferences/RemoveTelegramModal";
 import { ChannelStatusCard } from "@/components/preferences/ChannelStatusCard";
 import { Mail, MessageCircle, Smartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -24,6 +25,7 @@ export default function PreferencesPage() {
 
 	const [showEmailModal, setShowEmailModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [showRemoveTelegramModal, setShowRemoveTelegramModal] = useState(false);
 	const router = useRouter();
 
 	useEffect(() => {
@@ -113,8 +115,13 @@ export default function PreferencesPage() {
 							icon={MessageCircle}
 							status={status?.channels?.telegram ? "connected" : "disconnected"}
 							description="Get ultra-fast alerts directly in Telegram"
-							actionText={status?.channels?.telegram ? "Manage" : "Connect"}
-							onAction={() => router.push("/preferences/telegram")}
+							actionText={status?.channels?.telegram ? "Remove" : "Connect"}
+							actionVariant={status?.channels?.telegram ? "secondary" : "primary"}
+							onAction={() =>
+								status?.channels?.telegram
+									? setShowRemoveTelegramModal(true)
+									: router.push("/preferences/telegram")
+							}
 						/>
 
 						<ChannelStatusCard
@@ -141,6 +148,10 @@ export default function PreferencesPage() {
 					</div>
 
 					<EmailUpdateModal isOpen={showEmailModal} onClose={() => setShowEmailModal(false)} />
+					<RemoveTelegramModal
+						isOpen={showRemoveTelegramModal}
+						onClose={() => setShowRemoveTelegramModal(false)}
+					/>
 					<DeleteAccountModal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} />
 				</motion.div>
 			)}

@@ -67,15 +67,21 @@ export function ChannelStatusCard({
 					</div>
 				</div>
 				<Button
-					variant={status === "connected" ? "primary" : comingSoon ? "outline" : actionVariant}
+					variant={
+						status === "connected" && actionVariant !== "secondary"
+							? "primary"
+							: comingSoon
+								? "outline"
+								: actionVariant
+					}
 					size="sm"
 					onClick={onAction}
 					disabled={status === "loading" || comingSoon}
 					className={cn(
 						comingSoon &&
 							"border-dashed opacity-60 cursor-not-allowed hover:border-solid hover:bg-slate-100 hover:opacity-80",
-						!comingSoon && "hover:bg-teal/90",
-						status === "connected" && "hover:text-white"
+						!comingSoon && actionVariant !== "secondary" && "hover:bg-teal/90",
+						status === "connected" && actionVariant !== "secondary" && "hover:text-white"
 					)}
 				>
 					{comingSoon ? "Coming soon" : actionText}
