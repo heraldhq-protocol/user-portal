@@ -71,14 +71,14 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 						</button>
 					))}
 				</div>
-				<div className="flex items-center gap-2 bg-slate-50 dark:bg-navy-2 p-1 rounded-lg border border-slate-200 dark:border-border shrink-0 ml-4 hidden sm:flex">
+				<div className="items-center gap-2 bg-slate-50 dark:bg-navy-2 p-1 rounded-lg border border-slate-200 dark:border-border shrink-0 ml-4 hidden sm:flex">
 					<button
 						onClick={() => setTimeRange("all")}
 						className={cn(
 							"px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
 							timeRange === "all"
 								? "bg-white dark:bg-card border border-slate-200 dark:border-border text-white"
-								: "text-slate-500 dark:text-text-muted border border-transparent hover:text-slate-700 dark:text-text-secondary"
+								: "text-slate-500 border border-transparent hover:text-slate-700 dark:text-text-secondary"
 						)}
 					>
 						All time
@@ -89,7 +89,7 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 							"px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
 							timeRange === "30d"
 								? "bg-white dark:bg-card border border-slate-200 dark:border-border text-white"
-								: "text-slate-500 dark:text-text-muted border border-transparent hover:text-slate-700 dark:text-text-secondary"
+								: "text-slate-500  border border-transparent hover:text-slate-700 dark:text-text-secondary"
 						)}
 					>
 						Last 30 days
@@ -135,11 +135,66 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 						))}
 					</div>
 				) : filtered.length === 0 ? (
-					<div className="text-center py-16">
-						<div className="text-[32px] mb-3">📭</div>
-						<p className="text-slate-500 dark:text-text-muted text-sm px-4">
-							No notifications yet. You&apos;ll see them here once protocols start sending.
+					<div className="flex flex-col items-center justify-center py-16 sm:py-20 px-4">
+						{/* Styled bell icon with glow ring */}
+						<div className="relative mb-6">
+							<div className="absolute inset-0 rounded-full bg-teal/10 blur-xl scale-150" />
+							<div className="relative w-20 h-20 rounded-2xl bg-slate-50 dark:bg-card-2 border border-slate-200 dark:border-border-2 flex items-center justify-center">
+								<svg
+									className="w-9 h-9 text-slate-300 dark:text-text-muted/50"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={1.2}
+									stroke="currentColor"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
+									/>
+								</svg>
+							</div>
+						</div>
+
+						<h3 className="text-lg font-bold tracking-tight mb-2">
+							No notifications yet
+						</h3>
+						<p className="text-sm text-slate-500 dark:text-text-muted leading-relaxed max-w-xs text-center mb-6">
+							{category !== "all"
+								? `No ${CATEGORIES.find((c) => c.value === category)?.label ?? category} notifications found. Try switching to "All" to see everything.`
+								: "You\u2019ll see them here once Herald-integrated protocols start sending alerts to your wallet."}
 						</p>
+
+						{category !== "all" ? (
+							<button
+								onClick={() => setCategory("all")}
+								className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-card border border-slate-200 dark:border-border-2 text-sm font-semibold text-slate-600 dark:text-text-secondary hover:border-teal/40 hover:text-teal transition-all duration-200 cursor-pointer"
+							>
+								Show all notifications
+							</button>
+						) : (
+							<a
+								href="https://useherald.xyz"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-teal/10 border border-teal/20 text-sm font-semibold text-teal hover:bg-teal/15 hover:border-teal/40 transition-all duration-200"
+							>
+								<svg
+									className="w-4 h-4"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={2}
+									stroke="currentColor"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+									/>
+								</svg>
+								Explore Herald protocols
+							</a>
+						)}
 					</div>
 				) : (
 					<div

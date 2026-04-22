@@ -26,6 +26,50 @@ export default function TelegramSetupPage() {
 	const [isRegistering, setIsRegistering] = useState(false);
 	const [copied, setCopied] = useState(false);
 
+	const registerOnChain = async (chatId: string) => {
+		if (!publicKey || !signTransaction) {
+			toast.error("Wallet not connected");
+			return;
+		}
+
+		setIsRegistering(true);
+		try {
+			const client = new ChannelUserClient({
+				cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
+				rpcUrl: connection.rpcEndpoint,
+			});
+
+			const { instructions } = await client.buildTelegramRegistrationTx(publicKey, chatId);
+
+			const tx = new Transaction().add(...instructions);
+			tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+			tx.feePayer = publicKey;
+
+			const signedTx = await signTransaction(tx);
+			const signature = await connection.sendRawTransaction(signedTx.serialize());
+
+			const latestBlockhash = await connection.getLatestBlockhash();
+			await connection.confirmTransaction(
+				{
+					signature,
+					blockhash: latestBlockhash.blockhash,
+					lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+				},
+				"confirmed"
+			);
+
+			// Tell API to index changes
+			await fetchApi("/portal/identity", { method: "POST" });
+			toast.success("Telegram connected and registered on-chain!");
+			router.push("/preferences");
+		} catch (err: any) {
+			console.error(err);
+			toast.error(err.message || "Failed to register Telegram on-chain");
+		} finally {
+			setIsRegistering(false);
+		}
+	};
+
 	// Start polling when nonce changes
 	useEffect(() => {
 		if (!nonce || !isPolling) return;
@@ -82,50 +126,6 @@ export default function TelegramSetupPage() {
 		await navigator.clipboard.writeText(connectUrl);
 		setCopied(true);
 		setTimeout(() => setCopied(false), 2000);
-	};
-
-	const registerOnChain = async (chatId: string) => {
-		if (!publicKey || !signTransaction) {
-			toast.error("Wallet not connected");
-			return;
-		}
-
-		setIsRegistering(true);
-		try {
-			const client = new ChannelUserClient({
-				cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
-				rpcUrl: connection.rpcEndpoint,
-			});
-
-			const { instructions } = await client.buildTelegramRegistrationTx(publicKey, chatId);
-
-			const tx = new Transaction().add(...instructions);
-			tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-			tx.feePayer = publicKey;
-
-			const signedTx = await signTransaction(tx);
-			const signature = await connection.sendRawTransaction(signedTx.serialize());
-
-			const latestBlockhash = await connection.getLatestBlockhash();
-			await connection.confirmTransaction(
-				{
-					signature,
-					blockhash: latestBlockhash.blockhash,
-					lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-				},
-				"confirmed"
-			);
-
-			// Tell API to index changes
-			await fetchApi("/portal/identity", { method: "POST" });
-			toast.success("Telegram connected and registered on-chain!");
-			router.push("/preferences");
-		} catch (err: any) {
-			console.error(err);
-			toast.error(err.message || "Failed to register Telegram on-chain");
-		} finally {
-			setIsRegistering(false);
-		}
 	};
 
 	return (

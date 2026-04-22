@@ -37,11 +37,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 			return;
 		}
 
-		// 2. If connected, check registration status
+		// 2. If connected but not registered on-chain -> go to register
 		if (connected && status) {
 			if (!status.registered && !isRegisterPage) {
-				// Connected but not registered on-chain -> go to register
 				router.replace("/register");
+				return;
+			}
+
+			// 3. If connected + registered but NOT authenticated (no JWT) -> go to register
+			//    The wizard will detect isRegistered and show the login step
+			if (status.registered && !isAuthenticated && !isRegisterPage) {
+				router.replace("/register");
+				return;
 			}
 		}
 	}, [mounted, connected, connecting, isLoading, status, pathname, router, isAuthenticated]);
@@ -61,6 +68,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 		return null;
 	}
 	if (connected && !status?.registered && !isRegisterPage) {
+		return null;
+	}
+	if (connected && status?.registered && !isAuthenticated && !isRegisterPage) {
 		return null;
 	}
 

@@ -44,6 +44,7 @@ export default function PreferencesPage() {
 
 	useEffect(() => {
 		if (publicKey) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			loadIdentity();
 		} else {
 			setIsIdentityLoading(false);

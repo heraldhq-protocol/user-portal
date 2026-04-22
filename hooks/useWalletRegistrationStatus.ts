@@ -31,7 +31,7 @@ export function useWalletRegistrationStatus() {
 				return { registered: isRegistered };
 			} catch (err) {
 				console.error("Failed to get registration status:", err);
-				return { registered: false };
+				throw err;
 			}
 		},
 		enabled: !!publicKey,

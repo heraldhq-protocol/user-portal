@@ -46,6 +46,7 @@ export function StepConnectWallet({
 	// Sync local state with wallet adapter state when connection changes
 	useEffect(() => {
 		if (connected && publicKey && connectedWallet?.name) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setSelectedWalletName(connectedWallet.name);
 
 			// Notify parent of connection

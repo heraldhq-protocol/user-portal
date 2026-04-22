@@ -1,8 +1,3 @@
-#!/usr/bin/env sh
-msg=$(cat "$1")
-pattern="^(feat|fix|chore|docs|style|refactor|test|ci|perf|build|revert)(\(.+\))?: .{1,100}"
-if ! echo "$msg" | grep -qE "$pattern"; then
-  echo "Invalid commit message. Expected: <type>(<scope>): <description>"
-  echo "Example: feat(registration): add wallet connect step"
-  exit 1
-fi
+echo " Checking commit message..."
+pnpm exec commitlint --edit "$1" || exit 1
+echo "✅ Commit message valid"

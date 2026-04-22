@@ -178,10 +178,11 @@ export function useRegistration(): UseRegistrationReturn {
 				errorMsg = err.message;
 			} else if (err.message.includes("already in use")) {
 				// PDA already exists — wallet is already registered.
+				// Go to login step so they acquire their JWT portal token
 				setState((s) => ({
 					...s,
 					txSignature: "already-registered",
-					step: "success",
+					step: "login",
 				}));
 				return;
 			}

@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		const storedToken = localStorage.getItem("herald_portal_token");
 		if (storedToken) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setToken(storedToken);
 		}
 	}, []);
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 			if (walletPubkeyInToken && walletPubkeyInToken !== publicKey.toBase58()) {
 				console.log("Wallet mismatch detected, logging out...");
+				// eslint-disable-next-line react-hooks/set-state-in-effect
 				setToken(null);
 				localStorage.removeItem("herald_portal_token");
 				// Note: we don't call disconnect() here as the user just connected a new wallet
