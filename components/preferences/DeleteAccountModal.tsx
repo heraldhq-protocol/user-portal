@@ -125,7 +125,7 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 							onClick={handleDelete}
 							className="text-sm flex-1 justify-center"
 						>
-							{isDeleting ? "Deleting..." : "Delete My Account"}
+							{isDeleting ? "Deleting..." : "Delete Account"}
 						</Button>
 					</div>
 				</>

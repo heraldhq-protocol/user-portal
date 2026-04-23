@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -15,8 +15,9 @@
   --text-main: #0f172a;
   --text-dim: #334155;
   --text-muted: #64748b;
-  --app-glow: radial-gradient(circle at 15% 50%, rgba(0, 200, 150, 0.08), transparent 35%),
-              radial-gradient(circle at 85% 30%, rgba(91, 53, 213, 0.08), transparent 35%);
+  --app-glow:
+    radial-gradient(circle at 15% 50%, rgba(0, 200, 150, 0.08), transparent 35%),
+    radial-gradient(circle at 85% 30%, rgba(91, 53, 213, 0.08), transparent 35%);
 }
 
 .dark {
@@ -29,8 +30,9 @@
   --text-main: #ffffff;
   --text-dim: #cbd5e1;
   --text-muted: #64748b;
-  --app-glow: radial-gradient(circle at 15% 50%, rgba(0, 200, 150, 0.04), transparent 35%),
-              radial-gradient(circle at 85% 30%, rgba(91, 53, 213, 0.04), transparent 35%);
+  --app-glow:
+    radial-gradient(circle at 15% 50%, rgba(0, 200, 150, 0.04), transparent 35%),
+    radial-gradient(circle at 85% 30%, rgba(91, 53, 213, 0.04), transparent 35%);
 }
 
 /* ─── Herald Design System ─────────────────────────────── */
@@ -45,15 +47,15 @@
   --color-card-2: var(--bg-card-2);
   --color-border: var(--border-main);
   --color-border-2: var(--border-alt);
-  
+
   --color-teal: #00c896;
   --color-teal-2: #00e5a8;
   --color-teal-dim: #007a5c;
-  
+
   --color-text-primary: var(--text-main);
   --color-text-secondary: var(--text-dim);
   --color-text-muted: var(--text-muted);
-  
+
   --color-herald-red: #d63031;
   --color-herald-green: #27ae60;
   --color-herald-gold: #e8920a;
