@@ -23,13 +23,15 @@ export function WalletConnection({ children }: Readonly<{ children: React.ReactN
 	);
 
 	// Clean the environment variable (handle quotes or extra whitespace)
+	const customRpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
 	const rawCluster = process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet";
 	const cluster = rawCluster.replace(/['"]+/g, "").trim() as SolanaCluster;
 
 	const endpoint = useMemo(() => {
+		if (customRpcUrl) return customRpcUrl.replace(/['"]+/g, "").trim();
 		if (cluster === "localnet") return "http://127.0.0.1:8899";
 		return clusterApiUrl(cluster as "devnet" | "mainnet-beta" | "testnet");
-	}, [cluster]);
+	}, [cluster, customRpcUrl]);
 
 	return (
 		<ConnectionProvider endpoint={endpoint}>
