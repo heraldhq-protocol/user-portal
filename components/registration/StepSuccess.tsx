@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/Button";
 interface StepSuccessProps {
 	txSignature: string;
 	isAlreadyRegistered?: boolean;
-	onConnectWallet: () => void;
 }
 
 const REDIRECT_SECONDS = 30;
@@ -16,7 +15,6 @@ const REDIRECT_SECONDS = 30;
 export function StepSuccess({
 	txSignature,
 	isAlreadyRegistered,
-	onConnectWallet,
 }: StepSuccessProps) {
 	const alreadyRegistered = isAlreadyRegistered || txSignature === "already-registered";
 	const [countdown, setCountdown] = useState(REDIRECT_SECONDS);

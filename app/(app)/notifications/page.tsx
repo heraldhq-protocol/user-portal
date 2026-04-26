@@ -37,7 +37,8 @@ export default function NotificationsPage() {
 	}, [loadNotifications]);
 
 	const handleDecrypt = async () => {
-		const encrypted = notifications.filter((n) => n.ciphertext && n.nonce && !n.message).map((n) => ({
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const encrypted: any[] = notifications.filter((n) => n.ciphertext && n.nonce && !n.message).map((n) => ({
 			id: n.id,
 			ciphertext: new Uint8Array(Buffer.from(n.ciphertext!, "hex")),
 			nonce: new Uint8Array(Buffer.from(n.nonce!, "hex")),
@@ -53,17 +54,12 @@ export default function NotificationsPage() {
 				prev.map((n) => {
 					const d = decrypted.find((dec) => dec.id === n.id);
 					if (d) {
-						try {
-							const payload = JSON.parse(d.plaintext);
-							return {
-								...n,
-								message: payload.message,
-								actionUrl: payload.actionUrl,
-								subject: payload.subject || n.subject,
-							};
-						} catch (e) {
-							return { ...n, message: d.plaintext };
-						}
+						return {
+							...n,
+							message: d.body?.message || "Decrypted content unavailable",
+							actionUrl: d.body?.actionUrl,
+							subject: d.body?.subject || n.subject,
+						};
 					}
 					return n;
 				})

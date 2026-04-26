@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/Badge";
 import { cn, relativeTime, truncateAddress } from "@/lib/utils";
 import { type Notification } from "@/types";
-import { Lock, LockOpen } from "lucide-react";
+import { Lock } from "lucide-react";
 
 export function NotificationCard({ notification }: { notification: Notification }) {
 	const tx = notification.receiptTx || notification.id;

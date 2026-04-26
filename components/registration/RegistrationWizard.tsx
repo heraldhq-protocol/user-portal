@@ -101,10 +101,6 @@ export function RegistrationWizard() {
 		goToStep("success");
 	};
 
-	const handleSuccessClick = async () => {
-		window.location.reload();
-	};
-
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 24 }}
@@ -226,7 +222,6 @@ export function RegistrationWizard() {
 						<StepSuccess
 							txSignature={state.txSignature || ""}
 							isAlreadyRegistered={isRegistered}
-							onConnectWallet={handleSuccessClick}
 						/>
 					</motion.div>
 				)}
