@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
-import { SolanaCluster, UserClient, encryptEmail, hashEmail } from "@herald-protocol/sdk";
+import { SolanaCluster, UserClient, NotificationKeyClient, hashEmail } from "@herald-protocol/sdk";
+import { encryptEmail, sealNotificationKey } from "@/lib/crypto";
 import { Transaction } from "@solana/web3.js";
 import type { RegistrationStep } from "@/types";
 import { useWalletRegistrationStatus } from "./useWalletRegistrationStatus";
@@ -95,9 +96,12 @@ export function useRegistration(): UseRegistrationReturn {
 			throw new Error("Wallet not connected or does not support signing");
 		}
 
-		// Phase 1 — encrypt email (happens in-browser)
+		// Phase 1 — encrypt email and generate notification key (happens in-browser)
 		const { encryptedEmail, nonce } = await Promise.resolve(encryptEmail(state.email, publicKey));
 		const emailHashBytes = await Promise.resolve(hashEmail(state.email));
+		
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { sealedPubkey, senderPubkey, nonce: notifNonce } = await sealNotificationKey(wallet as any);
 		setPhase(1);
 
 		// Phase 2 — build the Solana instruction
@@ -119,12 +123,25 @@ export function useRegistration(): UseRegistrationReturn {
 			digestMode: state.digestMode,
 		});
 
+		const notifKeyClient = new NotificationKeyClient({
+			cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
+			rpcUrl: connection.rpcEndpoint,
+		});
+		
+		const { ix: notifIx } = await notifKeyClient.buildRegisterKeyIxWithData(
+			publicKey,
+			sealedPubkey,
+			senderPubkey,
+			notifNonce,
+			1 // version 1
+		);
+
 		const latestBlockhash = await connection.getLatestBlockhash("confirmed");
 		const tx = new Transaction({
 			feePayer: publicKey,
 			blockhash: latestBlockhash.blockhash,
 			lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-		}).add(ix);
+		}).add(ix).add(notifIx);
 		setPhase(2);
 
 		// Phase 3 — wallet signs the transaction

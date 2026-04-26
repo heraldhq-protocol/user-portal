@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/Badge";
 import { cn, relativeTime, truncateAddress } from "@/lib/utils";
 import { type Notification } from "@/types";
+import { Lock, LockOpen } from "lucide-react";
 
 export function NotificationCard({ notification }: { notification: Notification }) {
 	const tx = notification.receiptTx || notification.id;
@@ -41,8 +42,34 @@ export function NotificationCard({ notification }: { notification: Notification 
 				</div>
 
 				{/* Subject preview */}
-				<div className="text-[15px] leading-snug font-semibold text-white mb-3 line-clamp-2 break-words group-hover:text-teal-50 transition-colors">
+				<div className="text-[15px] leading-snug font-semibold text-white mb-1 line-clamp-2 break-words group-hover:text-teal-50 transition-colors">
 					{notification.subject || "Alert received from protocol"}
+				</div>
+
+				{/* Encrypted / Message state */}
+				<div className="mb-3">
+					{notification.message ? (
+						<div className="flex flex-col gap-1">
+							<p className="text-[13px] text-text-muted leading-relaxed line-clamp-3">
+								{notification.message}
+							</p>
+							{notification.actionUrl && (
+								<a 
+									href={notification.actionUrl} 
+									target="_blank" 
+									rel="noopener noreferrer"
+									className="text-[12px] text-teal hover:underline inline-flex items-center mt-1"
+								>
+									View Details ↗
+								</a>
+							)}
+						</div>
+					) : notification.ciphertext ? (
+						<div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-slate-800/50 border border-slate-700">
+							<Lock className="w-3 h-3 text-slate-400" />
+							<span className="text-[11px] text-slate-400 font-medium">End-to-End Encrypted Payload</span>
+						</div>
+					) : null}
 				</div>
 
 				{/* Receipt link */}

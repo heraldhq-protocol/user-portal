@@ -24,7 +24,7 @@ interface StepEncryptSignProps {
 
 const ENCRYPT_STEPS = [
 	"Converting wallet key for encryption",
-	"Encrypting your email (in browser)",
+	"Encrypting email & deriving notification keys",
 	"Building Solana transaction",
 	"Awaiting wallet signature",
 	"Recording on-chain",

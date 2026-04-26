@@ -5,11 +5,17 @@ import { useCallback, useEffect, useState } from "react";
 import { NotificationList } from "@/components/notifications/NotificationList";
 import { type Notification } from "@/types";
 import { fetchApi } from "@/lib/api";
+import { useDecryptNotifications } from "@/hooks/useDecryptNotifications";
+import { Button } from "@/components/ui/Button";
+import { LockOpen, Lock } from "lucide-react";
 
 export default function NotificationsPage() {
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const { decryptNotifications, isDecrypting } = useDecryptNotifications();
+	
+	const encryptedCount = notifications.filter((n) => n.ciphertext && !n.message).length;
 
 	const loadNotifications = useCallback(async () => {
 		setIsLoading(true);
@@ -30,6 +36,43 @@ export default function NotificationsPage() {
 		loadNotifications();
 	}, [loadNotifications]);
 
+	const handleDecrypt = async () => {
+		const encrypted = notifications.filter((n) => n.ciphertext && n.nonce && !n.message).map((n) => ({
+			id: n.id,
+			ciphertext: new Uint8Array(Buffer.from(n.ciphertext!, "hex")),
+			nonce: new Uint8Array(Buffer.from(n.nonce!, "hex")),
+		}));
+
+		if (encrypted.length === 0) return;
+
+		try {
+			const decrypted = await decryptNotifications(encrypted);
+			
+			// Merge decrypted payloads back into notifications
+			setNotifications((prev) => 
+				prev.map((n) => {
+					const d = decrypted.find((dec) => dec.id === n.id);
+					if (d) {
+						try {
+							const payload = JSON.parse(d.plaintext);
+							return {
+								...n,
+								message: payload.message,
+								actionUrl: payload.actionUrl,
+								subject: payload.subject || n.subject,
+							};
+						} catch (e) {
+							return { ...n, message: d.plaintext };
+						}
+					}
+					return n;
+				})
+			);
+		} catch (err) {
+			console.error("Failed to decrypt:", err);
+		}
+	};
+
 	return (
 		<div className="max-w-[700px] mx-auto px-4 sm:px-6 py-8 sm:py-12 h-[calc(100vh-80px)] font-sans">
 			<motion.div
@@ -38,9 +81,23 @@ export default function NotificationsPage() {
 				transition={{ duration: 0.4 }}
 				className="flex flex-col h-full"
 			>
-				<h1 className="text-[28px] font-extrabold tracking-tight mb-6 shrink-0">
-					Notification history
-				</h1>
+				<div className="flex items-center justify-between mb-6 shrink-0">
+					<h1 className="text-[28px] font-extrabold tracking-tight">
+						Notification history
+					</h1>
+					{encryptedCount > 0 && (
+						<Button 
+							size="sm" 
+							variant="secondary" 
+							onClick={handleDecrypt} 
+							disabled={isDecrypting}
+							className="gap-2"
+						>
+							{isDecrypting ? <Lock className="w-4 h-4 animate-pulse" /> : <LockOpen className="w-4 h-4" />}
+							{isDecrypting ? "Decrypting..." : `Decrypt ${encryptedCount} message${encryptedCount !== 1 ? 's' : ''}`}
+						</Button>
+					)}
+				</div>
 
 				{error ? (
 					<motion.div

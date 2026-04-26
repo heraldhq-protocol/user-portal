@@ -17,6 +17,10 @@ export interface Notification {
 	receiptTx?: string;
 	bounce?: string;
 	errorCode?: string;
+	ciphertext?: string;
+	nonce?: string;
+	message?: string;
+	actionUrl?: string;
 }
 
 /** Registration wizard step identifiers */
@@ -43,4 +47,9 @@ export interface IdentityStatus {
 		telegram: boolean;
 		sms: boolean;
 	};
+	notificationKey?: {
+		version: number;
+		rotationCount: number;
+		updatedAt: number;
+	} | null;
 }

@@ -35,7 +35,7 @@ export function WalletConnection({ children }: Readonly<{ children: React.ReactN
 
 	return (
 		<ConnectionProvider endpoint={endpoint}>
-			<WalletProvider wallets={wallets}>{children}</WalletProvider>
+			<WalletProvider wallets={wallets} autoConnect>{children}</WalletProvider>
 		</ConnectionProvider>
 	);
 }

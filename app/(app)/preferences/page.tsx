@@ -8,6 +8,7 @@ import { EmailUpdateModal } from "@/components/preferences/EmailUpdateModal";
 import { RemoveTelegramModal } from "@/components/preferences/RemoveTelegramModal";
 import { RemoveSmsModal } from "@/components/preferences/RemoveSmsModal";
 import { ChannelStatusCard } from "@/components/preferences/ChannelStatusCard";
+import { NotificationKeyCard } from "@/components/preferences/NotificationKeyCard";
 import { Mail, MessageCircle, Smartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PreferencesForm } from "@/components/preferences/PreferencesForm";
@@ -84,11 +85,11 @@ export default function PreferencesPage() {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.4 }}
 				>
-					<div className="mb-9">
-						<h1 className="text-[28px] font-extrabold tracking-tight mb-1.5">Preferences</h1>
+					<div className="mb-6 sm:mb-9">
+						<h1 className="text-xl sm:text-[28px] font-extrabold tracking-tight mb-1.5">Preferences</h1>
 						<div className="flex items-center gap-2">
-							<div className="w-2 h-2 rounded-full bg-teal" />
-							<span className="font-mono text-[13px] text-text-muted">
+							<div className="w-2 h-2 rounded-full bg-teal shrink-0" />
+							<span className="font-mono text-[12px] sm:text-[13px] text-text-muted truncate">
 								{publicKey ? truncateAddress(publicKey.toBase58(), 4) : "Unknown"}
 							</span>
 						</div>
@@ -100,8 +101,10 @@ export default function PreferencesPage() {
 					{/* Notification Channels */}
 					<div className="mb-8">
 						<h3 className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-4">
-							Notification channels
+							Security & Channels
 						</h3>
+						
+						<NotificationKeyCard />
 
 						<ChannelStatusCard
 							title="Email Address"

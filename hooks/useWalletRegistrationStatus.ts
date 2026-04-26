@@ -26,9 +26,25 @@ export function useWalletRegistrationStatus() {
 					commitment: "confirmed",
 				});
 
-				const isRegistered = await readClient.isRegistered(publicKey);
+				const account = await readClient.fetchIdentityAccount(publicKey);
+				if (!account) {
+					return { registered: false };
+				}
 
-				return { registered: isRegistered };
+				const hasNotifKey = 
+					account.notificationKeyVersion && 
+					account.notificationKeyVersion > 0 && 
+					account.sealedX25519Pubkey && 
+					!account.sealedX25519Pubkey.every((b: number) => b === 0);
+
+				return { 
+					registered: true,
+					notificationKey: hasNotifKey ? {
+						version: account.notificationKeyVersion,
+						rotationCount: account.notificationKeyRotationCount,
+						updatedAt: account.notificationKeyUpdatedAt
+					} : null
+				};
 			} catch (err) {
 				console.error("Failed to get registration status:", err);
 				throw err;
