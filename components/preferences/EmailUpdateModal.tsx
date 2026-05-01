@@ -9,7 +9,7 @@ import { Modal, ModalTitle } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { emailUpdateSchema, type EmailUpdateFormData } from "@/lib/schemas";
-import { encryptEmail } from "@herald-protocol/sdk";
+import { encryptEmail } from "@/lib/crypto";
 import { Transaction } from "@solana/web3.js";
 import { fetchApi } from "@/lib/api";
 import { useSolBalance } from "@/hooks/useSolBalance";
@@ -47,7 +47,7 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 			setIsEncrypting(true);
 
 			// 1. Encrypt email in browser
-			const { encryptedEmail, nonce } = encryptEmail(data.newEmail, walletContext.publicKey);
+			const { encryptedEmail, nonce } = await encryptEmail(data.newEmail, walletContext.publicKey);
 			setIsEncrypting(false);
 
 			// 2. Convert Uint8Array to base64 strings for JSON transport
