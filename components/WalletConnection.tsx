@@ -30,7 +30,14 @@ export function WalletConnection({ children }: Readonly<{ children: React.ReactN
 	const endpoint = useMemo(() => {
 		if (customRpcUrl) {
 			const url = customRpcUrl.replace(/['"]+/g, "").trim();
-			// If it's a relative path (like /api/rpc), it's fine as is for the browser
+
+			// If it's a relative path (like /api/rpc) and we're on the server (SSR),
+			// we must provide a full URL because the Solana SDK validates it.
+			if (url.startsWith("/") && typeof window === "undefined") {
+				// Use the server-side RPC URL if available, otherwise fallback to cluster default
+				return process.env.SOLANA_RPC_URL || clusterApiUrl(cluster as "devnet" | "mainnet-beta" | "testnet");
+			}
+
 			return url;
 		}
 		if (cluster === "localnet") return "http://127.0.0.1:8899";
