@@ -28,7 +28,11 @@ export function WalletConnection({ children }: Readonly<{ children: React.ReactN
 	const cluster = rawCluster.replace(/['"]+/g, "").trim() as SolanaCluster;
 
 	const endpoint = useMemo(() => {
-		if (customRpcUrl) return customRpcUrl.replace(/['"]+/g, "").trim();
+		if (customRpcUrl) {
+			const url = customRpcUrl.replace(/['"]+/g, "").trim();
+			// If it's a relative path (like /api/rpc), it's fine as is for the browser
+			return url;
+		}
 		if (cluster === "localnet") return "http://127.0.0.1:8899";
 		return clusterApiUrl(cluster as "devnet" | "mainnet-beta" | "testnet");
 	}, [cluster, customRpcUrl]);
