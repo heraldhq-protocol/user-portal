@@ -31,10 +31,15 @@ export function WalletConnection({ children }: Readonly<{ children: React.ReactN
 		if (customRpcUrl) {
 			const url = customRpcUrl.replace(/['"]+/g, "").trim();
 
-			// If it's a relative path (like /api/rpc) and we're on the server (SSR),
-			// we must provide a full URL because the Solana SDK validates it.
-			if (url.startsWith("/") && typeof window === "undefined") {
-				// Use the server-side RPC URL if available, otherwise fallback to cluster default
+			// The Solana Connection class requires a full URL (http/https).
+			// If the env var is a relative path (like /api/rpc), we need to
+			// resolve it to a full URL.
+			if (url.startsWith("/")) {
+				if (typeof window !== "undefined") {
+					// Client-side: prepend the current origin
+					return `${window.location.origin}${url}`;
+				}
+				// Server-side (SSR): use the real RPC URL directly
 				return process.env.SOLANA_RPC_URL || clusterApiUrl(cluster as "devnet" | "mainnet-beta" | "testnet");
 			}
 
