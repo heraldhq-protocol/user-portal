@@ -41,16 +41,13 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 
 			// 2. Sign and send
 			const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
+			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+			tx.recentBlockhash = blockhash;
 			const signedTx = await walletContext.signTransaction(tx);
 			const signature = await connection.sendRawTransaction(signedTx.serialize());
 
-			const latestBlockhash = await connection.getLatestBlockhash();
 			await connection.confirmTransaction(
-				{
-					signature,
-					blockhash: latestBlockhash.blockhash,
-					lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-				},
+				{ signature, blockhash, lastValidBlockHeight },
 				"confirmed"
 			);
 

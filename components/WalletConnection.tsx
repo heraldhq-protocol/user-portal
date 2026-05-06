@@ -49,8 +49,15 @@ export function WalletConnection({ children }: Readonly<{ children: React.ReactN
 		return clusterApiUrl(cluster as "devnet" | "mainnet-beta" | "testnet");
 	}, [cluster, customRpcUrl]);
 
+	const wsEndpoint = useMemo(() => {
+		const raw = process.env.NEXT_PUBLIC_SOLANA_WSS_URL;
+		if (raw) return raw.replace(/['"]+/g, "").trim();
+		// Derive WSS from the resolved HTTP endpoint as a fallback
+		return endpoint.replace(/^http/, "ws");
+	}, [endpoint]);
+
 	return (
-		<ConnectionProvider endpoint={endpoint}>
+		<ConnectionProvider endpoint={endpoint} config={{ wsEndpoint }}>
 			<WalletProvider wallets={wallets} autoConnect>{children}</WalletProvider>
 		</ConnectionProvider>
 	);
