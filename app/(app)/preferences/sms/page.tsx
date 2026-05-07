@@ -81,19 +81,19 @@ export default function SmsSetupPage() {
 
 			const { instructions } = await client.buildSmsRegistrationTx(publicKey, phone);
 
+			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 			const tx = new Transaction().add(...instructions);
-			tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+			tx.recentBlockhash = blockhash;
 			tx.feePayer = publicKey;
 
 			const signedTx = await signTransaction(tx);
 			const signature = await connection.sendRawTransaction(signedTx.serialize());
 
-			const latestBlockhash = await connection.getLatestBlockhash();
 			await connection.confirmTransaction(
 				{
 					signature,
-					blockhash: latestBlockhash.blockhash,
-					lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+					blockhash,
+					lastValidBlockHeight,
 				},
 				"confirmed"
 			);

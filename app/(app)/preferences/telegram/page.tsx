@@ -41,20 +41,16 @@ export default function TelegramSetupPage() {
 
 			const { instructions } = await client.buildTelegramRegistrationTx(publicKey, chatId);
 
+			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 			const tx = new Transaction().add(...instructions);
-			tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+			tx.recentBlockhash = blockhash;
 			tx.feePayer = publicKey;
 
 			const signedTx = await signTransaction(tx);
 			const signature = await connection.sendRawTransaction(signedTx.serialize());
 
-			const latestBlockhash = await connection.getLatestBlockhash();
 			await connection.confirmTransaction(
-				{
-					signature,
-					blockhash: latestBlockhash.blockhash,
-					lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-				},
+				{ signature, blockhash, lastValidBlockHeight },
 				"confirmed"
 			);
 
