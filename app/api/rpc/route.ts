@@ -1,36 +1,60 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+const CLUSTER = process.env.NEXT_PUBLIC_RPC_CLUSTER ?? "devnet";
+const FALLBACK_RPC =
+	CLUSTER === "mainnet-beta"
+		? "https://api.mainnet-beta.solana.com"
+		: "https://api.devnet.solana.com";
+const TIMEOUT_MS = 8000;
+
+async function proxyRpc(rpcUrl: string, body: unknown): Promise<Response> {
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 	try {
-		const rpcUrl = process.env.SOLANA_RPC_URL;
-
-		if (!rpcUrl) {
-			return NextResponse.json(
-				{ error: "SOLANA_RPC_URL environment variable is not set" },
-				{ status: 500 }
-			);
-		}
-
-		const body = await req.json();
-
-		const response = await fetch(rpcUrl, {
+		return await fetch(rpcUrl, {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
+			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(body),
+			signal: controller.signal,
 		});
+	} finally {
+		clearTimeout(timer);
+	}
+}
 
-		const data = await response.json();
+export async function POST(req: NextRequest) {
+	const primaryRpcUrl = process.env.SOLANA_RPC_URL;
 
-		return NextResponse.json(data);
-	} catch (error) {
-		console.error("RPC Proxy Error:", error);
+	if (!primaryRpcUrl) {
 		return NextResponse.json(
-			{ error: "Failed to proxy RPC request" },
+			{ error: "SOLANA_RPC_URL environment variable is not set" },
 			{ status: 500 }
 		);
 	}
+
+	const body = await req.json();
+
+	// Try primary RPC; fall back to the public cluster endpoint on timeout or network error
+	let response: Response;
+	try {
+		response = await proxyRpc(primaryRpcUrl, body);
+	} catch (primaryErr) {
+		if (primaryRpcUrl !== FALLBACK_RPC) {
+			console.warn("RPC primary failed, retrying on fallback:", (primaryErr as Error).message);
+			try {
+				response = await proxyRpc(FALLBACK_RPC, body);
+			} catch (fallbackErr) {
+				console.error("RPC Proxy Error (fallback):", fallbackErr);
+				return NextResponse.json({ error: "Failed to proxy RPC request" }, { status: 500 });
+			}
+		} else {
+			console.error("RPC Proxy Error:", primaryErr);
+			return NextResponse.json({ error: "Failed to proxy RPC request" }, { status: 500 });
+		}
+	}
+
+	const data = await response.json();
+	return NextResponse.json(data);
 }
 
 export async function OPTIONS() {

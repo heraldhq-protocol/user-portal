@@ -72,6 +72,31 @@ export default function SmsSetupPage() {
 			return;
 		}
 
+		const sendAndConfirmWithRetry = async (instructions: any[], attempt = 1): Promise<string> => {
+			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+			const tx = new Transaction().add(...instructions);
+			tx.recentBlockhash = blockhash;
+			tx.feePayer = publicKey;
+
+			const signedTx = await signTransaction(tx);
+			const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+				skipPreflight: true,
+				maxRetries: 3,
+			});
+
+			try {
+				await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+				return signature;
+			} catch (err: unknown) {
+				const isExpired = err instanceof Error && err.name === "TransactionExpiredBlockheightExceededError";
+				if (isExpired && attempt < 3) {
+					toast.info(`Network slow — retrying (${attempt}/3)...`);
+					return sendAndConfirmWithRetry(instructions, attempt + 1);
+				}
+				throw err;
+			}
+		};
+
 		setStep("registering");
 		try {
 			const client = new ChannelUserClient({
@@ -80,23 +105,7 @@ export default function SmsSetupPage() {
 			});
 
 			const { instructions } = await client.buildSmsRegistrationTx(publicKey, phone);
-
-			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-			const tx = new Transaction().add(...instructions);
-			tx.recentBlockhash = blockhash;
-			tx.feePayer = publicKey;
-
-			const signedTx = await signTransaction(tx);
-			const signature = await connection.sendRawTransaction(signedTx.serialize());
-
-			await connection.confirmTransaction(
-				{
-					signature,
-					blockhash,
-					lastValidBlockHeight,
-				},
-				"confirmed"
-			);
+			await sendAndConfirmWithRetry(instructions);
 
 			await fetchApi("/portal/identity", { method: "POST" });
 			toast.success("Phone number verified and registered on-chain!");
@@ -104,7 +113,7 @@ export default function SmsSetupPage() {
 		} catch (err: any) {
 			console.error(err);
 			toast.error(err.message || "Failed to register phone on-chain");
-			setStep("otp"); // Allow retry on chain failure but keep OTP session
+			setStep("otp");
 		}
 	};
 

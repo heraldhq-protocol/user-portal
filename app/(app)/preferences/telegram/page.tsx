@@ -54,6 +54,31 @@ export default function TelegramSetupPage() {
 			return;
 		}
 
+		const sendAndConfirmWithRetry = async (instructions: any[], attempt = 1): Promise<string> => {
+			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+			const tx = new Transaction().add(...instructions);
+			tx.recentBlockhash = blockhash;
+			tx.feePayer = publicKey;
+
+			const signedTx = await signTransaction(tx);
+			const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+				skipPreflight: true,
+				maxRetries: 3,
+			});
+
+			try {
+				await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+				return signature;
+			} catch (err: unknown) {
+				const isExpired = err instanceof Error && err.name === "TransactionExpiredBlockheightExceededError";
+				if (isExpired && attempt < 3) {
+					toast.info(`Network slow — retrying (${attempt}/3)...`);
+					return sendAndConfirmWithRetry(instructions, attempt + 1);
+				}
+				throw err;
+			}
+		};
+
 		setIsRegistering(true);
 		try {
 			const client = new ChannelUserClient({
@@ -62,19 +87,7 @@ export default function TelegramSetupPage() {
 			});
 
 			const { instructions } = await client.buildTelegramRegistrationTx(publicKey, chatId);
-
-			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-			const tx = new Transaction().add(...instructions);
-			tx.recentBlockhash = blockhash;
-			tx.feePayer = publicKey;
-
-			const signedTx = await signTransaction(tx);
-			const signature = await connection.sendRawTransaction(signedTx.serialize());
-
-			await connection.confirmTransaction(
-				{ signature, blockhash, lastValidBlockHeight },
-				"confirmed"
-			);
+			await sendAndConfirmWithRetry(instructions);
 
 			clearSession();
 			await fetchApi("/portal/identity", { method: "POST" });
@@ -83,6 +96,11 @@ export default function TelegramSetupPage() {
 		} catch (err: any) {
 			console.error(err);
 			toast.error(err.message || "Failed to register Telegram on-chain");
+			// Nonce is already consumed — reset so user can generate a fresh link
+			clearSession();
+			setConnectUrl(null);
+			setNonce(null);
+			setIsPolling(false);
 		} finally {
 			setIsRegistering(false);
 		}
