@@ -26,6 +26,34 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 	if (!isOpen && step !== 1) setStep(1);
 	if (!isOpen && confirmText !== "") setConfirmText("");
 
+	const sendAndConfirmWithRetry = async (
+		serializedTransaction: string,
+		attempt = 1,
+	): Promise<string> => {
+		const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
+		const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+		tx.recentBlockhash = blockhash;
+
+		const signedTx = await walletContext.signTransaction!(tx);
+		const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+			skipPreflight: false,
+			maxRetries: 3,
+		});
+
+		try {
+			await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+			return signature;
+		} catch (err: unknown) {
+			const isExpired =
+				err instanceof Error && err.name === "TransactionExpiredBlockheightExceededError";
+			if (isExpired && attempt < 3) {
+				toast.info(`Network slow — retrying (${attempt}/3)...`);
+				return sendAndConfirmWithRetry(serializedTransaction, attempt + 1);
+			}
+			throw err;
+		}
+	};
+
 	const handleDelete = async () => {
 		if (!walletContext.publicKey || !walletContext.signTransaction) return;
 
@@ -34,28 +62,16 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 			// 1. Build transaction in backend
 			const { serializedTransaction } = await fetchApi<{ serializedTransaction: string }>(
 				"/portal/delete/transaction",
-				{
-					method: "POST",
-				}
+				{ method: "POST" }
 			);
 
-			// 2. Sign and send
-			const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
-			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-			tx.recentBlockhash = blockhash;
-			const signedTx = await walletContext.signTransaction(tx);
-			const signature = await connection.sendRawTransaction(signedTx.serialize());
-
-			await connection.confirmTransaction(
-				{ signature, blockhash, lastValidBlockHeight },
-				"confirmed"
-			);
+			// 2. Sign, send, and confirm — retries up to 3× if blockhash expires
+			await sendAndConfirmWithRetry(serializedTransaction);
 
 			// 3. Cleanup off-chain data
 			await fetchApi("/portal/account", { method: "DELETE" });
 
 			toast.success("Account permanently deleted");
-
 			logout();
 			onClose();
 			window.location.replace("/");
