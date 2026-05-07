@@ -14,17 +14,39 @@ import { toast } from "sonner";
 import { Transaction } from "@solana/web3.js";
 import { ChannelUserClient, type SolanaCluster } from "@herald-protocol/sdk";
 
+const SESSION_KEY = "tg_connect";
+
 export default function TelegramSetupPage() {
 	const { publicKey, signTransaction } = useWallet();
 	const { connection } = useConnection();
 	const router = useRouter();
 
 	const [isGenerating, setIsGenerating] = useState(false);
-	const [connectUrl, setConnectUrl] = useState<string | null>(null);
-	const [nonce, setNonce] = useState<string | null>(null);
-	const [isPolling, setIsPolling] = useState(false);
 	const [isRegistering, setIsRegistering] = useState(false);
 	const [copied, setCopied] = useState(false);
+
+	// Lazy-initialize from sessionStorage so Phantom in-app browser navigation
+	// (which unmounts the page) doesn't wipe the pending nonce/connect state
+	const [connectUrl, setConnectUrl] = useState<string | null>(() => {
+		try {
+			const saved = sessionStorage.getItem(SESSION_KEY);
+			return saved ? (JSON.parse(saved).connectUrl ?? null) : null;
+		} catch { return null; }
+	});
+	const [nonce, setNonce] = useState<string | null>(() => {
+		try {
+			const saved = sessionStorage.getItem(SESSION_KEY);
+			return saved ? (JSON.parse(saved).nonce ?? null) : null;
+		} catch { return null; }
+	});
+	const [isPolling, setIsPolling] = useState<boolean>(() => {
+		try {
+			const saved = sessionStorage.getItem(SESSION_KEY);
+			return saved ? !!JSON.parse(saved).nonce : false;
+		} catch { return false; }
+	});
+
+	const clearSession = () => sessionStorage.removeItem(SESSION_KEY);
 
 	const registerOnChain = async (chatId: string) => {
 		if (!publicKey || !signTransaction) {
@@ -54,7 +76,7 @@ export default function TelegramSetupPage() {
 				"confirmed"
 			);
 
-			// Tell API to index changes
+			clearSession();
 			await fetchApi("/portal/identity", { method: "POST" });
 			toast.success("Telegram connected and registered on-chain!");
 			router.push("/preferences");
@@ -66,14 +88,15 @@ export default function TelegramSetupPage() {
 		}
 	};
 
-	// Start polling when nonce changes
+	// Poll every 3s; also fire immediately when the page becomes visible again
+	// (covers Phantom in-app browser returning from Telegram)
 	useEffect(() => {
 		if (!nonce || !isPolling) return;
 
-		// eslint-disable-next-line prefer-const
-		let intervalId: NodeJS.Timeout;
+		let cancelled = false;
 
 		const poll = async () => {
+			if (cancelled) return;
 			try {
 				const res = await fetchApi<{ status: string; chatId?: string }>(
 					`/portal/channels/telegram/poll?nonce=${nonce}`
@@ -86,6 +109,7 @@ export default function TelegramSetupPage() {
 				} else if (res.status === "expired") {
 					setIsPolling(false);
 					clearInterval(intervalId);
+					clearSession();
 					toast.error("Link expired. Please generate a new one.");
 					setConnectUrl(null);
 					setNonce(null);
@@ -95,8 +119,19 @@ export default function TelegramSetupPage() {
 			}
 		};
 
-		intervalId = setInterval(poll, 3000);
-		return () => clearInterval(intervalId);
+		// Immediate poll when page becomes visible (user returns from Telegram)
+		const onVisibilityChange = () => {
+			if (document.visibilityState === "visible") poll();
+		};
+
+		document.addEventListener("visibilitychange", onVisibilityChange);
+		const intervalId = setInterval(poll, 3000);
+
+		return () => {
+			cancelled = true;
+			clearInterval(intervalId);
+			document.removeEventListener("visibilitychange", onVisibilityChange);
+		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [nonce, isPolling]);
 
@@ -106,18 +141,19 @@ export default function TelegramSetupPage() {
 			const res = await fetchApi<{ nonce: string; connectUrl: string }>(
 				"/portal/channels/telegram/connect"
 			);
+
+			// Persist to sessionStorage before navigating — Phantom in-app browser
+			// may discard React state when opening a deep link
+			sessionStorage.setItem(SESSION_KEY, JSON.stringify({ nonce: res.nonce, connectUrl: res.connectUrl }));
+
 			setNonce(res.nonce);
 			setConnectUrl(res.connectUrl);
 			setIsPolling(true);
 
-			// On mobile in-app browsers (Phantom), opening _blank can lose state.
-			// Use a slightly delayed window.open to avoid blocking.
-			// The link is always visible so users can tap it manually.
 			try {
 				window.open(res.connectUrl, "_blank", "noopener,noreferrer");
 			} catch {
-				// Some in-app browsers block window.open — that's OK,
-				// the link is shown in the UI for manual tap.
+				// Some in-app browsers block window.open — link is shown in UI for manual tap
 			}
 		} catch (err: any) {
 			toast.error(err.message || "Failed to generate connect link");
