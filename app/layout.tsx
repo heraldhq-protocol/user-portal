@@ -24,6 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+	metadataBase: new URL("https://notify.useherald.xyz"),
 	title: {
 		default: "Herald — Privacy-Preserving Notifications for Solana",
 		template: "%s | Herald",
@@ -32,12 +33,10 @@ export const metadata: Metadata = {
 		"Receive DeFi alerts directly to your inbox — without sharing your email with any protocol. Herald encrypts your email in your browser and stores it on-chain.",
 	keywords: ["Solana", "DeFi", "notifications", "privacy", "wallet", "email", "encryption"],
 	openGraph: {
-		title: "Herald — Privacy-Preserving Notifications for Solana",
-		description:
-			"Receive DeFi alerts without sharing your email. Encrypted in your browser, stored on-chain.",
 		url: "https://notify.useherald.xyz",
 		siteName: "Herald",
 		type: "website",
+		images: ["/api/og"],
 	},
 	twitter: {
 		card: "summary_large_image",
