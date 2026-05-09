@@ -15,6 +15,24 @@ export const metadata: Metadata = {
 	title: "Privacy — Herald",
 	description:
 		"Learn how Herald protects your privacy with client-side encryption, on-chain storage, and zero PII exposure.",
+	openGraph: {
+		title: "Privacy | Herald",
+		description:
+			"Learn how Herald protects your privacy with client-side encryption, on-chain storage, and zero PII exposure.",
+		images: [
+			{
+				url: "/api/og?title=Privacy+by+Design&subtitle=Zero-Knowledge+Architecture&description=Herald+was+built+on+a+simple+premise%3A+we+should+be+technically+incapable+of+reading+your+email+address.",
+				width: 1200,
+				height: 630,
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		images: [
+			"/api/og?title=Privacy+by+Design&subtitle=Zero-Knowledge+Architecture&description=Herald+was+built+on+a+simple+premise%3A+we+should+be+technically+incapable+of+reading+your+email+address.",
+		],
+	},
 };
 
 export default function PrivacyPage() {
