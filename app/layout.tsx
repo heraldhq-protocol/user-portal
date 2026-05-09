@@ -36,13 +36,14 @@ export const metadata: Metadata = {
 		url: "https://notify.useherald.xyz",
 		siteName: "Herald",
 		type: "website",
-		images: ["/api/og"],
+		images: [{ url: "/api/og", width: 1200, height: 630 }],
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "Herald — Privacy-Preserving Notifications for Solana",
 		description:
 			"Receive DeFi alerts without sharing your email. Encrypted in your browser, stored on-chain.",
+		images: ["/api/og"],
 	},
 	robots: {
 		index: true,
