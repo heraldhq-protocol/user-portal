@@ -16,9 +16,9 @@ import { cn } from "@/lib/utils";
 export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const { connected, connecting, publicKey, disconnect } = useWallet();
+	const { connected, connecting, publicKey } = useWallet();
 	const { data: status, isLoading } = useWalletRegistrationStatus();
-	const { isAuthenticated } = useAuth();
+	const { isAuthenticated, logout } = useAuth();
 	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
@@ -128,7 +128,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 						<div className="flex items-center gap-1 sm:gap-2">
 							<ThemeToggle />
 							<button
-								onClick={() => disconnect()}
+								onClick={() => logout()}
 								title="Disconnect"
 								className="p-2 rounded-xl text-slate-400 dark:text-text-muted hover:text-red hover:bg-red/10 transition-colors"
 							>

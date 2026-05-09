@@ -1,8 +1,12 @@
 "use client";
 
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useState } from "react";
+import { useWallet, useConnection } from "@solana/wallet-adapter-react";
+import { Transaction } from "@solana/web3.js";
+import { UserClient, SolanaCluster } from "@herald-protocol/sdk";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
+import { fetchApiWithSignature } from "@/lib/api";
 import Image from "next/image";
 
 interface StepLoginProps {
@@ -11,17 +15,75 @@ interface StepLoginProps {
 }
 
 export function StepLogin({ onBack, onComplete }: StepLoginProps) {
-	const { publicKey, wallet } = useWallet();
+	const { publicKey, wallet, signTransaction, signMessage } = useWallet();
+	const { connection } = useConnection();
 	const { login, isLoggingIn } = useAuth();
+	const [loginFailed, setLoginFailed] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 
 	const connectedWallet = wallet?.adapter;
 
 	const handleLogin = async () => {
+		setLoginFailed(false);
+		setDeleteError(null);
 		try {
 			await login();
 			onComplete();
 		} catch {
-			// Error handled in useAuth toast
+			setLoginFailed(true);
+		}
+	};
+
+	const handleDeleteAndReset = async () => {
+		if (!publicKey || !signTransaction || !signMessage) return;
+
+		setIsDeleting(true);
+		setDeleteError(null);
+		try {
+			const owner = publicKey;
+
+			// 1. Build and broadcast on-chain deleteIdentity
+			const userClient = new UserClient({
+				cluster: (process.env.NEXT_PUBLIC_RPC_CLUSTER as SolanaCluster) || "devnet",
+				rpcUrl: connection.rpcEndpoint,
+			});
+			const ix = await userClient.deleteIdentity({ owner });
+
+			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+			const tx = new Transaction({
+				feePayer: owner,
+				blockhash,
+				lastValidBlockHeight,
+			}).add(ix);
+
+			const signedTx = await signTransaction(tx);
+			const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+				skipPreflight: false,
+				preflightCommitment: "confirmed",
+			});
+			await connection.confirmTransaction(
+				{ signature, blockhash, lastValidBlockHeight },
+				"confirmed",
+			);
+
+			// 2. Wipe off-chain DB data (wallet-signed auth, no JWT)
+			await fetchApiWithSignature(
+				"/portal/account/delete-with-signature",
+				publicKey.toBase58(),
+				signMessage,
+			);
+
+			// 3. Clear local state and full refresh to restart the wizard
+			localStorage.removeItem("herald_portal_token");
+			window.location.reload();
+		} catch (err: unknown) {
+			console.error("Delete account error:", err);
+			setDeleteError(
+				err instanceof Error ? err.message : "Failed to delete account",
+			);
+		} finally {
+			setIsDeleting(false);
 		}
 	};
 
@@ -62,10 +124,31 @@ export function StepLogin({ onBack, onComplete }: StepLoginProps) {
 				</div>
 			)}
 
+			{loginFailed && (
+				<div className="mb-6 p-3 bg-red-500/5 border border-red-500/10 rounded-lg">
+					<p className="text-red-400/80 text-xs leading-relaxed">
+						Can&apos;t sign in?{" "}
+						{isDeleting ? (
+							<span className="text-red-400/60">Deleting account...</span>
+						) : (
+							<button
+								onClick={handleDeleteAndReset}
+								className="font-bold text-red-400 hover:text-red-300 underline underline-offset-2 transition-colors"
+							>
+								Delete and start fresh
+							</button>
+						)}
+					</p>
+					{deleteError && (
+						<p className="text-red-400/60 text-xs mt-1">{deleteError}</p>
+					)}
+				</div>
+			)}
+
 			<div className="flex flex-col gap-3">
 				<Button
 					onClick={handleLogin}
-					disabled={isLoggingIn}
+					disabled={isLoggingIn || isDeleting}
 					size="lg"
 					className="w-full justify-center h-[52px] text-base font-bold shadow-lg shadow-teal/10"
 				>
@@ -81,7 +164,7 @@ export function StepLogin({ onBack, onComplete }: StepLoginProps) {
 
 				<button
 					onClick={onBack}
-					disabled={isLoggingIn}
+					disabled={isLoggingIn || isDeleting}
 					className="w-full py-3 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-text-muted dark:hover:text-text-secondary transition-colors disabled:opacity-50"
 				>
 					← Use a different wallet
