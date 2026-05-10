@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as nacl from 'tweetnacl';
 import { decodeUTF8, encodeUTF8, decodeBase64 } from 'tweetnacl-util';
-import { deriveX25519SecretFromEd25519 } from '@herald-protocol/sdk';
+import { deriveX25519SecretFromEd25519, deriveX25519FromEd25519 } from '@herald-protocol/sdk';
 import type { PublicKey } from '@solana/web3.js';
 
 // ─── Dual-encryption blob magic prefix ────────────────────────────────────────
@@ -112,8 +112,6 @@ export async function encryptEmail(
 	const gatewayPubkey = getGatewayEnclavePubkey();
 
 	// Derive user's X25519 public key from their Ed25519 wallet key.
-	// The SDK exports this conversion — same library used in the portal.
-	const { deriveX25519FromEd25519 } = await import('@herald-protocol/sdk');
 	const userX25519Pubkey = deriveX25519FromEd25519(walletPubkey.toBytes());
 
 	if (emailBytes.length <= DUAL_MAX_EMAIL_BYTES) {
