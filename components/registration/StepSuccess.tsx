@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/Button";
@@ -29,25 +29,30 @@ export function StepSuccess({
 
 	const handleRedirect = useCallback(() => {
 		if (alreadyRegistered) {
-			// For returning users, go directly to notifications
 			window.location.href = "/notifications";
 		} else {
-			// For fresh registrations, reload to enter the portal
 			window.location.reload();
 		}
 	}, [alreadyRegistered]);
 
-	// Countdown timer
+	const redirectRef = useRef(handleRedirect);
+	redirectRef.current = handleRedirect;
+
+	// Stable countdown — effect never re-runs unless component unmounts
 	useEffect(() => {
-		if (countdown <= 0) {
-			handleRedirect();
-			return;
-		}
 		const timer = setInterval(() => {
-			setCountdown((prev) => prev - 1);
+			setCountdown((prev) => {
+				if (prev <= 1) {
+					clearInterval(timer);
+					// Defer redirect to avoid setState-during-render
+					setTimeout(() => redirectRef.current(), 0);
+					return 0;
+				}
+				return prev - 1;
+			});
 		}, 1000);
 		return () => clearInterval(timer);
-	}, [countdown, handleRedirect]);
+	}, []);
 
 	const handleCopyLink = () => {
 		navigator.clipboard.writeText("https://notify.useherald.xyz");
