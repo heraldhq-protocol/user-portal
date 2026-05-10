@@ -19,12 +19,12 @@ const DUAL_MAX_EMAIL_BYTES = 50;
 
 /**
  * Returns true when sandbox (symmetric) encryption should be used.
- * Sandbox mode is active on devnet, localhost, or when explicitly set.
+ * Sandbox mode is only for localhost or when explicitly set.
+ * Devnet and mainnet both use production X25519 encryption.
  */
 export function shouldUseSandboxEncryption(): boolean {
 	return (
 		process.env.NEXT_PUBLIC_ENCLAVE_MODE === 'sandbox' ||
-		process.env.NEXT_PUBLIC_RPC_CLUSTER === 'devnet' ||
 		process.env.NEXT_PUBLIC_RPC_CLUSTER === 'localhost'
 	);
 }
