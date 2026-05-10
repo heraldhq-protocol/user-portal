@@ -7,7 +7,6 @@ import { Transaction } from "@solana/web3.js";
 import type { RegistrationStep } from "@/types";
 import { useWalletRegistrationStatus } from "./useWalletRegistrationStatus";
 import { useSolBalance } from "./useSolBalance";
-import { fetchApi } from "@/lib/api";
 
 type RegistrationPhase = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -167,11 +166,13 @@ export function useRegistration(): UseRegistrationReturn {
 		setPhase(5);
 
 		// Best-effort sync email hash to backend database.
-		// May fail if user doesn't have a JWT yet — that's OK,
-		// the hash will be synced on next email update or login.
+		// Use raw fetch — no JWT yet, so fetchApi would dispatch
+		// herald:unauthorized and trigger an immediate page reload.
 		try {
-			await fetchApi("/portal/email", {
+			const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/v1";
+			await fetch(`${apiBase}/portal/email`, {
 				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ email: state.email }),
 			});
 		} catch {
