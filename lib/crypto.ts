@@ -236,7 +236,7 @@ export function isDualEncryptedBlob(encryptedEmail: Uint8Array): boolean {
 export async function sealNotificationKey(wallet: any) {
 	const overridePubkey = shouldUseSandboxEncryption()
 		? getSandboxEnclavePubkey()
-		: undefined;
+		: getGatewayEnclavePubkey();
 	const { sealX25519PubkeyForEnclave } = await import('@herald-protocol/sdk');
 	return await sealX25519PubkeyForEnclave(wallet, overridePubkey);
 }
@@ -248,7 +248,7 @@ export async function decryptNotificationPayload(
 ) {
 	const overridePubkey = shouldUseSandboxEncryption()
 		? getSandboxEnclavePubkey()
-		: undefined;
+		: getGatewayEnclavePubkey();
 	const { decryptNotificationBody } = await import('@herald-protocol/sdk');
 	return await decryptNotificationBody(
 		wallet,

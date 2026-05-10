@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { Transaction } from "@solana/web3.js";
 import { NotificationKeyClient, SolanaCluster } from "@herald-protocol/sdk";
-import { shouldUseSandboxEncryption, getSandboxEnclavePubkey } from "@/lib/crypto";
+import { shouldUseSandboxEncryption, getSandboxEnclavePubkey, getGatewayEnclavePubkey } from "@/lib/crypto";
 
 export function useNotificationKey() {
   const wallet = useWallet();
@@ -18,9 +18,9 @@ export function useNotificationKey() {
     });
   };
 
-  /** Sandbox-aware enclave pubkey override. */
-  const getOverridePubkey = (): Uint8Array | undefined => {
-    return shouldUseSandboxEncryption() ? getSandboxEnclavePubkey() : undefined;
+  /** Enclave pubkey override — sandbox symmetric or production X25519. */
+  const getOverridePubkey = (): Uint8Array => {
+    return shouldUseSandboxEncryption() ? getSandboxEnclavePubkey() : getGatewayEnclavePubkey();
   };
 
   /**
