@@ -13,9 +13,9 @@ const buttonVariants = cva(
 				primary:
 					"bg-teal text-navy font-bold hover:bg-teal-2 hover:shadow-[0_0_20px_rgba(0,200,150,0.4)] hover:-translate-y-[1px] active:translate-y-0 active:scale-[0.98]",
 				secondary:
-					"bg-white dark:bg-card text-slate-700 dark:text-text-secondary border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:bg-slate-50 dark:bg-card-2 hover:text-white hover:shadow-lg active:scale-[0.98]",
+					"bg-card text-text-secondary border border-border-2 hover:border-teal/50 hover:bg-card-2 hover:text-text-primary hover:shadow-lg active:scale-[0.98]",
 				ghost:
-					"text-slate-500 dark:text-text-muted hover:text-white hover:bg-white dark:bg-card bg-transparent shadow-none",
+					"text-text-muted hover:text-text-primary hover:bg-card bg-transparent shadow-none",
 				danger:
 					"bg-herald-red/10 text-herald-red border border-herald-red/30 hover:bg-herald-red/20 hover:border-herald-red/50 hover:shadow-[0_0_15px_rgba(214,48,49,0.2)] active:scale-[0.98]",
 				outline:
