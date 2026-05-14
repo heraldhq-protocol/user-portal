@@ -127,14 +127,15 @@ export function RegistrationWizard() {
 			)}
 
 			{/* Step Content */}
-			<AnimatePresence mode="wait">
+			<AnimatePresence mode="popLayout">
 				{state.step === "connect" && (
 					<motion.div
 						key="connect"
 						initial={{ opacity: 0, x: 20 }}
 						animate={{ opacity: 1, x: 0 }}
 						exit={{ opacity: 0, x: -20 }}
-						transition={{ duration: 0.3 }}
+						transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+						layout
 					>
 						{isCheckingStatus && connected ? (
 							<div className="flex flex-col items-center justify-center py-12 gap-4">
@@ -157,7 +158,8 @@ export function RegistrationWizard() {
 						initial={{ opacity: 0, x: 20 }}
 						animate={{ opacity: 1, x: 0 }}
 						exit={{ opacity: 0, x: -20 }}
-						transition={{ duration: 0.3 }}
+						transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+						layout
 					>
 						<StepEnterEmail email={state.email} onBack={handleBack} onSubmit={handleEmailSubmit} />
 					</motion.div>
@@ -169,7 +171,8 @@ export function RegistrationWizard() {
 						initial={{ opacity: 0, x: 20 }}
 						animate={{ opacity: 1, x: 0 }}
 						exit={{ opacity: 0, x: -20 }}
-						transition={{ duration: 0.3 }}
+						transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+						layout
 					>
 						<StepEncryptSign
 							email={state.email}
@@ -203,7 +206,8 @@ export function RegistrationWizard() {
 						initial={{ opacity: 0, x: 20 }}
 						animate={{ opacity: 1, x: 0 }}
 						exit={{ opacity: 0, x: -20 }}
-						transition={{ duration: 0.3 }}
+						transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+						layout
 					>
 						<StepLogin onBack={handleBack} onComplete={handleLoginComplete} />
 					</motion.div>
@@ -214,10 +218,12 @@ export function RegistrationWizard() {
 						key="success"
 						initial={{ opacity: 0, scale: 0.95 }}
 						animate={{ opacity: 1, scale: 1 }}
+						exit={{ opacity: 0, scale: 0.95 }}
 						transition={{
-							duration: 0.4,
+							duration: 0.35,
 							ease: [0.22, 1, 0.36, 1],
 						}}
+						layout
 					>
 						<StepSuccess
 							txSignature={state.txSignature || ""}

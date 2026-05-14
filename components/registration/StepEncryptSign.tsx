@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { Button } from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
+import { Toggle } from "@/components/ui/Toggle";
 
 interface Prefs {
 	optInAll: boolean;
@@ -65,8 +65,8 @@ export function StepEncryptSign({
 		onComplete();
 	}, [onComplete]);
 
-	const togglePref = (key: keyof Omit<Prefs, "digestMode">) => {
-		onPrefsChange({ ...prefs, [key]: !prefs[key] });
+	const togglePref = (key: keyof Omit<Prefs, "digestMode">, checked: boolean) => {
+		onPrefsChange({ ...prefs, [key]: checked });
 	};
 
 	return (
@@ -82,58 +82,21 @@ export function StepEncryptSign({
 					Notification preferences
 				</div>
 				{CATEGORIES.map(({ key, label, desc }) => (
-					<div
+					<Toggle
 						key={key}
-						className="flex items-center justify-between py-4 border-b border-border last:border-b-0"
-					>
-						<div>
-							<div className="text-[13px] font-semibold text-text-secondary mb-0.5">{label}</div>
-							<div className="text-[11px] text-text-muted">{desc}</div>
-						</div>
-						<button
-							onClick={() => togglePref(key)}
-							className={cn(
-								"relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 cursor-pointer",
-								prefs[key] ? "bg-teal" : "bg-border-2"
-							)}
-							role="switch"
-							aria-checked={prefs[key]}
-							aria-label={`Toggle ${label}`}
-						>
-							<span
-								className={cn(
-									"absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform duration-200",
-									prefs[key] && "translate-x-5"
-								)}
-							/>
-						</button>
-					</div>
+						label={label}
+						description={desc}
+						checked={prefs[key]}
+						onCheckedChange={(checked) => togglePref(key, checked)}
+					/>
 				))}
 
-				{/* Digest mode */}
-				<div className="flex items-center justify-between py-4">
-					<div>
-						<div className="text-[13px] font-semibold text-text-secondary mb-0.5">Daily digest</div>
-						<div className="text-[11px] text-text-muted">Batch notifications at 9am UTC</div>
-					</div>
-					<button
-						onClick={() => onPrefsChange({ ...prefs, digestMode: !prefs.digestMode })}
-						className={cn(
-							"relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0 cursor-pointer",
-							prefs.digestMode ? "bg-teal" : "bg-border-2"
-						)}
-						role="switch"
-						aria-checked={prefs.digestMode}
-						aria-label="Toggle daily digest"
-					>
-						<span
-							className={cn(
-								"absolute top-[3px] left-[3px] w-[18px] h-[18px] bg-white rounded-full transition-transform duration-200",
-								prefs.digestMode && "translate-x-5"
-							)}
-						/>
-					</button>
-				</div>
+				<Toggle
+					label="Daily digest"
+					description="Batch notifications at 9am UTC"
+					checked={prefs.digestMode}
+					onCheckedChange={(checked) => onPrefsChange({ ...prefs, digestMode: checked })}
+				/>
 			</div>
 
 			{/* Encryption progress */}

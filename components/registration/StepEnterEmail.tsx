@@ -70,7 +70,7 @@ export function StepEnterEmail({ email: initialEmail, onBack, onSubmit }: StepEn
   return (
     <div>
       <h2 className="text-[26px] font-extrabold tracking-tight mb-2">Your email address</h2>
-      <p className="text-slate-500 dark:text-text-muted text-sm mb-6 leading-relaxed">
+      <p className="text-text-muted text-sm mb-6 leading-relaxed">
         Encrypted in your browser before it leaves your device.
       </p>
 
@@ -83,10 +83,10 @@ export function StepEnterEmail({ email: initialEmail, onBack, onSubmit }: StepEn
           onChange={handleChange}
           onBlur={handleBlur}
           className={cn(
-            'w-full rounded-[10px] bg-slate-50 dark:bg-navy-2 border px-4 py-3.5 text-[15px] text-primary-foreground placeholder:text-primary-foreground transition-colors duration-150 focus:outline-none focus:ring-1',
+            'w-full rounded-[10px] bg-navy-2 border px-4 py-3.5 text-[15px] text-primary-foreground placeholder:text-primary-foreground transition-colors duration-150 focus:outline-none focus:ring-1',
             error && touched
               ? 'border-red-500 focus:border-red-500 focus:ring-red-500/30'
-              : 'border-slate-300 dark:border-border-2 focus:border-teal focus:ring-teal/30',
+              : 'border-border-2 focus:border-teal focus:ring-teal/30',
           )}
           aria-label="Email address"
           aria-invalid={!!error && touched}
@@ -103,14 +103,14 @@ export function StepEnterEmail({ email: initialEmail, onBack, onSubmit }: StepEn
         )}
 
         {/* Helper text */}
-        <p className="mt-2 text-xs text-slate-500 dark:text-text-muted">
+        <p className="mt-2 text-xs text-text-muted">
           Use your primary email address. Plus addressing (e.g., name+tag@example.com) is not
           allowed.
         </p>
       </div>
 
       {/* Privacy explanation card */}
-      <div className="bg-slate-50 dark:bg-card-2 border border-slate-300 dark:border-border-2 rounded-xl p-5 mb-7">
+      <div className="bg-card-2 border border-border-2 rounded-xl p-5 mb-7">
         <div className="text-xs font-bold text-teal uppercase tracking-widest mb-3">
           How your email is protected
         </div>
@@ -133,12 +133,12 @@ export function StepEnterEmail({ email: initialEmail, onBack, onSubmit }: StepEn
             <span className="text-xs mt-0.5">{item.icon}</span>
             <div>
               <span
-                className={`text-xs font-semibold ${item.positive ? 'text-slate-700 dark:text-text-secondary' : 'text-slate-500 dark:text-text-muted'}`}
+                className={`text-xs font-semibold ${item.positive ? 'text-text-secondary' : 'text-text-muted'}`}
               >
                 {item.label}:{' '}
               </span>
               <span
-                className={`text-xs ${item.positive ? 'text-slate-700 dark:text-text-secondary' : 'text-slate-500 dark:text-text-muted'}`}
+                className={`text-xs ${item.positive ? 'text-text-secondary' : 'text-text-muted'}`}
               >
                 {item.value}
               </span>

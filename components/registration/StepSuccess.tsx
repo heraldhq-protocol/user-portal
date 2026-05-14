@@ -36,7 +36,9 @@ export function StepSuccess({
 	}, [alreadyRegistered]);
 
 	const redirectRef = useRef(handleRedirect);
-	redirectRef.current = handleRedirect;
+	useEffect(() => {
+		redirectRef.current = handleRedirect;
+	}, [handleRedirect]);
 
 	// Stable countdown — effect never re-runs unless component unmounts
 	useEffect(() => {
@@ -80,7 +82,7 @@ export function StepSuccess({
 			<h2 className="text-[28px] font-extrabold tracking-tight mb-2.5">
 				{alreadyRegistered ? "Welcome back!" : "You're registered!"}
 			</h2>
-			<p className="text-slate-500 dark:text-text-muted text-sm leading-relaxed mb-7 max-w-[360px] mx-auto">
+			<p className="text-text-muted text-sm leading-relaxed mb-7 max-w-[360px] mx-auto">
 				{alreadyRegistered
 					? "You've successfully signed back in. Manage your alerts or view your notification history below."
 					: "You'll now receive DeFi alerts from Herald-integrated protocols directly to your inbox\u00a0— without sharing your email with any of them."}
@@ -88,12 +90,12 @@ export function StepSuccess({
 
 			{/* Transaction card — only shown for fresh registrations */}
 			{!alreadyRegistered && (
-				<div className="bg-slate-50 dark:bg-card-2 border border-slate-300 dark:border-border-2 rounded-xl p-5 text-left mb-6">
-					<div className="text-[11px] text-slate-500 dark:text-text-muted font-semibold mb-1.5">
+				<div className="bg-card-2 border border-border-2 rounded-xl p-5 text-left mb-6">
+					<div className="text-[11px] text-text-muted font-semibold mb-1.5">
 						Transaction:
 					</div>
 					<div className="flex flex-col flex-1 items-center justify-between gap-4">
-						<div className="font-mono text-[13px] text-slate-700 dark:text-text-secondary truncate w-full">
+						<div className="font-mono text-[13px] text-text-secondary truncate w-full">
 							{txSignature}
 						</div>
 						<a
@@ -115,13 +117,13 @@ export function StepSuccess({
 						href={`https://twitter.com/intent/tweet?text=${tweetText}`}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
+						className="flex-1 inline-flex items-center justify-center gap-2 bg-card text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-border-2 hover:border-teal/50 hover:text-text-primary transition-all duration-150"
 					>
 						Share on 𝕏
 					</a>
 					<button
 						onClick={handleCopyLink}
-						className="flex-1 inline-flex items-center justify-center gap-2 bg-white dark:bg-card text-slate-700 font-semibold text-sm px-5 py-3 rounded-[10px] border border-slate-300 dark:border-border-2 hover:border-teal/50 hover:text-slate-900 dark:text-text-primary transition-all duration-150"
+						className="flex-1 inline-flex items-center justify-center gap-2 bg-card text-text-secondary font-semibold text-sm px-5 py-3 rounded-[10px] border border-border-2 hover:border-teal/50 hover:text-text-primary transition-all duration-150"
 					>
 						{copied ? "Copied ✓" : "Copy link"}
 					</button>
@@ -137,7 +139,7 @@ export function StepSuccess({
 						</Button>
 					</Link>
 					<Link href="/preferences" className="w-full">
-						<button className="w-full py-3 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-text-muted dark:hover:text-text-secondary transition-colors underline underline-offset-4 decoration-slate-300 hover:decoration-teal/50">
+						<button className="w-full py-3 text-sm font-semibold text-text-muted hover:text-text-secondary transition-colors underline underline-offset-4 decoration-border-2 hover:decoration-teal/50">
 							Update notification preferences
 						</button>
 					</Link>
@@ -169,7 +171,7 @@ export function StepSuccess({
 							r={radius}
 							fill="none"
 							stroke="currentColor"
-							className="text-slate-200 dark:text-border-2"
+							className="text-border-2"
 							strokeWidth="2.5"
 						/>
 						<circle
@@ -186,12 +188,12 @@ export function StepSuccess({
 							style={{ transition: "stroke-dashoffset 1s linear" }}
 						/>
 					</svg>
-					<span className="text-xs font-bold text-slate-600 dark:text-text-secondary tabular-nums">
+					<span className="text-xs font-bold text-text-secondary tabular-nums">
 						{countdown}
 					</span>
 				</div>
-				<p className="text-xs text-slate-400 dark:text-text-muted">
-					Redirecting in <span className="font-semibold text-slate-500 dark:text-text-secondary tabular-nums">{countdown}s</span>
+				<p className="text-xs text-text-muted">
+					Redirecting in <span className="font-semibold text-text-secondary tabular-nums">{countdown}s</span>
 					{" · "}
 					<button
 						onClick={handleRedirect}

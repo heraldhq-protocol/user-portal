@@ -90,13 +90,13 @@ export function StepLogin({ onBack, onComplete }: StepLoginProps) {
 	return (
 		<div className="flex flex-col gap-1">
 			<h2 className="text-[26px] font-extrabold tracking-tight">Welcome Back</h2>
-			<p className="text-slate-500 dark:text-text-muted text-sm mb-7 leading-relaxed">
+			<p className="text-text-muted text-sm mb-7 leading-relaxed">
 				Your wallet is already registered. Sign a message to access your Herald preferences.
 			</p>
 
 			{/* Connected Wallet Info */}
 			{publicKey && connectedWallet && (
-				<div className="mb-8 p-5 bg-slate-50 dark:bg-card-2 border border-slate-200 dark:border-border-2 rounded-xl">
+				<div className="mb-8 p-5 bg-card-2 border border-border-2 rounded-xl">
 					<div className="flex items-center gap-3">
 						<div className="relative w-10 h-10">
 							<Image
@@ -107,10 +107,10 @@ export function StepLogin({ onBack, onComplete }: StepLoginProps) {
 							/>
 						</div>
 						<div className="flex-1">
-							<p className="font-bold text-slate-700 dark:text-text-secondary leading-tight">
+							<p className="font-bold text-text-secondary leading-tight">
 								{connectedWallet.name}
 							</p>
-							<p className="text-[13px] font-mono text-slate-500 dark:text-text-muted mt-0.5">
+							<p className="text-[13px] font-mono text-text-muted mt-0.5">
 								{publicKey.toBase58().slice(0, 10)}...{publicKey.toBase58().slice(-10)}
 							</p>
 						</div>
@@ -165,7 +165,7 @@ export function StepLogin({ onBack, onComplete }: StepLoginProps) {
 				<button
 					onClick={onBack}
 					disabled={isLoggingIn || isDeleting}
-					className="w-full py-3 text-sm font-semibold text-slate-500 hover:text-slate-700 dark:text-text-muted dark:hover:text-text-secondary transition-colors disabled:opacity-50"
+					className="w-full py-3 text-sm font-semibold text-text-muted hover:text-text-secondary transition-colors disabled:opacity-50"
 				>
 					← Use a different wallet
 				</button>
