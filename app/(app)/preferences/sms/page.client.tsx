@@ -28,7 +28,7 @@ export default function SmsSetupPage() {
 	const [isVerifying, setIsVerifying] = useState(false);
 	const [resendCooldown, setResendCooldown] = useState(0);
 	const otpInputRef = useRef<HTMLInputElement>(null);
-	const cooldownRef = useRef<ReturnType<typeof setInterval>>();
+	const cooldownRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
 	useEffect(() => {
 		if (step === "otp" && otpInputRef.current) {

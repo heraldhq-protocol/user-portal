@@ -77,6 +77,9 @@ export default function NotificationsPage() {
 				id: n.id,
 				ciphertext: new Uint8Array(Buffer.from(n.ciphertext!, "hex")),
 				nonce: new Uint8Array(Buffer.from(n.nonce!, "hex")),
+				protocol: n.protocolId,
+				category: n.category,
+				createdAt: n.queuedAt,
 			}));
 
 		if (encrypted.length === 0) return;
@@ -199,7 +202,6 @@ export default function NotificationsPage() {
 						<NotificationList
 							notifications={notifications}
 							isLoading={isLoading}
-							onDecryptNotification={handleDecrypt}
 						/>
 					</div>
 				)}
