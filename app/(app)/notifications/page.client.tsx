@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { NotificationList } from "@/components/notifications/NotificationList";
 import { type Notification } from "@/types";
 import { fetchApi } from "@/lib/api";
@@ -9,23 +9,57 @@ import { useDecryptNotifications } from "@/hooks/useDecryptNotifications";
 import { Button } from "@/components/ui/Button";
 import { LockOpen, Lock } from "lucide-react";
 
+const DECRYPT_CACHE_KEY = "herald_decrypted_messages";
+
+function loadDecryptionCache(): Record<string, { message?: string; subject?: string; actionUrl?: string }> {
+	try {
+		const raw = sessionStorage.getItem(DECRYPT_CACHE_KEY);
+		return raw ? JSON.parse(raw) : {};
+	} catch {
+		return {};
+	}
+}
+
+function saveDecryptionCache(cache: Record<string, { message?: string; subject?: string; actionUrl?: string }>) {
+	try {
+		sessionStorage.setItem(DECRYPT_CACHE_KEY, JSON.stringify(cache));
+	} catch {
+	}
+}
+
 export default function NotificationsPage() {
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const { decryptNotifications, isDecrypting } = useDecryptNotifications();
-	
-	const encryptedCount = notifications.filter((n) => n.ciphertext && !n.message).length;
+
+	const encryptedCount = useMemo(
+		() => notifications.filter((n) => n.ciphertext && !n.message).length,
+		[notifications]
+	);
 
 	const loadNotifications = useCallback(async () => {
 		setIsLoading(true);
 		setError(null);
 		try {
 			const data = await fetchApi<{ notifications: Notification[] }>("/portal/notifications");
-			setNotifications(data.notifications);
+			const fresh = data.notifications;
+
+			const cache = loadDecryptionCache();
+			const merged = fresh.map((n) => {
+				const cached = cache[n.id];
+				if (cached && n.ciphertext && !n.message) {
+					return { ...n, message: cached.message, subject: cached.subject || n.subject, actionUrl: cached.actionUrl };
+				}
+				return n;
+			});
+
+			setNotifications(merged);
+			return merged;
 		} catch (err) {
 			console.error("Failed to load notifications:", err);
 			setError(err instanceof Error ? err.message : "Failed to load notification history");
+			return null;
 		} finally {
 			setIsLoading(false);
 		}
@@ -36,41 +70,54 @@ export default function NotificationsPage() {
 		loadNotifications();
 	}, [loadNotifications]);
 
-	const handleDecrypt = async () => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const encrypted: any[] = notifications.filter((n) => n.ciphertext && n.nonce && !n.message).map((n) => ({
-			id: n.id,
-			ciphertext: new Uint8Array(Buffer.from(n.ciphertext!, "hex")),
-			nonce: new Uint8Array(Buffer.from(n.nonce!, "hex")),
-		}));
+	const handleDecrypt = useCallback(async () => {
+		const encrypted = notifications
+			.filter((n) => n.ciphertext && n.nonce && !n.message)
+			.map((n) => ({
+				id: n.id,
+				ciphertext: new Uint8Array(Buffer.from(n.ciphertext!, "hex")),
+				nonce: new Uint8Array(Buffer.from(n.nonce!, "hex")),
+			}));
 
 		if (encrypted.length === 0) return;
 
 		try {
 			const decrypted = await decryptNotifications(encrypted);
-			
-			// Merge decrypted payloads back into notifications
-			setNotifications((prev) => 
+
+			const cache = loadDecryptionCache();
+
+			setNotifications((prev) =>
 				prev.map((n) => {
 					const d = decrypted.find((dec) => dec.id === n.id);
 					if (d) {
-						return {
+						const merged = {
 							...n,
 							message: d.body?.message || "Decrypted content unavailable",
 							actionUrl: d.body?.actionUrl,
 							subject: d.body?.subject || n.subject,
 						};
+						cache[n.id] = { message: merged.message, subject: merged.subject, actionUrl: merged.actionUrl };
+						return merged;
 					}
 					return n;
 				})
 			);
+
+			saveDecryptionCache(cache);
 		} catch (err) {
 			console.error("Failed to decrypt:", err);
 		}
-	};
+	}, [notifications, decryptNotifications]);
+
+	useEffect(() => {
+		if (!isLoading && encryptedCount > 0 && encryptedCount <= 10) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
+			handleDecrypt();
+		}
+	}, [isLoading, encryptedCount, handleDecrypt]);
 
 	return (
-		<div className="max-w-[700px] mx-auto px-4 sm:px-6 py-8 sm:py-12 h-[calc(100vh-80px)] font-sans">
+		<div className="max-w-[700px] mx-auto px-4 sm:px-6 py-8 sm:py-12 h-[calc(100dvh-80px)] font-sans">
 			<motion.div
 				initial={{ opacity: 0, y: 16 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -82,15 +129,15 @@ export default function NotificationsPage() {
 						Notification history
 					</h1>
 					{encryptedCount > 0 && (
-						<Button 
-							size="sm" 
-							variant="secondary" 
-							onClick={handleDecrypt} 
+						<Button
+							size="sm"
+							variant="secondary"
+							onClick={handleDecrypt}
 							disabled={isDecrypting}
 							className="gap-2"
 						>
-							{isDecrypting ? <Lock className="w-4 h-4 animate-pulse" /> : <LockOpen className="w-4 h-4" />}
-							{isDecrypting ? "Decrypting..." : `Decrypt ${encryptedCount} message${encryptedCount !== 1 ? 's' : ''}`}
+							{isDecrypting ? <Lock className="size-4 animate-pulse" /> : <LockOpen className="size-4" />}
+							{isDecrypting ? "Decrypting..." : `Decrypt ${encryptedCount} message${encryptedCount !== 1 ? "s" : ""}`}
 						</Button>
 					)}
 				</div>
@@ -103,7 +150,6 @@ export default function NotificationsPage() {
 						className="flex-1 flex items-center justify-center"
 					>
 						<div className="flex flex-col items-center text-center max-w-sm">
-							{/* Error icon */}
 							<div className="w-16 h-16 rounded-2xl bg-herald-red/10 border border-herald-red/20 flex items-center justify-center mb-5">
 								<svg
 									className="w-7 h-7 text-herald-red"
@@ -123,7 +169,7 @@ export default function NotificationsPage() {
 							<h3 className="text-lg font-bold tracking-tight mb-2">
 								Unable to load notifications
 							</h3>
-							<p className="text-sm text-slate-500 dark:text-text-muted leading-relaxed mb-6">
+							<p className="text-sm text-text-muted leading-relaxed mb-6">
 								{error}
 							</p>
 
@@ -150,7 +196,11 @@ export default function NotificationsPage() {
 					</motion.div>
 				) : (
 					<div className="flex-1 min-h-0 bg-transparent">
-						<NotificationList notifications={notifications} isLoading={isLoading} />
+						<NotificationList
+							notifications={notifications}
+							isLoading={isLoading}
+							onDecryptNotification={handleDecrypt}
+						/>
 					</div>
 				)}
 			</motion.div>
