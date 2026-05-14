@@ -31,16 +31,16 @@ export function ChannelStatusCard({
 		<Card className={cn("mb-4 group", status === "connected" && "group-hover:border-teal/50")}>
 			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 				<div className="flex items-start sm:items-center gap-3 w-full sm:w-auto">
-					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 group-hover:bg-teal/10 group-hover:dark:bg-teal/20">
-						<Icon className="h-5 w-5 shrink-0 text-slate-600 dark:text-slate-400 group-hover:text-teal" />
+					<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-card-2 group-hover:bg-teal/10">
+						<Icon className="size-5 shrink-0 text-text-muted group-hover:text-teal" />
 					</div>
 					<div className="flex-1">
-						<h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 group-hover:text-teal">
+						<h3 className="text-sm font-bold text-text-primary group-hover:text-teal">
 							{title}
 						</h3>
 						<div className="mt-1 flex items-center gap-2">
 							{status === "loading" ? (
-								<Loader2 className="h-3 w-3 animate-spin text-slate-400" />
+								<Loader2 className="size-3 animate-spin text-text-muted" />
 							) : (
 								<>
 									<span className="relative flex h-2 w-2">
@@ -55,13 +55,13 @@ export function ChannelStatusCard({
 											}`}
 										/>
 									</span>
-									<span className="text-xs font-medium text-slate-500 dark:text-slate-400 capitalize">
+									<span className="text-xs font-medium text-text-muted capitalize">
 										{status}
 									</span>
 								</>
 							)}
 							{description && (
-								<span className="text-xs text-slate-500 dark:text-slate-500">• {description}</span>
+								<span className="text-xs text-text-muted">• {description}</span>
 							)}
 						</div>
 					</div>

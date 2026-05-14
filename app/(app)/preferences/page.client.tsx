@@ -100,7 +100,7 @@ export default function PreferencesPage() {
 
 					{/* Notification Channels */}
 					<div className="mb-8">
-						<h3 className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-4">
+						<h3 className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-4">
 							Security & Channels
 						</h3>
 						
@@ -148,12 +148,11 @@ export default function PreferencesPage() {
 					</div>
 					{/* Danger zone */}
 					<div className="border-t border-border pt-6">
-						<div className="text-[11px] font-bold text-text-muted tracking-[2px] uppercase mb-3">
+						<div className="text-[11px] font-bold text-herald-red tracking-[2px] uppercase mb-3">
 							Danger zone
 						</div>
 						<Button
-							variant={"danger"}
-							className="bg-red-200 bg-opacity-10 text-red-700 border border-red border-opacity-20 hover:bg-opacity-20"
+							variant="danger"
 							onClick={() => setShowDeleteModal(true)}
 						>
 							Delete account

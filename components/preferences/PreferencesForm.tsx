@@ -91,8 +91,16 @@ export function PreferencesForm({ initialValues }: PreferencesFormProps) {
 
 	return (
 		<form onSubmit={handleSubmit(onSubmit)}>
+			<div className="flex items-center gap-2 mb-4">
+				<h2 className="text-xl font-extrabold tracking-tight">Notification preferences</h2>
+				{isDirty && !isSaving && (
+					<span className="px-2 py-0.5 rounded-full bg-herald-gold/15 text-herald-gold text-[10px] font-bold uppercase tracking-wider border border-herald-gold/20">
+						Unsaved
+					</span>
+				)}
+			</div>
 			<Card className="mb-4">
-				<h3 className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-1">
+				<h3 className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-1">
 					Notification categories
 				</h3>
 				{CATEGORIES.map(({ key, label, desc }) => (
@@ -113,7 +121,7 @@ export function PreferencesForm({ initialValues }: PreferencesFormProps) {
 			</Card>
 
 			<Card className="mb-6">
-				<h3 className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-4">
+				<h3 className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-4">
 					Delivery mode
 				</h3>
 				<Controller
