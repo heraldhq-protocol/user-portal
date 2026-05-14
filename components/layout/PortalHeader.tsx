@@ -10,7 +10,7 @@ export function PortalHeader() {
 	const pathname = usePathname();
 
 	return (
-		<nav className="sticky top-0 z-99 flex items-center justify-between px-4 md:px-8 py-4 border-b border-slate-200 dark:border-border bg-white dark:bg-navy/92 backdrop-blur-xl">
+		<nav className="sticky top-0 z-99 flex items-center justify-between px-4 md:px-8 py-4 border-b border-border bg-navy/92 backdrop-blur-xl">
 			{/* Logo */}
 			<Link href="/" className="flex items-center gap-2 group">
 				<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
@@ -24,8 +24,8 @@ export function PortalHeader() {
 					className={cn(
 						"text-sm font-medium transition-colors hidden sm:block",
 						pathname === "/"
-							? "text-slate-700 dark:text-text-secondary"
-							: "text-slate-500 dark:text-text-muted hover:text-slate-700 dark:text-text-secondary"
+							? "text-text-secondary"
+							: "text-text-muted hover:text-text-secondary"
 					)}
 				>
 					Home
@@ -35,8 +35,8 @@ export function PortalHeader() {
 					className={cn(
 						"text-sm font-medium transition-colors hidden sm:block",
 						pathname === "/how-it-works"
-							? "text-slate-700 dark:text-text-secondary"
-							: "text-slate-500 dark:text-text-muted hover:text-slate-700 dark:text-text-secondary"
+							? "text-text-secondary"
+							: "text-text-muted hover:text-text-secondary"
 					)}
 				>
 					How it works

@@ -87,7 +87,7 @@ body {
   background-color: var(--color-navy);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
-  min-height: 100vh;
+  min-height: 100dvh;
   /* Premium subtle ambient glow for the entire app */
   background-image: var(--app-glow);
   background-attachment: fixed;
@@ -143,6 +143,14 @@ body {
 
 .animate-marquee {
   animation: marquee 22s linear infinite;
+}
+
+/* ─── Shimmer Effect ──────────────────────────────────── */
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* ─── Blur Email ───────────────────────────────────────── */

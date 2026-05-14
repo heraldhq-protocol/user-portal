@@ -56,33 +56,53 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	// Show loading state while resolving
 	if (!mounted || connecting || isLoading) {
 		return (
-			<div className="flex-1 flex items-center justify-center p-12">
+			<div className="flex-1 flex flex-col items-center justify-center min-h-screen gap-4 px-4">
+				<div className="relative">
+					<div className="absolute inset-0 rounded-full bg-teal/20 blur-2xl scale-150" />
+					<Image src="/logo_icon.svg" alt="Herald Logo" width={40} height={40} className="relative z-10" />
+				</div>
 				<Loader message="Authenticating your wallet..." size="lg" />
+				<p className="text-text-muted text-sm">Checking your wallet and loading your portal...</p>
 			</div>
 		);
 	}
 
-	// Double safety: blank screen before redirect executes
+	// Double safety: branded splash screen before redirect executes
 	const isRegisterPage = pathname.startsWith("/register");
 	if (!connected && !isRegisterPage) {
-		return null;
+		return (
+			<div className="flex-1 flex flex-col items-center justify-center min-h-screen gap-3 px-4">
+				<Image src="/logo_icon.svg" alt="Herald Logo" width={36} height={36} />
+				<p className="text-text-muted text-sm">Redirecting to home...</p>
+			</div>
+		);
 	}
 	if (connected && !status?.registered && !isRegisterPage) {
-		return null;
+		return (
+			<div className="flex-1 flex flex-col items-center justify-center min-h-screen gap-3 px-4">
+				<Image src="/logo_icon.svg" alt="Herald Logo" width={36} height={36} />
+				<p className="text-text-muted text-sm">Redirecting to registration...</p>
+			</div>
+		);
 	}
 	if (connected && status?.registered && !isAuthenticated && !isRegisterPage) {
-		return null;
+		return (
+			<div className="flex-1 flex flex-col items-center justify-center min-h-screen gap-3 px-4">
+				<Image src="/logo_icon.svg" alt="Herald Logo" width={36} height={36} />
+				<p className="text-text-muted text-sm">Signing you in...</p>
+			</div>
+		);
 	}
 
 	return (
-		<div className="flex-1 flex flex-col min-h-screen">
+		<div className="flex-1 flex flex-col min-h-dvh">
 			{/* Top Navigation Bar for authenticated portal */}
-			<header className="sticky top-0 z-40 bg-white/80 dark:bg-navy/80 backdrop-blur-xl border-b border-slate-200 dark:border-border">
+			<header className="sticky top-0 z-40 bg-navy/80 backdrop-blur-xl border-b border-border">
 				<div className="max-w-[1100px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 					<div className="flex items-center gap-6 sm:gap-8">
 						<Link
 							href="/notifications"
-							className="flex items-center gap-2 font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight shrink-0"
+							className="flex items-center gap-2 font-extrabold text-lg sm:text-xl text-text-primary tracking-tight shrink-0"
 						>
 							<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
 							<span className="hidden xs:inline">Herald.</span>
@@ -96,10 +116,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 										"text-xs sm:text-sm transition-all duration-200",
 										pathname.startsWith("/notifications")
 											? "text-teal font-bold"
-											: "text-slate-500 hover:text-slate-900 dark:text-text-muted dark:hover:text-white font-semibold"
+											: "text-text-muted hover:text-text-primary font-semibold"
 									)}
 								>
-									Notifications
+										Notifications
 								</Link>
 								<Link
 									href="/preferences"
@@ -107,7 +127,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 										"text-xs sm:text-sm transition-all duration-200",
 										pathname.startsWith("/preferences")
 											? "text-teal font-bold"
-											: "text-slate-500 hover:text-slate-900 dark:text-text-muted dark:hover:text-white font-semibold"
+											: "text-text-muted hover:text-text-primary font-semibold"
 									)}
 								>
 									Preferences
@@ -130,7 +150,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 							<button
 								onClick={() => logout()}
 								title="Disconnect"
-								className="p-2 rounded-xl text-slate-400 dark:text-text-muted hover:text-red hover:bg-red/10 transition-colors"
+								className="p-2 rounded-xl text-text-muted hover:text-herald-red hover:bg-herald-red/10 transition-colors"
 							>
 								<FaArrowRightFromBracket className="w-4 h-4" />
 							</button>
