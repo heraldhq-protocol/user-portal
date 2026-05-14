@@ -55,14 +55,14 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 	return (
 		<div className="flex flex-col h-full">
 			{/* Filter bar */}
-			<div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-border gap-3">
 				<div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
 					{CATEGORIES.map((c) => (
 						<button
 							key={c.value}
 							onClick={() => setCategory(c.value)}
 							className={cn(
-								"px-3.5 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 border whitespace-nowrap",
+								"px-3.5 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 border whitespace-nowrap",
 								category === c.value
 									? "bg-teal text-navy border-teal"
 									: "bg-transparent text-text-muted border-border-2 hover:border-teal/50"
@@ -72,11 +72,11 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 						</button>
 					))}
 				</div>
-				<div className="items-center gap-2 bg-navy-2 p-1 rounded-lg border border-border shrink-0 ml-4 hidden sm:flex">
+				<div className="flex items-center gap-2 bg-navy-2 p-1 rounded-lg border border-border shrink-0 w-fit">
 					<button
 						onClick={() => setTimeRange("all")}
 						className={cn(
-							"px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
+							"px-3 py-1.5 rounded-md text-[11px] font-semibold transition-colors",
 							timeRange === "all"
 								? "bg-card border border-border text-white"
 								: "text-text-muted border border-transparent hover:text-text-secondary"
@@ -87,7 +87,7 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 					<button
 						onClick={() => setTimeRange("30d")}
 						className={cn(
-							"px-3 py-1 rounded-md text-[11px] font-semibold transition-colors",
+							"px-3 py-1.5 rounded-md text-[11px] font-semibold transition-colors",
 							timeRange === "30d"
 								? "bg-card border border-border text-white"
 								: "text-text-muted border border-transparent hover:text-text-secondary"

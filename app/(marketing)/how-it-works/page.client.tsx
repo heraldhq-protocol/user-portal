@@ -33,7 +33,7 @@ const steps = [
 
 export default function HowItWorksPage() {
 	return (
-		<div className="max-w-7xl mx-auto px-6 py-16">
+		<div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
 			<motion.div
 				initial={{ opacity: 0, y: 16 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -42,15 +42,15 @@ export default function HowItWorksPage() {
 				{/* Header */}
 				<div className="mb-12 max-w-[700px] mx-auto">
 					<h1 className="text-4xl font-extrabold tracking-tight mb-3">How Herald works</h1>
-					<p className="text-base text-slate-500 dark:text-text-muted leading-[1.7] max-w-[540px]">
+					<p className="text-base text-text-muted leading-[1.7] max-w-[540px]">
 						A privacy-preserving notification layer for Solana DeFi — from wallet to inbox, with
 						zero PII exposure.
 					</p>
 				</div>
 
-				<div className="grid grid-cols-1 md:grid-cols-5 gap-16">
+				<div className="grid grid-cols-1 md:grid-cols-5 gap-10 md:gap-16">
 					{/* Registration Infographic - Simplified Visual Flow */}
-					<div className="mb-16 md:col-span-3">
+					<div className="mb-10 md:mb-16 md:col-span-3">
 						<RegistrationInfographic />
 					</div>
 
@@ -81,7 +81,7 @@ export default function HowItWorksPage() {
 									<h3 className="text-lg font-bold mb-2" style={{ color: s.color }}>
 										{s.title}
 									</h3>
-									<p className="text-sm text-slate-500 dark:text-text-muted leading-[1.7]">
+									<p className="text-sm text-text-muted leading-[1.7]">
 										{s.desc}
 									</p>
 								</div>

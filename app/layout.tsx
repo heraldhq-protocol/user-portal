@@ -62,7 +62,7 @@ export default function RootLayout({
 			suppressHydrationWarning
 			className={cn("h-full", "antialiased", syne.variable, jetbrainsMono.variable, "font-sans")}
 		>
-			<body className="min-h-full flex flex-col font-sans bg-white dark:bg-navy text-slate-900 dark:text-text-primary">
+			<body className="min-h-full flex flex-col font-sans bg-navy text-text-primary">
 				<ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
 					{/* Skip to main content — accessibility requirement */}
 					<a

@@ -110,7 +110,7 @@ export default function PrivacyPage() {
 	];
 
 	return (
-		<div className="min-h-screen bg-slate-50 dark:bg-[#060D18] transition-colors duration-300">
+		<div className="min-h-dvh transition-colors duration-300">
 			<div className="max-w-[900px] mx-auto px-4 sm:px-6 py-12 sm:py-16">
 				{/* Hero Section */}
 				<div className="mb-12 sm:mb-16 text-center">
@@ -118,18 +118,18 @@ export default function PrivacyPage() {
 						<Shield className="w-3 h-3 sm:w-4 sm:h-4" />
 						Zero-Knowledge Architecture
 					</div>
-					<h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 sm:mb-4 text-slate-900 dark:text-white">
+					<h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-3 sm:mb-4 text-text-primary">
 						Privacy by <span className="text-emerald-600 dark:text-[#00C896]">Design</span>
 					</h1>
-					<p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-[600px] mx-auto px-2 sm:px-0">
+					<p className="text-base sm:text-lg text-text-secondary leading-relaxed max-w-[600px] mx-auto px-2 sm:px-0">
 						Herald was built on a simple premise: we should be technically incapable of reading your
 						email address, even if we wanted to.
 					</p>
 				</div>
 
 				{/* Privacy Architecture Diagram */}
-				<div className="mb-12 sm:mb-16 bg-white dark:bg-[#0D1F35] border border-slate-200 dark:border-[#1A3A52] rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm dark:shadow-none">
-					<h3 className="text-xs sm:text-sm font-mono text-slate-500 dark:text-[#64748B] uppercase tracking-wider mb-4 sm:mb-6">
+				<div className="mb-12 sm:mb-16 bg-card border border-border rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm">
+					<h3 className="text-xs sm:text-sm font-mono text-text-muted uppercase tracking-wider mb-4 sm:mb-6">
 						Data Flow Visualization
 					</h3>
 
@@ -138,14 +138,14 @@ export default function PrivacyPage() {
 						<div className="hidden md:block absolute top-1/2 left-[33%] right-[33%] h-0.5 bg-gradient-to-r from-violet-500 to-emerald-500 -translate-y-1/2 z-0 opacity-30" />
 
 						{/* Step 1: User */}
-						<div className="relative z-10 bg-slate-50 dark:bg-[#060D18] border border-violet-200 dark:border-[#5B35D5] rounded-xl p-4 sm:p-5 text-center group hover:scale-[1.02] transition-transform">
+						<div className="relative z-10 bg-navy-2 border border-violet-200 dark:border-[#5B35D5] rounded-xl p-4 sm:p-5 text-center group hover:scale-[1.02] transition-transform">
 							<div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 rounded-lg bg-violet-100 dark:bg-[#5B35D5]/20 flex items-center justify-center">
 								<Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600 dark:text-[#5B35D5]" />
 							</div>
-							<div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mb-1">
+							<div className="text-sm sm:text-base font-bold text-text-primary mb-1">
 								Your Browser
 							</div>
-							<div className="text-[10px] sm:text-xs text-slate-500 dark:text-[#64748B] font-mono">
+							<div className="text-[10px] sm:text-xs text-text-muted font-mono">
 								Encrypts email locally
 							</div>
 							<div className="mt-3 inline-block px-2 py-1 rounded bg-violet-100 dark:bg-[#5B35D5]/10 text-violet-700 dark:text-[#5B35D5] text-[10px] sm:text-xs font-mono border border-violet-200 dark:border-[#5B35D5]/20">
@@ -159,14 +159,14 @@ export default function PrivacyPage() {
 						</div>
 
 						{/* Step 2: Herald (Limited) */}
-						<div className="relative z-10 bg-slate-50 dark:bg-[#060D18] border border-amber-200 dark:border-[#E8920A] rounded-xl p-4 sm:p-5 text-center group hover:scale-[1.02] transition-transform">
+						<div className="relative z-10 bg-navy-2 border border-amber-200 dark:border-[#E8920A] rounded-xl p-4 sm:p-5 text-center group hover:scale-[1.02] transition-transform">
 							<div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 rounded-lg bg-amber-100 dark:bg-[#E8920A]/20 flex items-center justify-center">
 								<Server className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 dark:text-[#E8920A]" />
 							</div>
-							<div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mb-1">
+							<div className="text-sm sm:text-base font-bold text-text-primary mb-1">
 								Herald Servers
 							</div>
-							<div className="text-[10px] sm:text-xs text-slate-500 dark:text-[#64748B] font-mono">
+							<div className="text-[10px] sm:text-xs text-text-muted font-mono">
 								Sees only ciphertext
 							</div>
 							<div className="mt-3 inline-block px-2 py-1 rounded bg-rose-100 dark:bg-[#D63031]/10 text-rose-700 dark:text-[#D63031] text-[10px] sm:text-xs font-mono border border-rose-200 dark:border-[#D63031]/20">
@@ -180,14 +180,14 @@ export default function PrivacyPage() {
 						</div>
 
 						{/* Step 3: Blockchain */}
-						<div className="relative z-10 bg-slate-50 dark:bg-[#060D18] border border-emerald-200 dark:border-[#00C896] rounded-xl p-4 sm:p-5 text-center group hover:scale-[1.02] transition-transform">
+						<div className="relative z-10 bg-navy-2 border border-emerald-200 dark:border-[#00C896] rounded-xl p-4 sm:p-5 text-center group hover:scale-[1.02] transition-transform">
 							<div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 rounded-lg bg-emerald-100 dark:bg-[#00C896]/20 flex items-center justify-center">
 								<Database className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-[#00C896]" />
 							</div>
-							<div className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mb-1">
+							<div className="text-sm sm:text-base font-bold text-text-primary mb-1">
 								Solana Blockchain
 							</div>
-							<div className="text-[10px] sm:text-xs text-slate-500 dark:text-[#64748B] font-mono">
+							<div className="text-[10px] sm:text-xs text-text-muted font-mono">
 								Stores encrypted blob
 							</div>
 							<div className="mt-3 inline-block px-2 py-1 rounded bg-emerald-100 dark:bg-[#00C896]/10 text-emerald-700 dark:text-[#00C896] text-[10px] sm:text-xs font-mono border border-emerald-200 dark:border-[#00C896]/20">
@@ -196,7 +196,7 @@ export default function PrivacyPage() {
 						</div>
 					</div>
 
-					<div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-200 dark:border-[#1A3A52] flex items-center justify-center gap-2 text-[10px] sm:text-xs text-slate-500 dark:text-[#64748B] font-mono">
+					<div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border flex items-center justify-center gap-2 text-[10px] sm:text-xs text-text-muted font-mono">
 						<Lock className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-600 dark:text-[#27AE60]" />
 						<span className="text-center">Only the TEE can decrypt — and only at send time</span>
 					</div>
@@ -207,7 +207,7 @@ export default function PrivacyPage() {
 					{privacyFeatures.map((feature, i) => (
 						<div
 							key={i}
-							className={`group bg-white dark:bg-[#0D1F35] border border-slate-200 dark:border-[#1A3A52] rounded-2xl p-5 sm:p-6 hover:shadow-lg dark:hover:shadow-none hover:border-emerald-300 dark:hover:border-[#00C896]/50 transition-all duration-300 relative overflow-hidden`}
+							className={`group bg-card border border-border rounded-2xl p-5 sm:p-6 hover:shadow-lg hover:border-emerald-300 dark:hover:border-[#00C896]/50 transition-all duration-300 relative overflow-hidden`}
 						>
 							{/* Gradient blob effect */}
 							<div
@@ -222,10 +222,10 @@ export default function PrivacyPage() {
 							<h2 className={`text-base sm:text-lg font-bold mb-2 ${feature.color} relative z-10`}>
 								{feature.title}
 							</h2>
-							<p className="text-sm text-slate-600 dark:text-slate-400 leading-[1.6] sm:leading-[1.7] mb-3 relative z-10">
+							<p className="text-sm text-text-secondary leading-[1.6] sm:leading-[1.7] mb-3 relative z-10">
 								{feature.content}
 							</p>
-							<div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-slate-500 dark:text-[#64748B] bg-slate-100 dark:bg-[#060D18] px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 dark:border-[#1A3A52] relative z-10">
+							<div className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-mono text-text-muted bg-navy-2 px-2.5 sm:px-3 py-1.5 rounded-lg border border-border relative z-10">
 								<span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
 								{feature.highlight}
 							</div>
@@ -239,7 +239,7 @@ export default function PrivacyPage() {
 						<div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-rose-100 dark:bg-[#D63031]/10 flex items-center justify-center">
 							<EyeOff className="w-5 h-5 sm:w-6 sm:h-6 text-rose-600 dark:text-[#D63031]" />
 						</div>
-						<h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+						<h2 className="text-lg sm:text-xl font-bold text-text-primary">
 							What Herald Never Stores
 						</h2>
 					</div>
@@ -248,9 +248,9 @@ export default function PrivacyPage() {
 						{neverStores.map((item, i) => (
 							<div
 								key={i}
-								className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400 p-2 rounded-lg hover:bg-rose-50/50 dark:hover:bg-[#D63031]/5 transition-colors"
+								className="flex items-center gap-3 text-sm text-text-secondary p-2 rounded-lg hover:bg-rose-50/50 dark:hover:bg-[#D63031]/5 transition-colors"
 							>
-								<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-slate-100 dark:bg-[#060D18] border border-slate-200 dark:border-[#1A3A52] flex items-center justify-center shrink-0">
+								<div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-navy-2 border border-border flex items-center justify-center shrink-0">
 									<item.icon className="w-4 h-4 sm:w-5 sm:h-5 text-rose-500 dark:text-[#D63031]" />
 								</div>
 								<span className="line-through decoration-rose-400/50 dark:decoration-[#D63031]/50 decoration-2">
@@ -260,8 +260,8 @@ export default function PrivacyPage() {
 						))}
 					</div>
 
-					<div className="mt-6 p-4 bg-slate-100 dark:bg-[#060D18] rounded-xl border border-slate-200 dark:border-[#1A3A52]">
-						<p className="text-xs sm:text-sm text-slate-600 dark:text-[#64748B] leading-relaxed font-mono">
+					<div className="mt-6 p-4 bg-navy-2 rounded-xl border border-border">
+						<p className="text-xs sm:text-sm text-text-muted leading-relaxed font-mono">
 							<span className="text-rose-600 dark:text-[#D63031] font-semibold">
 								Technical guarantee:
 							</span>{" "}
@@ -276,7 +276,7 @@ export default function PrivacyPage() {
 					{complianceItems.map((item, i) => (
 						<div
 							key={i}
-							className="bg-white dark:bg-[#0D1F35] border border-slate-200 dark:border-[#1A3A52] rounded-2xl p-5 sm:p-6 hover:shadow-md dark:hover:shadow-none transition-shadow"
+							className="bg-card border border-border rounded-2xl p-5 sm:p-6 hover:shadow-md transition-shadow"
 						>
 							<div className="flex items-start gap-3 sm:gap-4">
 								<div
@@ -285,10 +285,10 @@ export default function PrivacyPage() {
 									<item.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${item.color}`} />
 								</div>
 								<div>
-									<h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1 sm:mb-2">
+									<h3 className="text-base sm:text-lg font-bold text-text-primary mb-1 sm:mb-2">
 										{item.title}
 									</h3>
-									<p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+									<p className="text-sm text-text-secondary leading-relaxed">
 										{item.content}
 									</p>
 								</div>
@@ -298,14 +298,14 @@ export default function PrivacyPage() {
 				</div>
 
 				{/* Trust Badge */}
-				<div className="text-center bg-white dark:bg-[#0D1F35] border border-slate-200 dark:border-[#1A3A52] rounded-2xl p-6 sm:p-8 shadow-sm dark:shadow-none">
+				<div className="text-center bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
 					<div className="inline-flex items-center gap-2 mb-3 sm:mb-4">
 						<Shield className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-[#00C896]" />
-						<span className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+						<span className="text-base sm:text-lg font-bold text-text-primary">
 							Audit-Ready Architecture
 						</span>
 					</div>
-					<p className="text-sm text-slate-600 dark:text-slate-400 max-w-[500px] mx-auto mb-4 sm:mb-6">
+					<p className="text-sm text-text-secondary max-w-[500px] mx-auto mb-4 sm:mb-6">
 						Our entire infrastructure is designed to be inspected. The code is open-source, the
 						encryption happens in your browser, and the on-chain logic is verifiable.
 					</p>

@@ -56,7 +56,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	// Show loading state while resolving
 	if (!mounted || connecting || isLoading) {
 		return (
-			<div className="flex-1 flex flex-col items-center justify-center min-h-screen gap-4 px-4">
+			<div className="flex-1 flex flex-col items-center justify-center min-h-dvh gap-4 px-4">
 				<div className="relative">
 					<div className="absolute inset-0 rounded-full bg-teal/20 blur-2xl scale-150" />
 					<Image src="/logo_icon.svg" alt="Herald Logo" width={40} height={40} className="relative z-10" />
@@ -71,7 +71,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const isRegisterPage = pathname.startsWith("/register");
 	if (!connected && !isRegisterPage) {
 		return (
-			<div className="flex-1 flex flex-col items-center justify-center min-h-screen gap-3 px-4">
+			<div className="flex-1 flex flex-col items-center justify-center min-h-dvh gap-3 px-4">
 				<Image src="/logo_icon.svg" alt="Herald Logo" width={36} height={36} />
 				<p className="text-text-muted text-sm">Redirecting to home...</p>
 			</div>
@@ -79,7 +79,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	}
 	if (connected && !status?.registered && !isRegisterPage) {
 		return (
-			<div className="flex-1 flex flex-col items-center justify-center min-h-screen gap-3 px-4">
+			<div className="flex-1 flex flex-col items-center justify-center min-h-dvh gap-3 px-4">
 				<Image src="/logo_icon.svg" alt="Herald Logo" width={36} height={36} />
 				<p className="text-text-muted text-sm">Redirecting to registration...</p>
 			</div>
@@ -87,7 +87,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	}
 	if (connected && status?.registered && !isAuthenticated && !isRegisterPage) {
 		return (
-			<div className="flex-1 flex flex-col items-center justify-center min-h-screen gap-3 px-4">
+			<div className="flex-1 flex flex-col items-center justify-center min-h-dvh gap-3 px-4">
 				<Image src="/logo_icon.svg" alt="Herald Logo" width={36} height={36} />
 				<p className="text-text-muted text-sm">Signing you in...</p>
 			</div>
@@ -105,7 +105,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 							className="flex items-center gap-2 font-extrabold text-lg sm:text-xl text-text-primary tracking-tight shrink-0"
 						>
 							<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
-							<span className="hidden xs:inline">Herald.</span>
+							<span className="hidden sm:inline">Herald.</span>
 						</Link>
 
 						{status?.registered && (
