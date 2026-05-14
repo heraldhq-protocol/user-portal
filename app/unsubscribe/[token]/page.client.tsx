@@ -72,7 +72,7 @@ export default function UnsubscribePage() {
 					{loading ? (
 						<div className="flex flex-col items-center justify-center py-8">
 							<Loader2 className="h-8 w-8 animate-spin text-teal mb-4" />
-							<p className="text-slate-500">Validating link...</p>
+							<p className="text-text-muted">Validating link...</p>
 						</div>
 					) : error ? (
 						<div className="flex flex-col items-center">
@@ -80,7 +80,7 @@ export default function UnsubscribePage() {
 								<AlertTriangle className="h-6 w-6 text-red" />
 							</div>
 							<h1 className="text-xl font-bold mb-2">Link Expired</h1>
-							<p className="text-slate-500 mb-6">{error}</p>
+							<p className="text-text-muted mb-6">{error}</p>
 						</div>
 					) : result ? (
 						<div className="flex flex-col items-center">
@@ -89,21 +89,21 @@ export default function UnsubscribePage() {
 							</div>
 							<h1 className="text-xl font-bold mb-2">Unsubscribed Successfully</h1>
 							{result.alreadyOptedOut ? (
-								<p className="text-slate-500 mb-6">
+								<p className="text-text-muted mb-6">
 									You were already opted out of these notifications.
 								</p>
 							) : (
-								<p className="text-slate-500 mb-6 text-sm">
+								<p className="text-text-muted mb-6 text-sm">
 									Your preferences have been updated. You will no longer receive{" "}
 									{preview?.category ? (
-										<span className="font-semibold text-slate-800 dark:text-slate-200">
+										<span className="font-semibold text-text-primary">
 											{preview.category}
 										</span>
 									) : (
 										"these"
 									)}{" "}
 									notifications for wallet{" "}
-									<span className="font-mono bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">
+									<span className="font-mono bg-card-2 px-1 py-0.5 rounded text-xs">
 										{preview?.walletPrefix}...
 									</span>
 									.
@@ -122,21 +122,21 @@ export default function UnsubscribePage() {
 						</div>
 					) : preview ? (
 						<div className="flex flex-col items-center">
-							<div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-								<BellOff className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+							<div className="size-12 rounded-full bg-card-2 flex items-center justify-center mb-4">
+								<BellOff className="size-6 text-text-muted" />
 							</div>
 							<h1 className="text-xl font-bold mb-2">Confirm Unsubscribe</h1>
-							<p className="text-slate-500 text-sm mb-8">
+							<p className="text-text-muted text-sm mb-8">
 								Are you sure you want to stop receiving{" "}
 								{preview.category ? (
-									<span className="font-semibold text-slate-800 dark:text-slate-200">
+									<span className="font-semibold text-text-primary">
 										{preview.category}
 									</span>
 								) : (
 									"these"
 								)}{" "}
 								notifications for wallet{" "}
-								<span className="font-mono bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">
+								<span className="font-mono bg-card-2 px-1 py-0.5 rounded text-xs">
 									{preview.walletPrefix}...
 								</span>
 								?

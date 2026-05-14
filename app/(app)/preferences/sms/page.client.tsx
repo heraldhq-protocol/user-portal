@@ -3,16 +3,18 @@
 
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Loader2, ArrowLeft, Smartphone } from "lucide-react";
+import { Loader2, ArrowLeft, Smartphone, RefreshCw } from "lucide-react";
 import { fetchApi } from "@/lib/api";
 import { toast } from "sonner";
 import { Transaction } from "@solana/web3.js";
 import { ChannelUserClient, type SolanaCluster } from "@herald-protocol/sdk";
 import { PhoneInput } from "@/components/ui/phone-input";
+
+const RESEND_COOLDOWN = 30;
 
 export default function SmsSetupPage() {
 	const { publicKey, signTransaction } = useWallet();
@@ -24,47 +26,32 @@ export default function SmsSetupPage() {
 	const [step, setStep] = useState<"phone" | "otp" | "registering">("phone");
 	const [isSending, setIsSending] = useState(false);
 	const [isVerifying, setIsVerifying] = useState(false);
+	const [resendCooldown, setResendCooldown] = useState(0);
+	const otpInputRef = useRef<HTMLInputElement>(null);
+	const cooldownRef = useRef<ReturnType<typeof setInterval>>();
 
-	const handleSendOtp = async (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!phoneRegex.test(phone)) {
-			toast.error("Please enter a valid international phone number (e.g., +1234567890)");
-			return;
+	useEffect(() => {
+		if (step === "otp" && otpInputRef.current) {
+			otpInputRef.current.focus();
 		}
+	}, [step]);
 
-		setIsSending(true);
-		try {
-			// Expected endpoint on Admin API
-			await fetchApi("/portal/channels/sms/send-otp", {
-				method: "POST",
-				body: JSON.stringify({ phone }),
-			});
-			setStep("otp");
-			toast.success("Verification code sent via SMS");
-		} catch (err: any) {
-			toast.error(err.message || "Failed to send code");
-		} finally {
-			setIsSending(false);
+	useEffect(() => {
+		if (resendCooldown > 0) {
+			cooldownRef.current = setInterval(() => {
+				setResendCooldown((prev) => {
+					if (prev <= 1) {
+						clearInterval(cooldownRef.current);
+						return 0;
+					}
+					return prev - 1;
+				});
+			}, 1000);
 		}
-	};
+		return () => clearInterval(cooldownRef.current);
+	}, [resendCooldown]);
 
-	const handleVerifyOtp = async (e: React.FormEvent) => {
-		e.preventDefault();
-		if (otp.length < 6) return;
-
-		setIsVerifying(true);
-		try {
-			await fetchApi("/portal/channels/sms/verify-otp", {
-				method: "POST",
-				body: JSON.stringify({ phone, code: otp }),
-			});
-
-			await registerOnChain();
-		} catch (err: any) {
-			toast.error(err.message || "Invalid or expired code");
-			setIsVerifying(false); // Let them try again
-		}
-	};
+	const phoneRegex = /^\+[1-9]\d{1,14}$/;
 
 	const registerOnChain = async () => {
 		if (!publicKey || !signTransaction) {
@@ -117,7 +104,63 @@ export default function SmsSetupPage() {
 		}
 	};
 
-	const phoneRegex = /^\+[1-9]\d{1,14}$/;
+	const handleSendOtp = useCallback(async (e?: React.FormEvent) => {
+		e?.preventDefault();
+		if (!phoneRegex.test(phone)) {
+			toast.error("Please enter a valid international phone number (e.g., +1234567890)");
+			return;
+		}
+
+		setIsSending(true);
+		try {
+			await fetchApi("/portal/channels/sms/send-otp", {
+				method: "POST",
+				body: JSON.stringify({ phone }),
+			});
+			setStep("otp");
+			setResendCooldown(RESEND_COOLDOWN);
+			toast.success("Verification code sent via SMS");
+		} catch (err: any) {
+			toast.error(err.message || "Failed to send code");
+		} finally {
+			setIsSending(false);
+		}
+	}, [phone]);
+
+	const handleVerifyOtp = useCallback(async (e?: React.FormEvent) => {
+		e?.preventDefault();
+		if (otp.length < 6) return;
+
+		setIsVerifying(true);
+		try {
+			await fetchApi("/portal/channels/sms/verify-otp", {
+				method: "POST",
+				body: JSON.stringify({ phone, code: otp }),
+			});
+
+			await registerOnChain();
+		} catch (err: any) {
+			toast.error(err.message || "Invalid or expired code");
+			setIsVerifying(false);
+		}
+	}, [phone, otp, registerOnChain]);
+
+	const handleOtpChange = (value: string) => {
+		const digits = value.replace(/\D/g, "").slice(0, 6);
+		setOtp(digits);
+		if (digits.length === 6) {
+			setTimeout(() => handleVerifyOtp(), 100);
+		}
+	};
+
+	const handleOtpPaste = (e: React.ClipboardEvent) => {
+		const text = e.clipboardData.getData("text");
+		const digits = text.replace(/\D/g, "").slice(0, 6);
+		if (digits.length === 6) {
+			setOtp(digits);
+			setTimeout(() => handleVerifyOtp(), 100);
+		}
+	};
 
 	return (
 		<div className="max-w-160 mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -127,7 +170,7 @@ export default function SmsSetupPage() {
 				onClick={() => router.push("/preferences")}
 				className="mb-6 h-8"
 			>
-				<ArrowLeft className="mr-2 h-4 w-4" />
+				<ArrowLeft className="mr-2 size-4" />
 				Back to Preferences
 			</Button>
 
@@ -138,10 +181,10 @@ export default function SmsSetupPage() {
 			>
 				<div className="mb-8">
 					<h1 className="text-[28px] font-extrabold tracking-tight mb-2 flex items-center gap-2">
-						<Smartphone className="h-8 w-8 text-teal-500" />
+						<Smartphone className="size-8 text-teal" />
 						Connect SMS
 					</h1>
-					<p className="text-slate-500">
+					<p className="text-text-muted">
 						Receive text messages for extreme emergencies. Your phone number is end-to-end encrypted
 						before entering the blockchain.
 					</p>
@@ -152,7 +195,7 @@ export default function SmsSetupPage() {
 						<form onSubmit={handleSendOtp} className="w-full max-w-sm flex flex-col gap-4">
 							<div className="text-center mb-2">
 								<h3 className="text-lg font-bold mb-1">Enter Phone Number</h3>
-								<p className="text-slate-500 text-sm">International format required (e.g. +1...)</p>
+								<p className="text-text-muted text-sm">International format required (e.g. +1...)</p>
 							</div>
 
 							<div className="flex flex-col gap-2">
@@ -163,13 +206,13 @@ export default function SmsSetupPage() {
 									onChange={(e) => setPhone(e)}
 									international
 									defaultCountry="GB"
-									className="flex h-11 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:focus:ring-slate-300"
+									className="flex h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal/50 disabled:cursor-not-allowed disabled:opacity-50"
 									required
 								/>
 							</div>
 
 							<Button type="submit" disabled={isSending}>
-								{isSending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+								{isSending ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
 								Send Verification Code
 							</Button>
 						</form>
@@ -179,9 +222,9 @@ export default function SmsSetupPage() {
 						<form onSubmit={handleVerifyOtp} className="w-full max-w-sm flex flex-col gap-4">
 							<div className="text-center mb-2 flex flex-col items-center">
 								<h3 className="text-lg font-bold mb-1">Verify Code</h3>
-								<p className="text-slate-500 text-sm mb-4">
+								<p className="text-text-muted text-sm mb-4">
 									We sent a 6-digit code to{" "}
-									<span className="font-mono bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">
+									<span className="font-mono bg-card-2 px-1 py-0.5 rounded text-xs">
 										{phone}
 									</span>
 								</p>
@@ -192,30 +235,50 @@ export default function SmsSetupPage() {
 
 							<div className="flex flex-col gap-2">
 								<input
+									ref={otpInputRef}
 									type="text"
+									inputMode="numeric"
+									autoComplete="one-time-code"
 									value={otp}
-									onChange={(e) => setOtp(e.target.value)}
+									onChange={(e) => handleOtpChange(e.target.value)}
+									onPaste={handleOtpPaste}
 									placeholder="000000"
-									className="flex h-11 w-full text-center tracking-widest font-mono text-lg rounded-md border border-slate-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:focus:ring-slate-300"
+									className="flex h-12 w-full text-center tracking-[0.3em] font-mono text-xl rounded-md border border-border bg-card px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal/50 disabled:cursor-not-allowed disabled:opacity-50"
 									required
 									maxLength={6}
 								/>
 							</div>
 
 							<Button type="submit" disabled={isVerifying || otp.length < 6}>
-								{isVerifying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+								{isVerifying ? <Loader2 className="size-4 mr-2 animate-spin" /> : null}
 								Verify & Continue
 							</Button>
+
+							<div className="flex justify-center">
+								<Button
+									variant="ghost"
+									size="sm"
+									type="button"
+									disabled={resendCooldown > 0 || isSending}
+									onClick={() => handleSendOtp()}
+									className="text-xs gap-1.5"
+								>
+									<RefreshCw className="size-3.5" />
+									{resendCooldown > 0
+										? `Resend code in ${resendCooldown}s`
+										: "Resend code"}
+								</Button>
+							</div>
 						</form>
 					)}
 
 					{step === "registering" && (
 						<div className="flex flex-col items-center">
-							<div className="h-16 w-16 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mb-6">
-								<Loader2 className="h-8 w-8 animate-spin" />
+							<div className="size-16 bg-card-2 text-text-muted rounded-full flex items-center justify-center mb-6">
+								<Loader2 className="size-8 animate-spin" />
 							</div>
 							<h3 className="text-xl font-bold mb-2">Securing on-chain...</h3>
-							<p className="text-slate-500 text-sm max-w-sm mb-6 text-center">
+							<p className="text-text-muted text-sm max-w-sm mb-6 text-center">
 								Your phone is verified! Please approve the wallet transaction to encrypt and
 								securely store it on-chain.
 							</p>

@@ -3,18 +3,18 @@ import { PortalFooter } from "@/components/layout/PortalFooter";
 import { PortalHeader } from "@/components/layout/PortalHeader";
 
 export const metadata: Metadata = {
-	title: "Herald — The Private Notification Standard for DeFi",
+	title: "Herald — Private DeFi Notifications for Solana",
 	description:
-		"Connect your wallet and receive alerts from any Solana dApp without ever exposing your email address. It is fully encrypted and verifiable on-chain.",
+		"Get liquidation warnings, governance votes, and yield alerts sent to your inbox — encrypted before leaving your wallet, verifiable on Solana. No protocol ever sees your email.",
 	openGraph: {
-		title: "Herald — The Private Notification Standard for DeFi",
+		title: "Herald — Private DeFi Notifications for Solana",
 		description:
-			"Connect your wallet and receive alerts from any Solana dApp without ever exposing your email address.",
+			"Get liquidation warnings, governance votes, and yield alerts sent to your inbox — without sharing your email with any protocol.",
 	},
 	twitter: {
-		title: "Herald — The Private Notification Standard for DeFi",
+		title: "Herald — Private DeFi Notifications for Solana",
 		description:
-			"Connect your wallet and receive alerts from any Solana dApp without ever exposing your email address.",
+			"Get liquidation warnings, governance votes, and yield alerts sent to your inbox — without sharing your email with any protocol.",
 	},
 };
 
