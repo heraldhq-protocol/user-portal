@@ -26,7 +26,12 @@ const STEPS_REGISTERED: { key: RegistrationStep; label: string }[] = [
 	{ key: "success", label: "Done" },
 ];
 
-export function RegistrationWizard() {
+interface ProtocolContext {
+	name?: string;
+	logoUrl?: string | null;
+}
+
+export function RegistrationWizard({ protocolContext }: { protocolContext?: ProtocolContext } = {}) {
 	const {
 		state,
 		setEmail,
@@ -110,10 +115,24 @@ export function RegistrationWizard() {
 		>
 			{/* Header */}
 			<div className="flex flex-col items-center justify-between mb-3 lg:mb-10 lg:flex lg:flex-row">
-				{/* Logo */}
+				{/* Logo / Protocol branding */}
 				<div className="flex items-center gap-2 mb-4 lg:mb-0">
-					<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
-					<span className="font-extrabold text-lg tracking-tight">Herald</span>
+					{protocolContext?.logoUrl ? (
+						<>
+							<img src={protocolContext.logoUrl} alt={protocolContext.name ?? "Protocol"} width={28} height={28} className="rounded-md object-contain" />
+							<span className="font-extrabold text-lg tracking-tight">{protocolContext.name}</span>
+							<span className="text-text-muted text-sm font-medium mx-1">×</span>
+							<Image src="/logo_icon.svg" alt="Herald" width={22} height={22} />
+							<span className="font-extrabold text-lg tracking-tight">Herald</span>
+						</>
+					) : (
+						<>
+							<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
+							<span className="font-extrabold text-lg tracking-tight">
+								{protocolContext?.name ? `${protocolContext.name} × Herald` : "Herald"}
+							</span>
+						</>
+					)}
 				</div>
 
 				{/* Step Indicator */}
@@ -137,6 +156,15 @@ export function RegistrationWizard() {
 						transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
 						layout
 					>
+						{protocolContext?.name && (
+							<div className="mb-5 px-4 py-3 bg-teal/5 border border-teal/20 rounded-xl text-center">
+								<p className="text-xs text-text-muted">
+									Enable notifications from{" "}
+									<span className="font-semibold text-teal">{protocolContext.name}</span>
+									{" "}— your email stays private, always.
+								</p>
+							</div>
+						)}
 						{isCheckingStatus && connected ? (
 							<div className="flex flex-col items-center justify-center py-12 gap-4">
 								<div className="w-10 h-10 border-2 border-teal border-t-transparent rounded-full animate-spin" />

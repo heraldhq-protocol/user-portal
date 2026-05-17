@@ -1,11 +1,11 @@
 "use client";
 
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { type Notification, type NotificationCategory } from "@/types";
 import { NotificationCard } from "./NotificationCard";
+import { Search, ChevronDown, ChevronRight } from "lucide-react";
 
 interface NotificationListProps {
 	notifications: Notification[];
@@ -20,9 +20,70 @@ const CATEGORIES: { value: "all" | NotificationCategory; label: string }[] = [
 	{ value: "marketing", label: "Marketing" },
 ];
 
+function ProtocolGroup({
+	protocolId,
+	notifications,
+	defaultExpanded,
+}: {
+	protocolId: string;
+	notifications: Notification[];
+	defaultExpanded: boolean;
+}) {
+	const [expanded, setExpanded] = useState(defaultExpanded);
+
+	const failedCount = notifications.filter((n) => n.status === "failed").length;
+
+	return (
+		<div className="mb-4">
+			<button
+				onClick={() => setExpanded(!expanded)}
+				className="flex items-center gap-2 w-full px-1 py-2 cursor-pointer group"
+			>
+				{expanded ? (
+					<ChevronDown className="size-4 text-text-muted group-hover:text-text-secondary transition-colors shrink-0" />
+				) : (
+					<ChevronRight className="size-4 text-text-muted group-hover:text-text-secondary transition-colors shrink-0" />
+				)}
+				<span className="text-sm font-bold text-text-secondary group-hover:text-white transition-colors">
+					{protocolId}
+				</span>
+				<span className="text-[11px] font-medium text-text-muted">
+					{notifications.length}
+				</span>
+				{failedCount > 0 && (
+					<div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-herald-red/10 border border-herald-red/20">
+						<span className="text-[10px] font-bold text-[#EF4444]">{failedCount} failed</span>
+					</div>
+				)}
+				<div className="flex-1 border-b border-border/30 ml-2" />
+			</button>
+			{expanded && (
+				<div className="flex flex-col gap-2.5 pl-6">
+					{notifications.map((n, i) => (
+						<motion.div
+							key={n.id}
+							initial={{ opacity: 0, y: 8 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{
+								duration: 0.25,
+								delay: Math.min(i * 0.02, 0.2),
+								ease: [0.22, 1, 0.36, 1],
+							}}
+						>
+							<NotificationCard notification={n} />
+						</motion.div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
 export function NotificationList({ notifications, isLoading }: NotificationListProps) {
 	const [category, setCategory] = useState<"all" | NotificationCategory>("all");
 	const [timeRange, setTimeRange] = useState<"all" | "30d">("all");
+	const [searchQuery, setSearchQuery] = useState("");
+	const searchRef = useRef<HTMLInputElement>(null);
 
 	const filtered = useMemo(() => {
 		return notifications.filter((n) => {
@@ -33,111 +94,115 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 				thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 				if (date < thirtyDaysAgo) return false;
 			}
+			if (searchQuery) {
+				const q = searchQuery.toLowerCase();
+				const inSubject = n.subject?.toLowerCase().includes(q);
+				const inMessage = n.message?.toLowerCase().includes(q);
+				const inProtocol = n.protocolId?.toLowerCase().includes(q);
+				if (!inSubject && !inMessage && !inProtocol) return false;
+			}
 			return true;
 		});
-	}, [notifications, category, timeRange]);
+	}, [notifications, category, timeRange, searchQuery]);
+
+	const grouped = useMemo(() => {
+		const groups: Record<string, Notification[]> = {};
+		for (const n of filtered) {
+			const key = n.protocolId || "Unknown";
+			if (!groups[key]) groups[key] = [];
+			groups[key].push(n);
+		}
+		// Sort groups by most recent notification
+		return Object.entries(groups).sort((a, b) => {
+			const aLatest = new Date(a[1][0]?.deliveredAt || a[1][0]?.queuedAt || 0).getTime();
+			const bLatest = new Date(b[1][0]?.deliveredAt || b[1][0]?.queuedAt || 0).getTime();
+			return bLatest - aLatest;
+		});
+	}, [filtered]);
 
 	const parentRef = useRef<HTMLDivElement>(null);
-
-	// eslint-disable-next-line react-hooks/incompatible-library
-	const rowVirtualizer = useVirtualizer({
-		count: isLoading ? 5 : filtered.length,
-		getScrollElement: () => parentRef.current,
-		estimateSize: () => 110,
-		overscan: 5,
-	});
-
-	// Ensure virtualization is recalculated on tab switch or loading state finish
-	useEffect(() => {
-		rowVirtualizer.measure();
-	}, [rowVirtualizer, filtered.length, isLoading]);
 
 	return (
 		<div className="flex flex-col h-full">
 			{/* Filter bar */}
-			<div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 pb-4 border-b border-border gap-3">
-				<div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-					{CATEGORIES.map((c) => (
+			<div className="flex flex-col gap-3 mb-4 pb-4 border-b border-border">
+				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+					<div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+						{CATEGORIES.map((c) => (
+							<button
+								key={c.value}
+								onClick={() => setCategory(c.value)}
+								className={cn(
+									"px-3.5 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 border whitespace-nowrap",
+									category === c.value
+										? "bg-teal text-navy border-teal"
+										: "bg-transparent text-text-muted border-border-2 hover:border-teal/50"
+								)}
+							>
+								{c.label}
+							</button>
+						))}
+					</div>
+					<div className="flex items-center gap-2 bg-navy-2 p-1 rounded-lg border border-border shrink-0 w-fit">
 						<button
-							key={c.value}
-							onClick={() => setCategory(c.value)}
+							onClick={() => setTimeRange("all")}
 							className={cn(
-								"px-3.5 py-2 rounded-lg text-xs font-semibold cursor-pointer transition-all duration-150 border whitespace-nowrap",
-								category === c.value
-									? "bg-teal text-navy border-teal"
-									: "bg-transparent text-text-muted border-border-2 hover:border-teal/50"
+								"px-3 py-1.5 rounded-md text-[11px] font-semibold transition-colors",
+								timeRange === "all"
+									? "bg-card border border-border text-white"
+									: "text-text-muted border border-transparent hover:text-text-secondary"
 							)}
 						>
-							{c.label}
+							All time
 						</button>
-					))}
+						<button
+							onClick={() => setTimeRange("30d")}
+							className={cn(
+								"px-3 py-1.5 rounded-md text-[11px] font-semibold transition-colors",
+								timeRange === "30d"
+									? "bg-card border border-border text-white"
+									: "text-text-muted border border-transparent hover:text-text-secondary"
+							)}
+						>
+							Last 30 days
+						</button>
+					</div>
 				</div>
-				<div className="flex items-center gap-2 bg-navy-2 p-1 rounded-lg border border-border shrink-0 w-fit">
-					<button
-						onClick={() => setTimeRange("all")}
-						className={cn(
-							"px-3 py-1.5 rounded-md text-[11px] font-semibold transition-colors",
-							timeRange === "all"
-								? "bg-card border border-border text-white"
-								: "text-text-muted border border-transparent hover:text-text-secondary"
-						)}
-					>
-						All time
-					</button>
-					<button
-						onClick={() => setTimeRange("30d")}
-						className={cn(
-							"px-3 py-1.5 rounded-md text-[11px] font-semibold transition-colors",
-							timeRange === "30d"
-								? "bg-card border border-border text-white"
-								: "text-text-muted border border-transparent hover:text-text-secondary"
-						)}
-					>
-						Last 30 days
-					</button>
+
+				{/* Search input */}
+				<div className="relative">
+					<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-muted pointer-events-none" />
+					<input
+						ref={searchRef}
+						type="text"
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						placeholder="Search notifications..."
+						className="w-full pl-9 pr-3 py-2 rounded-lg bg-navy-2 border border-border-2 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-teal/50 transition-colors"
+					/>
 				</div>
 			</div>
 
 			{/* List container */}
-			<div ref={parentRef} className="flex-1 overflow-auto pr-2 custom-scrollbar">
+			<div ref={parentRef} className="flex-1 overflow-auto pr-1 custom-scrollbar">
 				{isLoading ? (
-					<div
-						style={{
-							height: `${rowVirtualizer.getTotalSize()}px`,
-							width: "100%",
-							position: "relative",
-						}}
-					>
-						{rowVirtualizer.getVirtualItems().map((virtualRow) => (
-							<div
-								key={virtualRow.index}
-								style={{
-									position: "absolute",
-									top: 0,
-									left: 0,
-									width: "100%",
-									height: `${virtualRow.size}px`,
-									transform: `translateY(${virtualRow.start}px)`,
-									paddingBottom: "10px",
-								}}
-							>
-								<div className="animate-pulse flex gap-3.5 items-start p-4 rounded-xl border border-border bg-card h-full">
-									<div className="w-2 h-2 rounded-full bg-border-2 mt-1.5 shrink-0" />
-									<div className="flex-1 space-y-3 min-w-0">
-										<div className="flex gap-2 justify-between">
-											<div className="h-4 w-16 bg-border-2 rounded" />
-											<div className="h-4 w-12 bg-border-2 rounded" />
-										</div>
-										<div className="h-4 w-3/4 bg-border-2 rounded" />
-										<div className="h-3 w-1/3 bg-border-2 rounded mt-2" />
+					<div className="flex flex-col gap-2.5">
+						{[...Array(5)].map((_, i) => (
+							<div key={i} className="animate-pulse flex gap-3.5 items-start p-4 rounded-xl border border-border bg-card h-[110px]">
+								<div className="w-2 h-2 rounded-full bg-border-2 mt-1.5 shrink-0" />
+								<div className="flex-1 space-y-3 min-w-0">
+									<div className="flex gap-2 justify-between">
+										<div className="h-4 w-16 bg-border-2 rounded" />
+										<div className="h-4 w-12 bg-border-2 rounded" />
 									</div>
+									<div className="h-4 w-3/4 bg-border-2 rounded" />
+									<div className="h-3 w-1/3 bg-border-2 rounded mt-2" />
 								</div>
 							</div>
 						))}
 					</div>
 				) : filtered.length === 0 ? (
 					<div className="flex flex-col items-center justify-center py-16 sm:py-20 px-4">
-						{/* Styled bell icon with glow ring */}
 						<div className="relative mb-6">
 							<div className="absolute inset-0 rounded-full bg-teal/10 blur-xl scale-150" />
 							<div className="relative w-20 h-20 rounded-2xl bg-card-2 border border-border-2 flex items-center justify-center">
@@ -158,15 +223,24 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 						</div>
 
 						<h3 className="text-lg font-bold tracking-tight mb-2">
-							No notifications yet
+							{searchQuery ? "No matching notifications" : "No notifications yet"}
 						</h3>
 						<p className="text-sm text-text-muted leading-relaxed max-w-xs text-center mb-6">
-							{category !== "all"
-								? `No ${CATEGORIES.find((c) => c.value === category)?.label ?? category} notifications found. Try switching to "All" to see everything.`
-								: "You\u2019ll see them here once Herald-integrated protocols start sending alerts to your wallet."}
+							{searchQuery
+								? `No notifications match "${searchQuery}". Try a different search term.`
+								: category !== "all"
+									? `No ${CATEGORIES.find((c) => c.value === category)?.label ?? category} notifications found.`
+									: "You\u2019ll see them here once Herald-integrated protocols start sending alerts to your wallet."}
 						</p>
 
-						{category !== "all" ? (
+						{searchQuery ? (
+							<button
+								onClick={() => { setSearchQuery(""); searchRef.current?.focus(); }}
+								className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border-2 text-sm font-semibold text-text-secondary hover:border-teal/40 hover:text-teal transition-all duration-200 cursor-pointer"
+							>
+								Clear search
+							</button>
+						) : category !== "all" ? (
 							<button
 								onClick={() => setCategory("all")}
 								className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border-2 text-sm font-semibold text-text-secondary hover:border-teal/40 hover:text-teal transition-all duration-200 cursor-pointer"
@@ -198,35 +272,14 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 						)}
 					</div>
 				) : (
-					<div
-						style={{
-							height: `${rowVirtualizer.getTotalSize()}px`,
-							width: "100%",
-							position: "relative",
-						}}
-					>
-						{rowVirtualizer.getVirtualItems().map((virtualRow, i) => (
-							<motion.div
-								key={virtualRow.key}
-								initial={{ opacity: 0, y: 12 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{
-									duration: 0.3,
-									delay: Math.min(i * 0.03, 0.3),
-									ease: [0.22, 1, 0.36, 1],
-								}}
-								style={{
-									position: "absolute",
-									top: 0,
-									left: 0,
-									width: "100%",
-									height: `${virtualRow.size}px`,
-									transform: `translateY(${virtualRow.start}px)`,
-									paddingBottom: "10px",
-								}}
-							>
-								<NotificationCard notification={filtered[virtualRow.index]} />
-							</motion.div>
+					<div>
+						{grouped.map(([protocolId, protocolNotifications], gi) => (
+							<ProtocolGroup
+								key={protocolId}
+								protocolId={protocolId}
+								notifications={protocolNotifications}
+								defaultExpanded={gi < 3}
+							/>
 						))}
 					</div>
 				)}

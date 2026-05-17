@@ -1,5 +1,5 @@
 /** Notification delivery status */
-export type NotificationStatus = "queued" | "processing" | "delivered" | "failed" | "opted_out";
+export type NotificationStatus = "queued" | "processing" | "delivered" | "partial" | "failed" | "opted_out" | "digested";
 
 /** Notification category */
 export type NotificationCategory = "defi" | "governance" | "system" | "marketing";
@@ -15,7 +15,7 @@ export interface Notification {
 	queuedAt: string;
 	deliveredAt?: string;
 	receiptTx?: string;
-	bounce?: string;
+  bounce?: boolean;
 	errorCode?: string;
 	ciphertext?: string;
 	nonce?: string;

@@ -1,15 +1,134 @@
+"use client";
+
+import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { cn, relativeTime, truncateAddress } from "@/lib/utils";
-import { type Notification } from "@/types";
-import { Lock } from "lucide-react";
+import { type Notification, type NotificationStatus } from "@/types";
+import { Lock, CheckCircle2, XCircle, Clock, Ban, AlertTriangle, Flag } from "lucide-react";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogDescription,
+	DialogFooter,
+} from "@/components/ui/dialog";
+import { fetchApi } from "@/lib/api";
+
+const statusConfig: Record<NotificationStatus, { dot: string; label: string; Icon: typeof CheckCircle2 }> = {
+	delivered: {
+		dot: "bg-[#00C896] shadow-[0_0_6px_rgba(0,200,150,0.5)]",
+		label: "Delivered",
+		Icon: CheckCircle2,
+	},
+	failed: {
+		dot: "bg-[#EF4444] shadow-[0_0_6px_rgba(239,68,68,0.5)]",
+		label: "Failed",
+		Icon: XCircle,
+	},
+	partial: {
+		dot: "bg-[#E8920A] shadow-[0_0_6px_rgba(232,146,10,0.5)]",
+		label: "Partial",
+		Icon: AlertTriangle,
+	},
+	processing: {
+		dot: "bg-[#60A5FA] shadow-[0_0_6px_rgba(96,165,250,0.5)]",
+		label: "Processing",
+		Icon: Clock,
+	},
+	queued: {
+		dot: "bg-[#94A3B8] shadow-[0_0_6px_rgba(148,163,184,0.5)]",
+		label: "Queued",
+		Icon: Clock,
+	},
+	opted_out: {
+		dot: "bg-[#64748B] shadow-[0_0_6px_rgba(100,116,139,0.3)]",
+		label: "Opted out",
+		Icon: Ban,
+	},
+	digested: {
+		dot: "bg-[#8B5CF6] shadow-[0_0_6px_rgba(139,92,246,0.4)]",
+		label: "Digested",
+		Icon: CheckCircle2,
+	},
+};
+
+const REPORT_REASONS = [
+	{ value: "spam", label: "Spam" },
+	{ value: "phishing", label: "Phishing / Scam" },
+	{ value: "impersonation", label: "Impersonation" },
+	{ value: "unwanted", label: "Unwanted" },
+	{ value: "other", label: "Other" },
+] as const;
+
+type ReportReason = (typeof REPORT_REASONS)[number]["value"];
 
 export function NotificationCard({ notification }: { notification: Notification }) {
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [reason, setReason] = useState<ReportReason | null>(null);
+	const [details, setDetails] = useState("");
+	const [submitting, setSubmitting] = useState(false);
+	const [reported, setReported] = useState(false);
+
 	const tx = notification.receiptTx || notification.id;
+	const status = notification.status || "delivered";
+	const config = statusConfig[status] || statusConfig.delivered;
+	const StatusIcon = config.Icon;
+
+	async function handleReport() {
+		if (!reason) return;
+		setSubmitting(true);
+		try {
+			const result = await fetchApi<{ success: boolean; already_reported: boolean }>(
+				`/portal/notifications/${notification.id}/report`,
+				{
+					method: "POST",
+					body: JSON.stringify({ reason, details: details.trim() || undefined }),
+				},
+			);
+			if (result.success) {
+				setReported(true);
+				setTimeout(() => setDialogOpen(false), 1200);
+			}
+		} catch {
+			// non-fatal — user can retry
+		} finally {
+			setSubmitting(false);
+		}
+	}
+
+	function handleOpenChange(open: boolean) {
+		setDialogOpen(open);
+		if (!open && !reported) {
+			setReason(null);
+			setDetails("");
+		}
+	}
 
 	return (
-		<div className="group relative flex gap-4 items-start p-5 rounded-2xl border border-border bg-card/40 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:bg-card-2 hover:shadow-[0_10px_40px_rgba(0,0,0,0.2)] hover:border-teal/30 h-full overflow-hidden">
+		<div className={cn(
+			"group relative flex gap-4 items-start p-5 rounded-2xl border backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.2)] h-full overflow-hidden",
+			status === "failed"
+				? "border-herald-red/20 bg-herald-red/5 hover:border-herald-red/40 hover:bg-herald-red/10"
+				: "border-border bg-card/40 hover:bg-card-2 hover:border-teal/30",
+		)}>
 			{/* Subtle shine effect on hover */}
 			<div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 pointer-events-none" />
+
+			{/* Report abuse button — visible on hover (or permanently if reported) */}
+			<button
+				onClick={(e) => { e.stopPropagation(); setDialogOpen(true); }}
+				className={cn(
+					"absolute top-3 right-3 p-1 rounded transition-all",
+					reported
+						? "opacity-100 text-[#EF4444]"
+						: "opacity-0 group-hover:opacity-100 text-text-muted hover:text-[#EF4444] hover:bg-herald-red/10",
+				)}
+				title={reported ? "Reported" : "Report abuse"}
+			>
+				<Flag className="size-3.5" fill={reported ? "currentColor" : "none"} />
+			</button>
 
 			<div
 				className={cn(
@@ -25,7 +144,7 @@ export function NotificationCard({ notification }: { notification: Notification 
 			/>
 
 			<div className="flex-1 min-w-0 flex flex-col h-full relative z-10">
-				{/* Badge + protocol + time */}
+				{/* Badge + protocol + time + status */}
 				<div className="flex items-center gap-2.5 mb-2">
 					<Badge
 						variant={notification.category}
@@ -36,15 +155,49 @@ export function NotificationCard({ notification }: { notification: Notification 
 					<span className="text-[13px] font-bold text-text-secondary truncate tracking-tight">
 						{notification.protocolId}
 					</span>
-					<span className="text-[11px] font-medium text-text-muted ml-auto shrink-0">
-						{relativeTime(notification.deliveredAt || notification.queuedAt)}
-					</span>
+					<div className="flex items-center gap-1.5 ml-auto shrink-0">
+						<div className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
+						<StatusIcon className={cn(
+							"size-3",
+							status === "delivered" || status === "digested" ? "text-[#00C896]" : "",
+							status === "failed" ? "text-[#EF4444]" : "",
+							status === "processing" || status === "queued" ? "text-[#60A5FA]" : "",
+							status === "opted_out" ? "text-[#64748B]" : "",
+							status === "partial" ? "text-[#E8920A]" : "",
+						)} />
+						<span className={cn(
+							"text-[11px] font-semibold",
+							status === "delivered" || status === "digested" ? "text-[#00C896]" : "",
+							status === "failed" ? "text-[#EF4444]" : "",
+							status === "processing" || status === "queued" ? "text-[#60A5FA]" : "",
+							status === "opted_out" ? "text-[#64748B]" : "",
+							status === "partial" ? "text-[#E8920A]" : "",
+						)}>
+							{config.label}
+						</span>
+						<span className="text-[11px] font-medium text-text-muted shrink-0">
+							{relativeTime(notification.deliveredAt || notification.queuedAt)}
+						</span>
+					</div>
 				</div>
 
 				{/* Subject preview */}
-				<div className="text-[15px] leading-snug font-semibold text-text-primary mb-1 line-clamp-2 break-words group-hover:text-teal-50 transition-colors">
-					{notification.subject || "Alert received from protocol"}
-				</div>
+				{notification.subject && (
+					<div className="text-[15px] leading-snug font-semibold text-text-primary mb-1 line-clamp-2 break-words group-hover:text-teal-50 transition-colors">
+						{notification.subject}
+					</div>
+				)}
+
+				{/* Error info for failed notifications */}
+				{status === "failed" && notification.errorCode && (
+					<div className="mb-2">
+						<div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-herald-red/10 border border-herald-red/20">
+							<span className="text-[11px] text-[#EF4444] font-mono font-medium">
+								{notification.errorCode}
+							</span>
+						</div>
+					</div>
+				)}
 
 				{/* Encrypted / Message state */}
 				<div className="mb-3">
@@ -54,9 +207,9 @@ export function NotificationCard({ notification }: { notification: Notification 
 								{notification.message}
 							</p>
 							{notification.actionUrl && (
-								<a 
-									href={notification.actionUrl} 
-									target="_blank" 
+								<a
+									href={notification.actionUrl}
+									target="_blank"
 									rel="noopener noreferrer"
 									className="text-[12px] text-teal hover:underline inline-flex items-center mt-1"
 								>
@@ -67,17 +220,17 @@ export function NotificationCard({ notification }: { notification: Notification 
 					) : notification.ciphertext ? (
 						<div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-card-2 border border-border-2">
 							<Lock className="size-3 text-text-muted" />
-							<span className="text-[11px] text-text-muted font-medium">End-to-End Encrypted Payload</span>
+							<span className="text-[11px] text-text-muted font-medium">End-to-End Encrypted</span>
 						</div>
 					) : null}
 				</div>
 
 				{/* Receipt link */}
-				<div className="flex items-center gap-2 mt-auto pt-2 border-t border-border/50">
-					<span className="font-mono text-[11px] font-medium text-teal-dim bg-teal/5 px-2 py-0.5 rounded-md border border-teal/10">
-						{truncateAddress(tx, 4)}
-					</span>
-					{notification.receiptTx ? (
+				{notification.receiptTx && (
+					<div className="flex items-center gap-2 mt-auto pt-2 border-t border-border/50">
+						<span className="font-mono text-[11px] font-medium text-teal-dim bg-teal/5 px-2 py-0.5 rounded-md border border-teal/10">
+							{truncateAddress(tx, 4)}
+						</span>
 						<a
 							href={`https://solscan.io/tx/${notification.receiptTx}${process.env.NEXT_PUBLIC_RPC_CLUSTER !== "mainnet-beta" ? `?cluster=${process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet"}` : ""}`}
 							target="_blank"
@@ -86,13 +239,73 @@ export function NotificationCard({ notification }: { notification: Notification 
 						>
 							Verify on-chain <span className="text-[14px]">↗</span>
 						</a>
-					) : (
-						<span className="text-[11px] text-text-muted font-medium italic">
-							Processing receipt...
-						</span>
-					)}
-				</div>
+					</div>
+				)}
 			</div>
+
+			{/* Report abuse dialog */}
+			<Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
+				<DialogContent onClick={(e) => e.stopPropagation()}>
+					<DialogHeader>
+						<DialogTitle>Report notification</DialogTitle>
+						<DialogDescription>
+							{reported
+								? "Thank you — your report has been submitted."
+								: "Help us keep Herald safe. Select a reason for reporting this notification."}
+						</DialogDescription>
+					</DialogHeader>
+
+					{!reported && (
+						<>
+							<div className="flex flex-col gap-2">
+								{REPORT_REASONS.map((r) => (
+									<label
+										key={r.value}
+										className={cn(
+											"flex items-center gap-3 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors text-sm",
+											reason === r.value
+												? "border-[#EF4444]/50 bg-herald-red/10 text-text-primary"
+												: "border-border bg-card/30 text-text-muted hover:border-border-2 hover:text-text-secondary",
+										)}
+									>
+										<input
+											type="radio"
+											name="report-reason"
+											value={r.value}
+											checked={reason === r.value}
+											onChange={() => setReason(r.value)}
+											className="accent-[#EF4444]"
+										/>
+										{r.label}
+									</label>
+								))}
+							</div>
+
+							{reason === "other" && (
+								<textarea
+									placeholder="Optional details…"
+									value={details}
+									onChange={(e) => setDetails(e.target.value)}
+									maxLength={500}
+									rows={3}
+									className="w-full resize-none rounded-lg border border-border bg-card/30 px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-border-2"
+								/>
+							)}
+
+							<DialogFooter>
+								<Button
+									variant="danger"
+									size="sm"
+									disabled={!reason || submitting}
+									onClick={handleReport}
+								>
+									{submitting ? "Submitting…" : "Submit report"}
+								</Button>
+							</DialogFooter>
+						</>
+					)}
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }
