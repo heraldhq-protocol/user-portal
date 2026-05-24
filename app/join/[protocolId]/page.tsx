@@ -36,5 +36,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function Page({ params }: Props) {
 	const { protocolId } = await params;
 	const protocol = await fetchPublicProtocol(protocolId);
-	return <JoinPage protocol={protocol} />;
+	return <JoinPage protocol={protocol} protocolId={protocolId} />;
 }

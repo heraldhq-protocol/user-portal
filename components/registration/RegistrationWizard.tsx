@@ -10,6 +10,7 @@ import { StepEncryptSign } from "./StepEncryptSign";
 import { StepSuccess } from "./StepSuccess";
 import { StepLogin } from "./StepLogin";
 import { useRegistration } from "@/hooks/useRegistration";
+import { fetchApi } from "@/lib/api";
 import type { RegistrationStep } from "@/types";
 import Image from "next/image";
 
@@ -29,6 +30,7 @@ const STEPS_REGISTERED: { key: RegistrationStep; label: string }[] = [
 interface ProtocolContext {
 	name?: string;
 	logoUrl?: string | null;
+	protocolId?: string;
 }
 
 export function RegistrationWizard({ protocolContext }: { protocolContext?: ProtocolContext } = {}) {
@@ -87,6 +89,9 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 
 	const handleSignComplete = async () => {
 		await register();
+		if (protocolContext?.protocolId) {
+			fetchApi(`/portal/protocols/${protocolContext.protocolId}/subscribe`, { method: "POST" }).catch(() => {});
+		}
 	};
 
 	const handleBack = () => {
@@ -103,6 +108,9 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 	};
 
 	const handleLoginComplete = () => {
+		if (protocolContext?.protocolId) {
+			fetchApi(`/portal/protocols/${protocolContext.protocolId}/subscribe`, { method: "POST" }).catch(() => {});
+		}
 		goToStep("success");
 	};
 
@@ -114,20 +122,20 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 			className="w-full max-w-130"
 		>
 			{/* Header */}
-			<div className="flex flex-col items-center justify-between mb-3 lg:mb-10 lg:flex lg:flex-row">
-				{/* Logo / Protocol branding */}
-				<div className="flex items-center gap-2 mb-4 lg:mb-0">
+			<div className="flex flex-col items-center gap-5 mb-8">
+				{/* Protocol × Herald branding — centered, always its own row */}
+				<div className="flex items-center gap-3">
 					{protocolContext?.logoUrl ? (
 						<>
-							<img src={protocolContext.logoUrl} alt={protocolContext.name ?? "Protocol"} width={28} height={28} className="rounded-md object-contain" />
+							<img src={protocolContext.logoUrl} alt={protocolContext.name ?? "Protocol"} width={32} height={32} className="rounded-lg object-contain" />
 							<span className="font-extrabold text-lg tracking-tight">{protocolContext.name}</span>
-							<span className="text-text-muted text-sm font-medium mx-1">×</span>
-							<Image src="/logo_icon.svg" alt="Herald" width={22} height={22} />
+							<span className="text-text-muted text-base font-bold px-1">×</span>
+							<Image src="/logo_icon.svg" alt="Herald" width={28} height={28} />
 							<span className="font-extrabold text-lg tracking-tight">Herald</span>
 						</>
 					) : (
 						<>
-							<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
+							<Image src="/logo_icon.svg" alt="Herald Logo" width={32} height={32} />
 							<span className="font-extrabold text-lg tracking-tight">
 								{protocolContext?.name ? `${protocolContext.name} × Herald` : "Herald"}
 							</span>
@@ -135,7 +143,7 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 					)}
 				</div>
 
-				{/* Step Indicator */}
+				{/* Step Indicator — its own row below branding */}
 				<StepIndicator steps={steps} currentIndex={stepIndex} />
 			</div>
 

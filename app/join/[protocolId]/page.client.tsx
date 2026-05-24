@@ -9,14 +9,14 @@ interface Protocol {
 	notificationCategories?: string[];
 }
 
-export function JoinPage({ protocol }: { protocol: Protocol | null }) {
+export function JoinPage({ protocol, protocolId }: { protocol: Protocol | null; protocolId: string }) {
 	return (
 		<div className="flex items-center justify-center min-h-dvh px-6 py-16">
 			<RegistrationWizard
 				protocolContext={
 					protocol
-						? { name: protocol.name, logoUrl: protocol.logoUrl }
-						: undefined
+						? { name: protocol.name, logoUrl: protocol.logoUrl, protocolId }
+						: { protocolId }
 				}
 			/>
 		</div>
