@@ -24,7 +24,7 @@ export function StepSuccess({
 	const cluster = rpcCluster === "localnet" ? "custom&customUrl=http://127.0.0.1:8899" : rpcCluster;
 	const solscanUrl = `https://solscan.io/tx/${txSignature}${rpcCluster !== "mainnet-beta" ? `?cluster=${cluster}` : ""}`;
 	const tweetText = encodeURIComponent(
-		"Just registered for privacy-preserving DeFi notifications with @herald_xyz 🔒⛓️\n\nMy email is encrypted — no protocol ever sees it.\n\nnotify.useherald.xyz"
+		"Just registered for privacy-preserving DeFi notifications with @useheraldmail 🔒⛓️\n\nMy email is encrypted — no protocol ever sees it.\n\nnotify.useherald.xyz"
 	);
 
 	const handleRedirect = useCallback(() => {
