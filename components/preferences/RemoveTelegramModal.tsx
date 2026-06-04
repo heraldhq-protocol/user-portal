@@ -36,18 +36,31 @@ export function RemoveTelegramModal({ isOpen, onClose, onSuccess }: RemoveTelegr
 				channel: "telegram",
 			});
 
-			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-			const tx = new Transaction().add(ix);
-			tx.recentBlockhash = blockhash;
-			tx.feePayer = walletContext.publicKey;
+			const sendAndConfirmWithRetry = async (attempt = 1): Promise<void> => {
+				const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+				const tx = new Transaction().add(ix);
+				tx.recentBlockhash = blockhash;
+				tx.feePayer = walletContext.publicKey!;
 
-			const signedTx = await walletContext.signTransaction(tx);
-			const signature = await connection.sendRawTransaction(signedTx.serialize());
+				const signedTx = await walletContext.signTransaction!(tx);
+				const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+					skipPreflight: true,
+					maxRetries: 3,
+				});
 
-			await connection.confirmTransaction(
-				{ signature, blockhash, lastValidBlockHeight },
-				"confirmed"
-			);
+				try {
+					await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+				} catch (err: any) {
+					const isExpired = err instanceof Error && err.name === "TransactionExpiredBlockheightExceededError";
+					if (isExpired && attempt < 3) {
+						toast.info(`Network slow — retrying (${attempt}/3)...`);
+						return sendAndConfirmWithRetry(attempt + 1);
+					}
+					throw err;
+				}
+			};
+
+			await sendAndConfirmWithRetry();
 
 			// Sync changes (off-chain) so that status clears out
 			await fetchApi("/portal/identity", { method: "POST" });

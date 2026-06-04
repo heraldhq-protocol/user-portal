@@ -67,17 +67,28 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 				}
 			);
 
-			// 4. Sign and send
-			const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
-			const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
-			tx.recentBlockhash = blockhash;
-			const signedTx = await walletContext.signTransaction(tx);
-			const signature = await connection.sendRawTransaction(signedTx.serialize());
-
-			await connection.confirmTransaction(
-				{ signature, blockhash, lastValidBlockHeight },
-				"confirmed"
-			);
+			// 4. Sign and send (with retry on blockhash expiry)
+			const sendAndConfirmWithRetry = async (attempt = 1): Promise<void> => {
+				const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+				const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
+				tx.recentBlockhash = blockhash;
+				const signedTx = await walletContext.signTransaction!(tx);
+				const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+					skipPreflight: true,
+					maxRetries: 3,
+				});
+				try {
+					await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+				} catch (err: unknown) {
+					const isExpired = err instanceof Error && err.name === "TransactionExpiredBlockheightExceededError";
+					if (isExpired && attempt < 3) {
+						toast.info(`Network slow — retrying (${attempt}/3)...`);
+						return sendAndConfirmWithRetry(attempt + 1);
+					}
+					throw err;
+				}
+			};
+			await sendAndConfirmWithRetry();
 
 			// 5. Sync email hash to database (off-chain)
 			await fetchApi("/portal/email", {

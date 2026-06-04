@@ -36,7 +36,7 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 
 		const signedTx = await walletContext.signTransaction!(tx);
 		const signature = await connection.sendRawTransaction(signedTx.serialize(), {
-			skipPreflight: false,
+			skipPreflight: true,
 			maxRetries: 3,
 		});
 
