@@ -13,6 +13,7 @@ import { fetchApi } from "@/lib/api";
 import { toast } from "sonner";
 import { Transaction } from "@solana/web3.js";
 import { ChannelUserClient, type SolanaCluster } from "@herald-protocol/sdk";
+import { getGatewayEnclavePubkey } from "@/lib/crypto";
 
 const SESSION_KEY = "tg_connect";
 const POLL_TIMEOUT = 60_000;
@@ -86,7 +87,11 @@ export default function TelegramSetupPage() {
 				rpcUrl: connection.rpcEndpoint,
 			});
 
-			const { instructions } = await client.buildTelegramRegistrationTx(publicKey, chatId);
+			const { instructions } = await client.buildTelegramRegistrationTx(
+				publicKey,
+				chatId,
+				getGatewayEnclavePubkey(),
+			);
 			await sendAndConfirmWithRetry(instructions);
 
 			clearSession();

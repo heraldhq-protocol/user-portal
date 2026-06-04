@@ -12,6 +12,7 @@ import { fetchApi } from "@/lib/api";
 import { toast } from "sonner";
 import { Transaction } from "@solana/web3.js";
 import { ChannelUserClient, type SolanaCluster } from "@herald-protocol/sdk";
+import { getGatewayEnclavePubkey } from "@/lib/crypto";
 import { PhoneInput } from "@/components/ui/phone-input";
 
 const RESEND_COOLDOWN = 30;
@@ -91,7 +92,11 @@ export default function SmsSetupPage() {
 				rpcUrl: connection.rpcEndpoint,
 			});
 
-			const { instructions } = await client.buildSmsRegistrationTx(publicKey, phone);
+			const { instructions } = await client.buildSmsRegistrationTx(
+				publicKey,
+				phone,
+				getGatewayEnclavePubkey(),
+			);
 			await sendAndConfirmWithRetry(instructions);
 
 			await fetchApi("/portal/identity", { method: "POST" });
