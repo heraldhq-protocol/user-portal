@@ -171,6 +171,21 @@ export function StepConnectWallet({
 
 	const isConnected = connected && !!publicKey;
 
+	// Auto-connect if embedded and not connected/connecting
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			const isEmbedded = window.self !== window.top || window.location.search.includes("embed=true");
+			if (isEmbedded && !isConnected && !isConnecting && !walletConnecting) {
+				const embeddedWallet = wallets.find((w) => w.adapter.name === "Embedded Wallet");
+				if (embeddedWallet) {
+					setTimeout(() => {
+						handleConnect("Embedded Wallet" as WalletName);
+					}, 0);
+				}
+			}
+		}
+	}, [isConnected, isConnecting, walletConnecting, wallets, handleConnect]);
+
 	const handleNext = () => {
 		if (isConnected && onNext) {
 			onNext();

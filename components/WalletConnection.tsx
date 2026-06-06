@@ -10,15 +10,24 @@ import {
 import { useMemo } from "react";
 import { clusterApiUrl } from "@solana/web3.js";
 import { type SolanaCluster } from "@herald-protocol/sdk";
+import { IframeWalletAdapter } from "@/lib/iframe-wallet-adapter";
 
 export function WalletConnection({ children }: Readonly<{ children: React.ReactNode }>) {
 	const wallets = useMemo(
-		() => [
-			new PhantomWalletAdapter(),
-			new SolflareWalletAdapter(),
-			new CoinbaseWalletAdapter(),
-			new LedgerWalletAdapter(),
-		],
+		() => {
+			if (typeof window !== "undefined") {
+				const isEmbedded = window.self !== window.top || window.location.search.includes("embed=true");
+				if (isEmbedded) {
+					return [new IframeWalletAdapter()];
+				}
+			}
+			return [
+				new PhantomWalletAdapter(),
+				new SolflareWalletAdapter(),
+				new CoinbaseWalletAdapter(),
+				new LedgerWalletAdapter(),
+			];
+		},
 		[]
 	);
 

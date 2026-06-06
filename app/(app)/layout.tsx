@@ -20,10 +20,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const { data: status, isLoading } = useWalletRegistrationStatus();
 	const { isAuthenticated, logout } = useAuth();
 	const [mounted, setMounted] = useState(false);
+	const [isEmbedded, setIsEmbedded] = useState(false);
 
 	useEffect(() => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setMounted(true);
+		if (typeof window !== "undefined") {
+			const embedded = window.self !== window.top || window.location.search.includes("embed=true");
+			setIsEmbedded(embedded);
+		}
 	}, []);
 
 	useEffect(() => {
@@ -97,67 +102,69 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<div className="flex-1 flex flex-col min-h-dvh">
 			{/* Top Navigation Bar for authenticated portal */}
-			<header className="sticky top-0 z-40 bg-navy/80 backdrop-blur-xl border-b border-border">
-				<div className="max-w-[1100px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-					<div className="flex items-center gap-6 sm:gap-8">
-						<Link
-							href="/notifications"
-							className="flex items-center gap-2 font-extrabold text-lg sm:text-xl text-text-primary tracking-tight shrink-0"
-						>
-							<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
-							<span className="hidden sm:inline">Herald.</span>
-						</Link>
-
-						{status?.registered && (
-							<nav className="flex items-center gap-4 sm:gap-6">
-								<Link
-									href="/notifications"
-									className={cn(
-										"text-xs sm:text-sm transition-all duration-200",
-										pathname.startsWith("/notifications")
-											? "text-teal font-bold"
-											: "text-text-muted hover:text-text-primary font-semibold"
-									)}
-								>
-										Notifications
-								</Link>
-								<Link
-									href="/preferences"
-									className={cn(
-										"text-xs sm:text-sm transition-all duration-200",
-										pathname.startsWith("/preferences")
-											? "text-teal font-bold"
-											: "text-text-muted hover:text-text-primary font-semibold"
-									)}
-								>
-									Preferences
-								</Link>
-							</nav>
-						)}
-					</div>
-
-					<div className="flex items-center gap-2 sm:gap-4">
-						<WalletStatusBadge />
-
-						{publicKey && (
-							<div className="hidden lg:block">
-								<WalletAddressDisplay address={publicKey.toBase58()} />
-							</div>
-						)}
-
-						<div className="flex items-center gap-1 sm:gap-2">
-							<ThemeToggle />
-							<button
-								onClick={() => logout()}
-								title="Disconnect"
-								className="p-2 rounded-xl text-text-muted hover:text-herald-red hover:bg-herald-red/10 transition-colors"
+			{!isEmbedded && (
+				<header className="sticky top-0 z-40 bg-navy/80 backdrop-blur-xl border-b border-border">
+					<div className="max-w-[1100px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+						<div className="flex items-center gap-6 sm:gap-8">
+							<Link
+								href="/notifications"
+								className="flex items-center gap-2 font-extrabold text-lg sm:text-xl text-text-primary tracking-tight shrink-0"
 							>
-								<FaArrowRightFromBracket className="w-4 h-4" />
-							</button>
+								<Image src="/logo_icon.svg" alt="Herald Logo" width={28} height={28} />
+								<span className="hidden sm:inline">Herald.</span>
+							</Link>
+
+							{status?.registered && (
+								<nav className="flex items-center gap-4 sm:gap-6">
+									<Link
+										href="/notifications"
+										className={cn(
+											"text-xs sm:text-sm transition-all duration-200",
+											pathname.startsWith("/notifications")
+												? "text-teal font-bold"
+												: "text-text-muted hover:text-text-primary font-semibold"
+										)}
+									>
+											Notifications
+									</Link>
+									<Link
+										href="/preferences"
+										className={cn(
+											"text-xs sm:text-sm transition-all duration-200",
+											pathname.startsWith("/preferences")
+												? "text-teal font-bold"
+												: "text-text-muted hover:text-text-primary font-semibold"
+										)}
+									>
+										Preferences
+									</Link>
+								</nav>
+							)}
+						</div>
+
+						<div className="flex items-center gap-2 sm:gap-4">
+							<WalletStatusBadge />
+
+							{publicKey && (
+								<div className="hidden lg:block">
+									<WalletAddressDisplay address={publicKey.toBase58()} />
+								</div>
+							)}
+
+							<div className="flex items-center gap-1 sm:gap-2">
+								<ThemeToggle />
+								<button
+									onClick={() => logout()}
+									title="Disconnect"
+									className="p-2 rounded-xl text-text-muted hover:text-herald-red hover:bg-herald-red/10 transition-colors"
+								>
+									<FaArrowRightFromBracket className="w-4 h-4" />
+								</button>
+							</div>
 						</div>
 					</div>
-				</div>
-			</header>
+				</header>
+			)}
 
 			<main id="main-content" className="flex-1 flex flex-col relative">
 				{children}

@@ -40,6 +40,23 @@ export function StepSuccess({
 		redirectRef.current = handleRedirect;
 	}, [handleRedirect]);
 
+	// Notify parent host application if embedded
+	useEffect(() => {
+		if (typeof window !== "undefined" && window.self !== window.top) {
+			window.parent.postMessage(
+				{
+					source: "HERALD_PORTAL_IFRAME",
+					action: "onRegistrationComplete",
+					params: {
+						txSignature,
+						alreadyRegistered,
+					},
+				},
+				"*"
+			);
+		}
+	}, [txSignature, alreadyRegistered]);
+
 	// Stable countdown — effect never re-runs unless component unmounts
 	useEffect(() => {
 		const timer = setInterval(() => {
