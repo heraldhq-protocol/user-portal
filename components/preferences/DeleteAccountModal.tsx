@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Transaction } from "@solana/web3.js";
 import { Modal, ModalTitle } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { fetchApi } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -87,7 +88,7 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 		<Modal
 			open={isOpen}
 			onOpenChange={(val) => !val && onClose()}
-			className="bg-red-100 border-red-500"
+			danger={true}
 		>
 			<ModalTitle className="text-xl font-extrabold mb-2.5">
 				{step === 1 ? "Delete account?" : "Confirm Deletion"}
@@ -117,9 +118,9 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 					<p className="text-sm text-slate-500 dark:text-text-muted leading-relaxed mb-4">
 						Type <strong>DELETE</strong> below to confirm permanent deletion.
 					</p>
-					<input
+					<Input
 						type="text"
-						className="w-full bg-white dark:bg-navy border border-slate-200 dark:border-border rounded-lg px-4 py-3 text-white mb-6 outline-none focus:border-red"
+						className="h-11 mb-6 text-foreground placeholder:text-muted-foreground focus-visible:border-red focus-visible:ring-red/50"
 						placeholder="DELETE"
 						value={confirmText}
 						onChange={(e) => setConfirmText(e.target.value)}

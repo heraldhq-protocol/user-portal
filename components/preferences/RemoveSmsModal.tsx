@@ -80,7 +80,7 @@ export function RemoveSmsModal({ isOpen, onClose, onSuccess }: RemoveSmsModalPro
 		<Modal
 			open={isOpen}
 			onOpenChange={(val) => !val && onClose()}
-			className="bg-red-100 border-red-500"
+			danger={true}
 		>
 			<ModalTitle className="text-xl font-extrabold mb-2.5">Disable SMS Alerts</ModalTitle>
 			<p className="text-sm text-slate-500 dark:text-text-muted leading-relaxed mb-6">
