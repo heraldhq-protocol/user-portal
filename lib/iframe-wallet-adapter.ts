@@ -35,6 +35,39 @@ export class IframeWalletAdapter extends BaseMessageSignerWalletAdapter {
 					this._parentOrigin = "*";
 				}
 			}
+
+			// Listen for host-initiated events (disconnect / wallet switch)
+			window.addEventListener("message", (event) => {
+				if (event.source !== window.parent) return;
+				if (this._parentOrigin !== "*" && event.origin !== this._parentOrigin) {
+					console.warn("[IframeWalletAdapter] Blocked host event from unauthorized origin:", event.origin);
+					return;
+				}
+
+				const data = event.data;
+				if (!data || data.source !== "HERALD_HOST_APPLICATION") return;
+
+				if (data.action === "hostDisconnect") {
+					console.log("[IframeWalletAdapter] Host-initiated disconnect received");
+					if (this._publicKey) {
+						this._publicKey = null;
+						this.emit("disconnect");
+					}
+				} else if (data.action === "hostWalletSwitch") {
+					console.log("[IframeWalletAdapter] Host-initiated wallet switch received:", data.params?.address);
+					if (data.params?.address) {
+						try {
+							const newPubkey = new PublicKey(data.params.address);
+							if (!this._publicKey || !this._publicKey.equals(newPubkey)) {
+								this._publicKey = newPubkey;
+								this.emit("connect", newPubkey);
+							}
+						} catch (err) {
+							console.error("[IframeWalletAdapter] Invalid host public key received in switch:", err);
+						}
+					}
+				}
+			});
 		}
 	}
 

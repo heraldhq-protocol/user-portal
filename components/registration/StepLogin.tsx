@@ -7,6 +7,7 @@ import { UserClient, SolanaCluster } from "@herald-protocol/sdk";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
 import { fetchApiWithSignature } from "@/lib/api";
+import { safeStorage } from "@/lib/storage";
 import Image from "next/image";
 
 interface StepLoginProps {
@@ -75,7 +76,7 @@ export function StepLogin({ onBack, onComplete }: StepLoginProps) {
 			);
 
 			// 3. Clear local state and full refresh to restart the wizard
-			localStorage.removeItem("herald_portal_token");
+			safeStorage.removeItem("herald_portal_token");
 			window.location.reload();
 		} catch (err: unknown) {
 			console.error("Delete account error:", err);

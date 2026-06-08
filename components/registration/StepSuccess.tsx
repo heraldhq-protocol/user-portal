@@ -73,10 +73,14 @@ export function StepSuccess({
 		return () => clearInterval(timer);
 	}, []);
 
-	const handleCopyLink = () => {
-		navigator.clipboard.writeText("https://notify.useherald.xyz");
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+	const handleCopyLink = async () => {
+		try {
+			await navigator.clipboard.writeText("https://notify.useherald.xyz");
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch (err) {
+			console.warn("Failed to copy link to clipboard:", err);
+		}
 	};
 
 	// Circular progress for countdown

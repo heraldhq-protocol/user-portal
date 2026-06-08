@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useWallet } from "@solana/wallet-adapter-react";
 import bs58 from "bs58";
 import { toast } from "sonner";
+import { safeStorage } from "@/lib/storage";
 
 /**
  * Basic JWT payload decoder.
@@ -41,9 +42,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [isLoggingIn, setIsLoggingIn] = useState(false);
 	const { publicKey, signMessage, disconnect } = useWallet();
 
-	// Load token from localStorage on mount
+	// Load token from safeStorage on mount
 	useEffect(() => {
-		const storedToken = localStorage.getItem("herald_portal_token");
+		const storedToken = safeStorage.getItem("herald_portal_token");
 		if (storedToken) {
 			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setToken(storedToken);
@@ -52,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	const logout = useCallback(() => {
 		setToken(null);
-		localStorage.removeItem("herald_portal_token");
+		safeStorage.removeItem("herald_portal_token");
 		disconnect();
 	}, [disconnect]);
 
@@ -60,9 +61,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		const handleUnauthorized = () => {
 			console.log("Unauthorized request intercepted, logging out...");
 			setToken(null);
-			localStorage.removeItem("herald_portal_token");
+			safeStorage.removeItem("herald_portal_token");
 			disconnect();
-			window.location.reload();
+			// Removing window.location.reload() to prevent infinite redirect loops.
 		};
 
 		window.addEventListener("herald:unauthorized", handleUnauthorized);
@@ -79,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				console.log("Wallet mismatch detected, logging out...");
 				// eslint-disable-next-line react-hooks/set-state-in-effect
 				setToken(null);
-				localStorage.removeItem("herald_portal_token");
+				safeStorage.removeItem("herald_portal_token");
 				// Note: we don't call disconnect() here as the user just connected a new wallet
 			}
 		}
@@ -121,16 +122,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			const data = await response.json();
 			if (data.token) {
 				setToken(data.token);
-				localStorage.setItem("herald_portal_token", data.token);
+				safeStorage.setItem("herald_portal_token", data.token);
 			} else {
 				throw new Error("No token returned from server");
 			}
 		} catch (error) {
 			console.error("Login failed:", error);
-			toast.error(error instanceof Error ? error.message : "Authentication failed");
+			const err = error as { message?: string; name?: string };
+			const isRejection = 
+				err?.message?.toLowerCase().includes("user rejected") || 
+				err?.message?.toLowerCase().includes("declined") ||
+				err?.name === "WalletSignMessageError";
+			
+			const friendlyMessage = isRejection 
+				? "You rejected the signature request. Please try again." 
+				: (error instanceof Error ? error.message : "Authentication failed");
+
+			toast.error(friendlyMessage);
 			setToken(null);
-			localStorage.removeItem("herald_portal_token");
-			disconnect();
+			safeStorage.removeItem("herald_portal_token");
+			
+			// Only disconnect the wallet on real non-rejection failures
+			if (!isRejection) {
+				disconnect();
+			}
 			throw error;
 		} finally {
 			setIsLoggingIn(false);

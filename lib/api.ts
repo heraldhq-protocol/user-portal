@@ -1,3 +1,5 @@
+import { safeStorage } from "./storage";
+
 /**
  * Herald User Portal API client helper
  */
@@ -5,7 +7,7 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/v1";
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-	const token = typeof window !== "undefined" ? localStorage.getItem("herald_portal_token") : null;
+	const token = typeof window !== "undefined" ? safeStorage.getItem("herald_portal_token") : null;
 
 	const headers = new Headers(options.headers);
 	if (token) {

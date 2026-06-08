@@ -12,10 +12,14 @@ interface WalletAddressDisplayProps {
 export function WalletAddressDisplay({ address, className, chars = 4 }: WalletAddressDisplayProps) {
 	const [copied, setCopied] = useState(false);
 
-	const handleCopy = () => {
-		navigator.clipboard.writeText(address);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+	const handleCopy = async () => {
+		try {
+			await navigator.clipboard.writeText(address);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch (err) {
+			console.warn("Failed to copy address to clipboard:", err);
+		}
 	};
 
 	return (

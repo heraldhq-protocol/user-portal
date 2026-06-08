@@ -188,8 +188,14 @@ export function useRegistration(): UseRegistrationReturn {
 		let errorMsg = "An unexpected error occurred. Please try again.";
 
 		if (err instanceof Error) {
-			if (err.message.includes("User rejected") || err.name === "WalletSignTransactionError") {
-				errorMsg = "You rejected the transaction. Please try again.";
+			const isRejection = 
+				err.message.toLowerCase().includes("user rejected") ||
+				err.message.toLowerCase().includes("declined") ||
+				err.name === "WalletSignTransactionError" ||
+				err.name === "WalletSignMessageError";
+
+			if (isRejection) {
+				errorMsg = "You rejected the signature request. Please try again.";
 			} else if (err.message.includes("timeout")) {
 				errorMsg = "Transaction timed out. Please try again.";
 			} else if (err.message.includes("message signing")) {

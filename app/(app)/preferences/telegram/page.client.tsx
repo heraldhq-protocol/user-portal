@@ -203,9 +203,13 @@ export default function TelegramSetupPage() {
 
 	const handleCopyLink = async () => {
 		if (!connectUrl) return;
-		await navigator.clipboard.writeText(connectUrl);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+		try {
+			await navigator.clipboard.writeText(connectUrl);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch (err) {
+			console.warn("Failed to copy Telegram link to clipboard:", err);
+		}
 	};
 
 	const handleCancel = () => {
