@@ -10,8 +10,7 @@ import { BellOff, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { fetchApi } from "@/lib/api";
 
 type PreviewData = {
-	walletPrefix: string;
-	category?: string;
+	category?: string | null;
 	valid: boolean;
 };
 
@@ -102,11 +101,7 @@ export default function UnsubscribePage() {
 									) : (
 										"these"
 									)}{" "}
-									notifications for wallet{" "}
-									<span className="font-mono bg-card-2 px-1 py-0.5 rounded text-xs">
-										{preview?.walletPrefix}...
-									</span>
-									.
+									notifications. You can re-enable them anytime from your preferences.
 								</p>
 							)}
 							{result.txSignature && (
@@ -135,11 +130,7 @@ export default function UnsubscribePage() {
 								) : (
 									"these"
 								)}{" "}
-								notifications for wallet{" "}
-								<span className="font-mono bg-card-2 px-1 py-0.5 rounded text-xs">
-									{preview.walletPrefix}...
-								</span>
-								?
+								notifications?
 							</p>
 
 							<div className="flex flex-col w-full gap-3">
