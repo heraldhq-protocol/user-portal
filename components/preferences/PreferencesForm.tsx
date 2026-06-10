@@ -16,6 +16,7 @@ import { useSolBalance } from "@/hooks/useSolBalance";
 
 interface PreferencesFormProps {
 	initialValues: PreferencesFormData;
+	isEarlyBeliever?: boolean;
 }
 
 const CATEGORIES = [
@@ -25,7 +26,7 @@ const CATEGORIES = [
 	{ key: "optInMarketing", label: "Marketing", desc: "Product updates, newsletters" },
 ] as const;
 
-export function PreferencesForm({ initialValues }: PreferencesFormProps) {
+export function PreferencesForm({ initialValues, isEarlyBeliever }: PreferencesFormProps) {
 	const walletContext = useWallet();
 	const { connection } = useConnection();
 	const { checkAndAirdrop } = useSolBalance();
@@ -139,7 +140,7 @@ export function PreferencesForm({ initialValues }: PreferencesFormProps) {
 					name="digestMode"
 					control={control}
 					render={({ field }) => (
-						<DeliveryModeSelect value={field.value} onChange={field.onChange} />
+						<DeliveryModeSelect value={field.value} onChange={field.onChange} isEarlyBeliever={isEarlyBeliever} />
 					)}
 				/>
 			</Card>

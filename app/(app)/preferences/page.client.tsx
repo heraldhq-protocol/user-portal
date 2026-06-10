@@ -18,12 +18,14 @@ import { truncateAddress } from "@/lib/utils";
 import { fetchApi } from "@/lib/api";
 import { type IdentityStatus } from "@/types";
 import { useWalletRegistrationStatus } from "@/hooks/useWalletRegistrationStatus";
+import { useOrynthHolder } from "@/hooks/useOrynthHolder";
 
 export default function PreferencesPage() {
 	const { publicKey } = useWallet();
 	const [status, setStatus] = useState<IdentityStatus | null>(null);
 	const [isIdentityLoading, setIsIdentityLoading] = useState(true);
 	const { data: registerStatus, isLoading: isRegisterLoading } = useWalletRegistrationStatus();
+	const { data: isEarlyBeliever } = useOrynthHolder();
 
 	const [showEmailModal, setShowEmailModal] = useState(false);
 	const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -87,16 +89,21 @@ export default function PreferencesPage() {
 				>
 					<div className="mb-6 sm:mb-9">
 						<h1 className="text-xl sm:text-[28px] font-extrabold tracking-tight mb-1.5">Preferences</h1>
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 flex-wrap">
 							<div className="w-2 h-2 rounded-full bg-teal shrink-0" />
 							<span className="font-mono text-[12px] sm:text-[13px] text-text-muted truncate">
 								{publicKey ? truncateAddress(publicKey.toBase58(), 4) : "Unknown"}
 							</span>
+							{isEarlyBeliever && (
+								<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal/10 border border-teal/25 text-teal text-[10px] font-bold uppercase tracking-wide">
+									✦ Early Believer
+								</span>
+							)}
 						</div>
 					</div>
 
 					{/* Categories & Delivery Mode Form */}
-					<PreferencesForm initialValues={initialPrefs} />
+					<PreferencesForm initialValues={initialPrefs} isEarlyBeliever={isEarlyBeliever} />
 
 					{/* Notification Channels */}
 					<div className="mb-8">

@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 interface DeliveryModeSelectProps {
 	value: boolean; // true = digestMode, false = realtime
 	onChange: (digestMode: boolean) => void;
+	isEarlyBeliever?: boolean;
 }
 
 const MODES = [
@@ -10,11 +11,12 @@ const MODES = [
 	{ id: "digest", digestMode: true, label: "Daily digest", desc: "Batched every day at 9am UTC" },
 ];
 
-export function DeliveryModeSelect({ value, onChange }: DeliveryModeSelectProps) {
+export function DeliveryModeSelect({ value, onChange, isEarlyBeliever }: DeliveryModeSelectProps) {
 	return (
 		<div className="flex flex-col gap-2">
 			{MODES.map((mode) => {
 				const isActive = mode.digestMode === value;
+				const showPriority = isEarlyBeliever && mode.id === "realtime";
 				return (
 					<div
 						key={mode.id}
@@ -36,9 +38,16 @@ export function DeliveryModeSelect({ value, onChange }: DeliveryModeSelectProps)
 						>
 							{isActive && <div className="w-2 h-2 rounded-full bg-teal" />}
 						</div>
-						<div>
-							<div className="text-sm font-semibold text-text-secondary">
-								{mode.label}
+						<div className="flex-1">
+							<div className="flex items-center gap-2">
+								<span className="text-sm font-semibold text-text-secondary">
+									{mode.label}
+								</span>
+								{showPriority && (
+									<span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-teal/10 border border-teal/25 text-teal text-[10px] font-bold uppercase tracking-wide">
+										✦ Priority
+									</span>
+								)}
 							</div>
 							<div className="text-xs text-text-muted">{mode.desc}</div>
 						</div>
