@@ -11,7 +11,15 @@ import Image from "next/image";
 import { FaArrowRightFromBracket } from "react-icons/fa6";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader } from "@/components/ui/Loader";
+import { Menu, X, Bell, Settings, Bookmark, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const NAV_LINKS = [
+	{ href: "/notifications", label: "Notifications", icon: Bell },
+	{ href: "/preferences", label: "Preferences", icon: Settings },
+	{ href: "/subscriptions", label: "Subscriptions", icon: Bookmark },
+	{ href: "/discover", label: "Discover", icon: Compass },
+] as const;
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
@@ -21,6 +29,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 	const { isAuthenticated, logout } = useAuth();
 	const [mounted, setMounted] = useState(false);
 	const [isEmbedded, setIsEmbedded] = useState(false);
+	const [menuOpen, setMenuOpen] = useState(false);
 
 	useEffect(() => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect
@@ -31,26 +40,37 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 		}
 	}, []);
 
+	// Close mobile menu on route change
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
+		setMenuOpen(false);
+	}, [pathname]);
+
+	// Lock body scroll when menu is open
+	useEffect(() => {
+		if (menuOpen) {
+			document.body.style.overflow = "hidden";
+		} else {
+			document.body.style.overflow = "";
+		}
+		return () => { document.body.style.overflow = ""; };
+	}, [menuOpen]);
+
 	useEffect(() => {
 		if (!mounted || connecting || isLoading) return;
 
 		const isRegisterPage = pathname.startsWith("/register");
 
-		// 1. If not connected, redirect to landing (root)
 		if (!connected && !isRegisterPage) {
 			router.replace("/");
 			return;
 		}
 
-		// 2. If connected but not registered on-chain -> go to register
 		if (connected && status) {
 			if (!status.registered && !isRegisterPage) {
 				router.replace("/register");
 				return;
 			}
-
-			// 3. If connected + registered but NOT authenticated (no JWT) -> go to register
-			//    The wizard will detect isRegistered and show the login step
 			if (status.registered && !isAuthenticated && !isRegisterPage) {
 				router.replace("/register");
 				return;
@@ -58,7 +78,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 		}
 	}, [mounted, connected, connecting, isLoading, status, pathname, router, isAuthenticated]);
 
-	// Show loading state while resolving
 	if (!mounted || connecting || isLoading) {
 		return (
 			<div className="flex-1 flex flex-col items-center justify-center min-h-dvh gap-4 px-4">
@@ -72,7 +91,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 		);
 	}
 
-	// Double safety: branded splash screen before redirect executes
 	const isRegisterPage = pathname.startsWith("/register");
 	if (!connected && !isRegisterPage) {
 		return (
@@ -101,10 +119,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
 	return (
 		<div className="flex-1 flex flex-col min-h-dvh">
-			{/* Top Navigation Bar for authenticated portal */}
 			{!isEmbedded && (
 				<header className="sticky top-0 z-40 bg-navy/80 backdrop-blur-xl border-b border-border">
 					<div className="max-w-[1100px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+
+						{/* Left: logo + desktop nav */}
 						<div className="flex items-center gap-6 sm:gap-8">
 							<Link
 								href="/notifications"
@@ -115,55 +134,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 							</Link>
 
 							{status?.registered && (
-								<nav className="flex items-center gap-4 sm:gap-6">
-									<Link
-										href="/notifications"
-										className={cn(
-											"text-xs sm:text-sm transition-all duration-200",
-											pathname.startsWith("/notifications")
-												? "text-teal font-bold"
-												: "text-text-muted hover:text-text-primary font-semibold"
-										)}
-									>
-											Notifications
-									</Link>
-									<Link
-										href="/preferences"
-										className={cn(
-											"text-xs sm:text-sm transition-all duration-200",
-											pathname.startsWith("/preferences")
-												? "text-teal font-bold"
-												: "text-text-muted hover:text-text-primary font-semibold"
-										)}
-									>
-										Preferences
-									</Link>
-									<Link
-										href="/subscriptions"
-										className={cn(
-											"text-xs sm:text-sm transition-all duration-200",
-											pathname.startsWith("/subscriptions")
-												? "text-teal font-bold"
-												: "text-text-muted hover:text-text-primary font-semibold"
-										)}
-									>
-										Subscriptions
-									</Link>
-									<Link
-										href="/discover"
-										className={cn(
-											"text-xs sm:text-sm transition-all duration-200",
-											pathname.startsWith("/discover")
-												? "text-teal font-bold"
-												: "text-text-muted hover:text-text-primary font-semibold"
-										)}
-									>
-										Discover
-									</Link>
+								<nav className="hidden sm:flex items-center gap-4 sm:gap-6">
+									{NAV_LINKS.map(({ href, label }) => (
+										<Link
+											key={href}
+											href={href}
+											className={cn(
+												"text-sm transition-all duration-200 font-semibold",
+												pathname.startsWith(href)
+													? "text-teal font-bold"
+													: "text-text-muted hover:text-text-primary"
+											)}
+										>
+											{label}
+										</Link>
+									))}
 								</nav>
 							)}
 						</div>
 
+						{/* Right: badges + theme + disconnect (desktop) + hamburger (mobile) */}
 						<div className="flex items-center gap-2 sm:gap-4">
 							<WalletStatusBadge />
 
@@ -173,7 +163,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 								</div>
 							)}
 
-							<div className="flex items-center gap-1 sm:gap-2">
+							<div className="hidden sm:flex items-center gap-1 sm:gap-2">
 								<ThemeToggle />
 								<button
 									onClick={() => logout()}
@@ -183,9 +173,99 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 									<FaArrowRightFromBracket className="w-4 h-4" />
 								</button>
 							</div>
+
+							{/* Hamburger — mobile only */}
+							{status?.registered && (
+								<button
+									onClick={() => setMenuOpen(true)}
+									className="sm:hidden p-2 rounded-xl text-text-muted hover:text-text-primary hover:bg-card transition-colors"
+									aria-label="Open menu"
+								>
+									<Menu className="w-5 h-5" />
+								</button>
+							)}
 						</div>
 					</div>
 				</header>
+			)}
+
+			{/* Mobile side drawer */}
+			{menuOpen && (
+				<>
+					{/* Backdrop */}
+					<div
+						className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm sm:hidden"
+						onClick={() => setMenuOpen(false)}
+						aria-hidden="true"
+					/>
+
+					{/* Drawer panel */}
+					<div className="fixed top-0 right-0 z-50 h-full w-72 bg-navy border-l border-border flex flex-col sm:hidden animate-in slide-in-from-right duration-200">
+						{/* Drawer header */}
+						<div className="flex items-center justify-between px-5 h-16 border-b border-border shrink-0">
+							<Link
+								href="/notifications"
+								onClick={() => setMenuOpen(false)}
+								className="flex items-center gap-2 font-extrabold text-lg text-text-primary tracking-tight"
+							>
+								<Image src="/logo_icon.svg" alt="Herald Logo" width={24} height={24} />
+								Herald.
+							</Link>
+							<button
+								onClick={() => setMenuOpen(false)}
+								className="p-2 rounded-xl text-text-muted hover:text-text-primary hover:bg-card transition-colors"
+								aria-label="Close menu"
+							>
+								<X className="w-5 h-5" />
+							</button>
+						</div>
+
+						{/* Nav links */}
+						<nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+							{NAV_LINKS.map(({ href, label, icon: Icon }) => {
+								const active = pathname.startsWith(href);
+								return (
+									<Link
+										key={href}
+										href={href}
+										onClick={() => setMenuOpen(false)}
+										className={cn(
+											"flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-150",
+											active
+												? "bg-teal/10 text-teal border border-teal/20"
+												: "text-text-muted hover:text-text-primary hover:bg-card border border-transparent"
+										)}
+									>
+										<Icon className={cn("w-4 h-4 shrink-0", active ? "text-teal" : "text-text-muted")} />
+										{label}
+									</Link>
+								);
+							})}
+						</nav>
+
+						{/* Drawer footer: wallet + actions */}
+						<div className="border-t border-border px-5 py-4 space-y-3 shrink-0">
+							{publicKey && (
+								<div className="px-1">
+									<WalletAddressDisplay address={publicKey.toBase58()} />
+								</div>
+							)}
+							<div className="flex items-center justify-between">
+								<WalletStatusBadge />
+								<div className="flex items-center gap-2">
+									<ThemeToggle />
+									<button
+										onClick={() => { logout(); setMenuOpen(false); }}
+										title="Disconnect"
+										className="p-2 rounded-xl text-text-muted hover:text-herald-red hover:bg-herald-red/10 transition-colors"
+									>
+										<FaArrowRightFromBracket className="w-4 h-4" />
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</>
 			)}
 
 			<main id="main-content" className="flex-1 flex flex-col relative">

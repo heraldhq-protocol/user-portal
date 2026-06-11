@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Globe, Check, Plus, Loader2, Search } from "lucide-react";
+import { Globe, Check, Plus, Loader2, Search, BadgeCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type DiscoverableProtocol, type NotificationCategory } from "@/types";
 import {
@@ -24,6 +24,14 @@ const CATEGORY_COLORS: Record<string, string> = {
 	marketing: "bg-amber-500/10 text-amber-400 border-amber-500/20",
 	system: "bg-blue-500/10 text-blue-400 border-blue-500/20",
 };
+
+const FILTER_CATEGORIES = [
+	{ value: "all", label: "All" },
+	{ value: "defi", label: "DeFi" },
+	{ value: "governance", label: "Governance" },
+	{ value: "marketing", label: "Marketing" },
+	{ value: "system", label: "System" },
+];
 
 function ProtocolCard({ protocol }: { protocol: DiscoverableProtocol }) {
 	const subscribe = useSubscribeToProtocol();
@@ -62,7 +70,12 @@ function ProtocolCard({ protocol }: { protocol: DiscoverableProtocol }) {
 			<div className="flex-1 min-w-0">
 				<div className="flex items-start justify-between gap-3">
 					<div className="min-w-0">
-						<p className="text-sm font-bold text-text-primary truncate">{protocol.name}</p>
+						<div className="flex items-center gap-1.5">
+							<p className="text-sm font-bold text-text-primary truncate">{protocol.name}</p>
+							{protocol.isVerified && (
+								<BadgeCheck className="size-4 text-teal shrink-0" aria-label="Verified protocol" />
+							)}
+						</div>
 						{protocol.websiteUrl && (
 							<a
 								href={protocol.websiteUrl}
@@ -123,14 +136,7 @@ export default function DiscoverPageClient() {
 	const [search, setSearch] = useState("");
 	const [filterCategory, setFilterCategory] = useState<string>("all");
 	const [filterStatus, setFilterStatus] = useState<"all" | "subscribed" | "unsubscribed">("all");
-
-	const FILTER_CATEGORIES = [
-		{ value: "all", label: "All" },
-		{ value: "defi", label: "DeFi" },
-		{ value: "governance", label: "Governance" },
-		{ value: "marketing", label: "Marketing" },
-		{ value: "system", label: "System" },
-	];
+	const [verifiedOnly, setVerifiedOnly] = useState(false);
 
 	const filtered = protocols.filter((p) => {
 		if (search) {
@@ -140,6 +146,7 @@ export default function DiscoverPageClient() {
 		if (filterCategory !== "all" && !p.categories.includes(filterCategory)) return false;
 		if (filterStatus === "subscribed" && !p.isSubscribed) return false;
 		if (filterStatus === "unsubscribed" && p.isSubscribed) return false;
+		if (verifiedOnly && !p.isVerified) return false;
 		return true;
 	});
 
@@ -152,6 +159,7 @@ export default function DiscoverPageClient() {
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.4 }}
 			>
+				{/* Header */}
 				<div className="mb-6">
 					<h1 className="text-[28px] font-extrabold tracking-tight">Discover protocols</h1>
 					<p className="text-sm text-text-muted mt-1">
@@ -163,6 +171,7 @@ export default function DiscoverPageClient() {
 
 				{/* Filters */}
 				<div className="flex flex-col gap-3 mb-6">
+					{/* Search */}
 					<div className="relative">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-muted pointer-events-none" />
 						<input
@@ -174,7 +183,8 @@ export default function DiscoverPageClient() {
 						/>
 					</div>
 
-					<div className="flex flex-wrap gap-2">
+					{/* Category pills + right-side toggles */}
+					<div className="flex flex-wrap items-center gap-2">
 						{FILTER_CATEGORIES.map((c) => (
 							<button
 								key={c.value}
@@ -190,21 +200,37 @@ export default function DiscoverPageClient() {
 							</button>
 						))}
 
-						<div className="ml-auto flex items-center gap-1 bg-navy-2 p-1 rounded-lg border border-border">
-							{(["all", "subscribed", "unsubscribed"] as const).map((s) => (
-								<button
-									key={s}
-									onClick={() => setFilterStatus(s)}
-									className={cn(
-										"px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors capitalize cursor-pointer",
-										filterStatus === s
-											? "bg-card border border-border text-white"
-											: "text-text-muted border border-transparent hover:text-text-secondary"
-									)}
-								>
-									{s}
-								</button>
-							))}
+						{/* Verified + subscription status pushed to the right */}
+						<div className="ml-auto flex items-center gap-2">
+							<button
+								onClick={() => setVerifiedOnly((v) => !v)}
+								className={cn(
+									"flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer whitespace-nowrap",
+									verifiedOnly
+										? "bg-teal/10 text-teal border-teal/30"
+										: "bg-transparent text-text-muted border-border-2 hover:border-teal/40"
+								)}
+							>
+								<BadgeCheck className="size-3.5" />
+								Verified
+							</button>
+
+							<div className="flex items-center gap-1 bg-navy-2 p-1 rounded-lg border border-border">
+								{(["all", "subscribed", "unsubscribed"] as const).map((s) => (
+									<button
+										key={s}
+										onClick={() => setFilterStatus(s)}
+										className={cn(
+											"px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors capitalize cursor-pointer",
+											filterStatus === s
+												? "bg-card border border-border text-white"
+												: "text-text-muted border border-transparent hover:text-text-secondary"
+										)}
+									>
+										{s}
+									</button>
+								))}
+							</div>
 						</div>
 					</div>
 				</div>

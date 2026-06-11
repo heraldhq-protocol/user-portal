@@ -53,6 +53,7 @@ export interface DiscoverableProtocol {
 	websiteUrl: string | null;
 	categories: string[];
 	isSubscribed: boolean;
+	isVerified: boolean;
 }
 
 export interface IdentityStatus {

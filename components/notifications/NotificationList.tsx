@@ -109,7 +109,7 @@ export function NotificationList({ notifications, protocols = {}, isLoading }: N
 			}
 			return true;
 		});
-	}, [notifications, category, timeRange, searchQuery]);
+	}, [notifications, category, timeRange, searchQuery, protocols]);
 
 	const grouped = useMemo(() => {
 		const groups: Record<string, Notification[]> = {};
