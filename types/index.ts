@@ -32,6 +32,20 @@ export interface WalletInfo {
 	color: string;
 }
 
+export interface ProtocolSubscription {
+	protocolId: string;
+	status: 'active' | 'unsubscribed';
+	channels: string[];
+	subscribedAt: string;
+	updatedAt: string;
+	protocol: {
+		name: string | null;
+		logoUrl: string | null;
+		websiteUrl: string | null;
+		categories: string[];
+	};
+}
+
 export interface IdentityStatus {
 	registered: boolean;
 	optIns?: {

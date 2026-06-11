@@ -138,6 +138,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 									>
 										Preferences
 									</Link>
+									<Link
+										href="/subscriptions"
+										className={cn(
+											"text-xs sm:text-sm transition-all duration-200",
+											pathname.startsWith("/subscriptions")
+												? "text-teal font-bold"
+												: "text-text-muted hover:text-text-primary font-semibold"
+										)}
+									>
+										Subscriptions
+									</Link>
 								</nav>
 							)}
 						</div>

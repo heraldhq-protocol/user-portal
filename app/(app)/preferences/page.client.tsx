@@ -102,6 +102,28 @@ export default function PreferencesPage() {
 						</div>
 					</div>
 
+					{/* Early Believer CTA — shown only to confirmed non-holders */}
+					{isEarlyBeliever === false && (
+						<a
+							href="https://orynth.dev/projects/herald-protocol"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="flex items-center justify-between gap-3 mb-6 px-4 py-3 rounded-xl bg-teal/5 border border-teal/20 hover:border-teal/40 transition-colors duration-200 group"
+						>
+							<div>
+								<p className="text-xs font-bold text-teal uppercase tracking-wide mb-0.5">
+									✦ Early Believer
+								</p>
+								<p className="text-xs text-text-muted">
+									Hold the Herald coin on Orynth to unlock priority delivery and your Early Believer badge.
+								</p>
+							</div>
+							<span className="text-teal text-sm shrink-0 group-hover:translate-x-0.5 transition-transform">
+								→
+							</span>
+						</a>
+					)}
+
 					{/* Categories & Delivery Mode Form */}
 					<PreferencesForm initialValues={initialPrefs} isEarlyBeliever={isEarlyBeliever} />
 
