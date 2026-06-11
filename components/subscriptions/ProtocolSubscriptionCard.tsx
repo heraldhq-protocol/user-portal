@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, Mail, MessageCircle, Smartphone, ChevronDown, ChevronRight } from "lucide-react";
+import { Globe, Mail, MessageCircle, Smartphone, ChevronDown, ChevronRight, Share2, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { type ProtocolSubscription } from "@/types";
@@ -147,6 +147,15 @@ export function ProtocolSubscriptionCard({
 	isPending,
 }: Props) {
 	const [showPrefs, setShowPrefs] = useState(false);
+	const [copied, setCopied] = useState(false);
+
+	const handleShare = () => {
+		const url = `https://notify.useherald.xyz/join/${subscription.protocolId}`;
+		navigator.clipboard.writeText(url).then(() => {
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		}).catch(() => {});
+	};
 	const { protocol, status, channels, subscribedAt } = subscription;
 	const categories = protocol.categories;
 	const isActive = status === "active";
@@ -268,6 +277,14 @@ export function ProtocolSubscriptionCard({
 							Preferences
 						</button>
 					)}
+					<button
+						onClick={handleShare}
+						title="Copy join link"
+						className="flex items-center gap-1 text-[10px] font-semibold text-text-muted hover:text-teal transition-colors cursor-pointer"
+					>
+						{copied ? <Check size={11} className="text-teal" /> : <Share2 size={11} />}
+						{copied ? "Copied!" : "Share"}
+					</button>
 				</div>
 			</div>
 

@@ -12,6 +12,7 @@ import { NotificationKeyCard } from "@/components/preferences/NotificationKeyCar
 import { Mail, MessageCircle, Smartphone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PreferencesForm } from "@/components/preferences/PreferencesForm";
+import { QuietHours } from "@/components/preferences/QuietHours";
 import { Button } from "@/components/ui/Button";
 import { Loader } from "@/components/ui/Loader";
 import { truncateAddress } from "@/lib/utils";
@@ -127,6 +128,14 @@ export default function PreferencesPage() {
 					{/* Categories & Delivery Mode Form */}
 					<PreferencesForm initialValues={initialPrefs} isEarlyBeliever={isEarlyBeliever} />
 
+					{/* Quiet Hours */}
+					<div className="mb-8">
+						<h3 className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-4">
+							Quiet Hours & Snooze
+						</h3>
+						<QuietHours />
+					</div>
+
 					{/* Notification Channels */}
 					<div className="mb-8">
 						<h3 className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-4">
@@ -152,7 +161,6 @@ export default function PreferencesPage() {
 							status={status?.channels?.telegram ? "connected" : "disconnected"}
 							description="Get ultra-fast alerts directly in Telegram"
 							actionText={status?.channels?.telegram ? "Remove" : "Connect"}
-							actionVariant={status?.channels?.telegram ? "secondary" : "primary"}
 							onAction={() =>
 								status?.channels?.telegram
 									? setShowRemoveTelegramModal(true)
@@ -166,7 +174,7 @@ export default function PreferencesPage() {
 							status={status?.channels?.sms ? "connected" : "disconnected"}
 							description="For critical liquidation or security alerts"
 							actionText={status?.channels?.sms ? "Remove" : "Connect"}
-							actionVariant={status?.channels?.sms ? "secondary" : "primary"}
+	
 							onAction={() =>
 								status?.channels?.sms
 									? setShowRemoveSmsModal(true)

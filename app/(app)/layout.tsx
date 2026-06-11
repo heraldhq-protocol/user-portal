@@ -13,6 +13,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Loader } from "@/components/ui/Loader";
 import { Menu, X, Bell, Settings, Bookmark, Compass } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { KeyRotationBanner } from "@/components/layout/KeyRotationBanner";
 
 const NAV_LINKS = [
 	{ href: "/notifications", label: "Notifications", icon: Bell },
@@ -119,6 +120,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
 	return (
 		<div className="flex-1 flex flex-col min-h-dvh">
+			{!isEmbedded && <KeyRotationBanner />}
 			{!isEmbedded && (
 				<header className="sticky top-0 z-40 bg-navy/80 backdrop-blur-xl border-b border-border">
 					<div className="max-w-[1100px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">

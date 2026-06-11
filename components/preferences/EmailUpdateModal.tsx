@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
@@ -13,6 +13,9 @@ import { encryptEmail } from "@/lib/crypto";
 import { Transaction } from "@solana/web3.js";
 import { fetchApi } from "@/lib/api";
 import { useSolBalance } from "@/hooks/useSolBalance";
+import { cn } from "@/lib/utils";
+
+type Step = "email" | "otp" | "sign";
 
 interface EmailUpdateModalProps {
 	isOpen: boolean;
@@ -23,6 +26,16 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 	const walletContext = useWallet();
 	const { connection } = useConnection();
 	const { checkAndAirdrop } = useSolBalance();
+
+	const [step, setStep] = useState<Step>("email");
+	const [pendingEmail, setPendingEmail] = useState("");
+	const [maskedEmail, setMaskedEmail] = useState("");
+	const [digits, setDigits] = useState<string[]>(["", "", "", "", "", ""]);
+	const [otpError, setOtpError] = useState<string | null>(null);
+	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+	const [cooldown, setCooldown] = useState(0);
+	const [isSending, setIsSending] = useState(false);
+	const [isVerifying, setIsVerifying] = useState(false);
 	const [isEncrypting, setIsEncrypting] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,39 +48,160 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 		resolver: zodResolver(emailUpdateSchema),
 	});
 
-	const onSubmit = async (data: EmailUpdateFormData) => {
-		if (!walletContext.publicKey || !walletContext.signTransaction) return;
+	useEffect(() => {
+		if (cooldown <= 0) return;
+		const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
+		return () => clearTimeout(t);
+	}, [cooldown]);
 
+	const handleClose = () => {
+		reset();
+		setStep("email");
+		setPendingEmail("");
+		setMaskedEmail("");
+		setDigits(["", "", "", "", "", ""]);
+		setOtpError(null);
+		onClose();
+	};
+
+	const handleDigitChange = (index: number, value: string) => {
+		const digit = value.replace(/\D/g, "").slice(-1);
+		const next = [...digits];
+		next[index] = digit;
+		setDigits(next);
+		setOtpError(null);
+		if (digit && index < 5) inputRefs.current[index + 1]?.focus();
+		if (digit && index === 5) {
+			const code = next.join("");
+			if (code.length === 6) triggerVerify(code);
+		}
+	};
+
+	const handleDigitKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === "Backspace") {
+			if (digits[index]) {
+				const next = [...digits];
+				next[index] = "";
+				setDigits(next);
+			} else if (index > 0) {
+				inputRefs.current[index - 1]?.focus();
+			}
+		} else if (e.key === "ArrowLeft" && index > 0) {
+			inputRefs.current[index - 1]?.focus();
+		} else if (e.key === "ArrowRight" && index < 5) {
+			inputRefs.current[index + 1]?.focus();
+		}
+	};
+
+	const handlePaste = (e: React.ClipboardEvent) => {
+		e.preventDefault();
+		const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+		if (!pasted) return;
+		const next = Array(6).fill("").map((_, i) => pasted[i] ?? "");
+		setDigits(next);
+		setOtpError(null);
+		const lastFilled = Math.min(pasted.length - 1, 5);
+		inputRefs.current[lastFilled]?.focus();
+		if (pasted.length === 6) triggerVerify(pasted);
+	};
+
+	// Step 1 → 2: send OTP to the new email
+	const onEmailSubmit = async (data: EmailUpdateFormData) => {
+		if (!walletContext.publicKey) return;
 		try {
+			setIsSending(true);
+			const result = await fetchApi<{ maskedEmail: string }>("/auth/email/otp/send", {
+				method: "POST",
+				body: JSON.stringify({
+					email: data.newEmail,
+					walletPubkey: walletContext.publicKey.toBase58(),
+				}),
+			});
+			setPendingEmail(data.newEmail);
+			setMaskedEmail(result.maskedEmail);
+			setCooldown(60);
+			setStep("otp");
+		} catch (err: unknown) {
+			toast.error((err as { message?: string }).message || "Failed to send verification code");
+		} finally {
+			setIsSending(false);
+		}
+	};
+
+	// Resend OTP
+	const handleResend = async () => {
+		if (!walletContext.publicKey || !pendingEmail || cooldown > 0 || isSending) return;
+		try {
+			setIsSending(true);
+			setDigits(["", "", "", "", "", ""]);
+			setOtpError(null);
+			const result = await fetchApi<{ maskedEmail: string }>("/auth/email/otp/send", {
+				method: "POST",
+				body: JSON.stringify({
+					email: pendingEmail,
+					walletPubkey: walletContext.publicKey.toBase58(),
+				}),
+			});
+			setMaskedEmail(result.maskedEmail);
+			setCooldown(60);
+			inputRefs.current[0]?.focus();
+		} catch (err: unknown) {
+			toast.error((err as { message?: string }).message || "Failed to resend code");
+		} finally {
+			setIsSending(false);
+		}
+	};
+
+	// Step 2 → 3: verify OTP then run on-chain update
+	const triggerVerify = async (code: string) => {
+		if (!walletContext.publicKey || !walletContext.signTransaction) return;
+		try {
+			setIsVerifying(true);
+			const verifyResult = await fetchApi<{ verified: boolean; error?: string }>(
+				"/auth/email/otp/verify",
+				{
+					method: "POST",
+					body: JSON.stringify({
+						email: pendingEmail,
+						code,
+						walletPubkey: walletContext.publicKey.toBase58(),
+					}),
+				},
+			);
+
+			if (!verifyResult.verified) {
+				setOtpError(verifyResult.error || "Incorrect code — please try again");
+				setDigits(["", "", "", "", "", ""]);
+				inputRefs.current[0]?.focus();
+				setIsVerifying(false);
+				return;
+			}
+
+			setIsVerifying(false);
 			setIsSubmitting(true);
 
 			// Check SOL balance before proceeding
 			await checkAndAirdrop(0.01);
 
 			setIsEncrypting(true);
-
-			// 1. Encrypt email in browser
-			const { encryptedEmail, nonce } = await encryptEmail(data.newEmail, walletContext.publicKey);
+			const { encryptedEmail, nonce } = await encryptEmail(pendingEmail, walletContext.publicKey);
 			setIsEncrypting(false);
 
-			// 2. Convert Uint8Array to base64 strings for JSON transport
 			const encryptedEmailBase64 = Buffer.from(encryptedEmail).toString("base64");
 			const nonceBase64 = Buffer.from(nonce).toString("base64");
 
-			// 3. Request transaction from backend
 			const { serializedTransaction } = await fetchApi<{ serializedTransaction: string }>(
 				"/portal/email/transaction",
 				{
 					method: "POST",
 					body: JSON.stringify({
-						newEmail: data.newEmail, // sent for hashing in backend
+						newEmail: pendingEmail,
 						encryptedEmail: encryptedEmailBase64,
 						nonce: nonceBase64,
 					}),
-				}
+				},
 			);
 
-			// 4. Sign and send (with retry on blockhash expiry)
 			const sendAndConfirmWithRetry = async (attempt = 1): Promise<void> => {
 				const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 				const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
@@ -90,61 +224,160 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 			};
 			await sendAndConfirmWithRetry();
 
-			// 5. Sync email hash to database (off-chain)
 			await fetchApi("/portal/email", {
 				method: "PATCH",
-				body: JSON.stringify({ email: data.newEmail }),
+				body: JSON.stringify({ email: pendingEmail }),
 			});
 
 			toast.success("Email updated successfully");
-			reset();
-			onClose();
+			handleClose();
 		} catch (err: unknown) {
 			console.error("Update email error:", err);
 			toast.error((err as { message?: string }).message || "Failed to update email");
 		} finally {
+			setIsVerifying(false);
 			setIsSubmitting(false);
 			setIsEncrypting(false);
 		}
 	};
 
-	return (
-		<Modal open={isOpen} onOpenChange={(val) => !val && onClose()}>
-			<ModalTitle className="text-xl font-extrabold mb-4">Update Email Address</ModalTitle>
-			<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-				<div>
-					<label className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-1.5 block">
-						New Email
-					</label>
-					<Input {...register("newEmail")} placeholder="alice@example.com" />
-					{errors.newEmail?.message && (
-						<span className="text-red text-xs mt-1 block">{errors.newEmail.message}</span>
-					)}
-				</div>
-				<div>
-					<label className="text-[13px] font-bold text-slate-500 dark:text-text-muted uppercase tracking-widest mb-1.5 block">
-						Confirm Email
-					</label>
-					<Input {...register("confirmEmail")} placeholder="alice@example.com" />
-					{errors.confirmEmail?.message && (
-						<span className="text-red text-xs mt-1 block">{errors.confirmEmail.message}</span>
-					)}
-				</div>
+	const signingLabel = isEncrypting ? "Encrypting…" : isSubmitting ? "Signing…" : "Confirm update";
 
-				<div className="flex gap-3 mt-4">
-					<Button
-						variant="secondary"
-						className="flex-1 justify-center"
-						onClick={onClose}
-						type="button"
-					>
-						Cancel
-					</Button>
-					<Button className="flex-1 justify-center" type="submit" disabled={isSubmitting}>
-						{isEncrypting ? "Encrypting..." : isSubmitting ? "Signing..." : "Update Email"}
-					</Button>
+	return (
+		<Modal open={isOpen} onOpenChange={(val) => !val && handleClose()}>
+			<ModalTitle className="text-xl font-extrabold mb-1">Update Email Address</ModalTitle>
+
+			{/* Step indicators */}
+			<div className="flex items-center gap-2 mb-6 mt-2">
+				{(["email", "otp", "sign"] as Step[]).map((s, i) => (
+					<div key={s} className="flex items-center gap-2">
+						<div className={cn(
+							"w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-colors",
+							step === s
+								? "bg-teal border-teal text-navy"
+								: (["email", "otp", "sign"].indexOf(step) > i)
+									? "bg-teal/20 border-teal/40 text-teal"
+									: "bg-transparent border-border text-text-muted"
+						)}>
+							{i + 1}
+						</div>
+						<span className={cn(
+							"text-[11px] font-semibold",
+							step === s ? "text-text-primary" : "text-text-muted"
+						)}>
+							{s === "email" ? "New email" : s === "otp" ? "Verify" : "Confirm"}
+						</span>
+						{i < 2 && <div className="w-6 h-px bg-border" />}
+					</div>
+				))}
+			</div>
+
+			{/* Step 1: Email + confirm */}
+			{step === "email" && (
+				<form onSubmit={handleSubmit(onEmailSubmit)} className="flex flex-col gap-4">
+					<div>
+						<label className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-1.5 block">
+							New Email
+						</label>
+						<Input {...register("newEmail")} placeholder="alice@example.com" />
+						{errors.newEmail?.message && (
+							<span className="text-red-400 text-xs mt-1 block">{errors.newEmail.message}</span>
+						)}
+					</div>
+					<div>
+						<label className="text-[13px] font-bold text-text-muted uppercase tracking-widest mb-1.5 block">
+							Confirm Email
+						</label>
+						<Input {...register("confirmEmail")} placeholder="alice@example.com" />
+						{errors.confirmEmail?.message && (
+							<span className="text-red-400 text-xs mt-1 block">{errors.confirmEmail.message}</span>
+						)}
+					</div>
+					<div className="flex gap-3 mt-2">
+						<Button variant="secondary" className="shrink-0 justify-center" onClick={handleClose} type="button">
+							Cancel
+						</Button>
+						<Button className="flex-1 justify-center whitespace-nowrap" type="submit" disabled={isSending}>
+							{isSending ? "Sending…" : "Send code"}
+						</Button>
+					</div>
+				</form>
+			)}
+
+			{/* Step 2: OTP */}
+			{step === "otp" && (
+				<div className="flex flex-col gap-4">
+					<p className="text-sm text-text-muted">
+						A 6-digit code was sent to{" "}
+						<span className="font-semibold text-text-primary">{maskedEmail}</span>.
+					</p>
+
+					{/* Pin boxes */}
+					<div className="flex gap-2 sm:gap-3 justify-center" onPaste={handlePaste}>
+						{digits.map((digit, i) => (
+							<input
+								key={i}
+								ref={(el) => { inputRefs.current[i] = el; }}
+								type="text"
+								inputMode="numeric"
+								maxLength={1}
+								value={digit}
+								onChange={(e) => handleDigitChange(i, e.target.value)}
+								onKeyDown={(e) => handleDigitKeyDown(i, e)}
+								autoFocus={i === 0}
+								className={cn(
+									"w-11 h-14 sm:w-12 sm:h-14 text-center text-xl font-bold rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 bg-navy-2 text-text-primary caret-transparent select-none",
+									otpError
+										? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+										: digit
+											? "border-teal focus:border-teal focus:ring-teal/30"
+											: "border-border-2 focus:border-teal/60 focus:ring-teal/20"
+								)}
+								aria-label={`Digit ${i + 1}`}
+							/>
+						))}
+					</div>
+
+					{otpError && (
+						<p className="text-xs text-red-400 text-center -mt-2">
+							{otpError}
+						</p>
+					)}
+
+					<div className="flex items-center justify-between text-xs">
+						<button
+							onClick={() => setStep("email")}
+							className="text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
+						>
+							← Change email
+						</button>
+						{cooldown > 0 ? (
+							<span className="text-text-muted">Resend in {cooldown}s</span>
+						) : (
+							<button
+								onClick={handleResend}
+								disabled={isSending}
+								className="text-teal hover:text-teal/80 font-semibold transition-colors cursor-pointer disabled:opacity-50"
+							>
+								{isSending ? "Sending…" : "Resend code"}
+							</button>
+						)}
+					</div>
+
+					<div className="flex gap-3">
+						<Button variant="secondary" className="shrink-0" onClick={handleClose} type="button">
+							Cancel
+						</Button>
+						<Button
+							className="flex-1 whitespace-nowrap"
+							onClick={() => triggerVerify(digits.join(""))}
+							disabled={!digits.every((d) => d !== "") || isVerifying || isSubmitting}
+						>
+							{isVerifying ? "Verifying…" : signingLabel}
+						</Button>
+					</div>
 				</div>
-			</form>
+			)}
 		</Modal>
 	);
 }

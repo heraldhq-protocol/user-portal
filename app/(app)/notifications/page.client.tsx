@@ -3,6 +3,7 @@
 import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { NotificationList } from "@/components/notifications/NotificationList";
+import { DeliveryHealth } from "@/components/dashboard/DeliveryHealth";
 import { type Notification } from "@/types";
 import { fetchApi } from "@/lib/api";
 import { useDecryptNotifications } from "@/hooks/useDecryptNotifications";
@@ -203,7 +204,8 @@ export default function NotificationsPage() {
 						</div>
 					</motion.div>
 				) : (
-					<div className="flex-1 min-h-0 bg-transparent">
+					<div className="flex-1 min-h-0 bg-transparent flex flex-col">
+						<DeliveryHealth />
 						<NotificationList
 							notifications={notifications}
 							protocols={protocols}

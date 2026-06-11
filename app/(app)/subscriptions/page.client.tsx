@@ -9,6 +9,7 @@ import {
 	useUnsubscribeProtocol,
 	useResubscribeProtocol,
 } from "@/hooks/useProtocolSubscriptions";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 
 export default function SubscriptionsPage() {
 	const { data: subscriptions, isLoading, isError } = useProtocolSubscriptions();
@@ -43,6 +44,8 @@ export default function SubscriptionsPage() {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.4 }}
 				>
+					<OnboardingChecklist />
+
 					<div className="mb-8">
 						<h1 className="text-xl sm:text-[28px] font-extrabold tracking-tight mb-1.5">
 							Protocol subscriptions

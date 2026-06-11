@@ -75,7 +75,7 @@ function ProtocolGroup({
 								ease: [0.22, 1, 0.36, 1],
 							}}
 						>
-							<NotificationCard notification={n} />
+							<NotificationCard notification={n} protocolMeta={protocolMeta} />
 						</motion.div>
 					))}
 				</div>

@@ -13,7 +13,6 @@ interface ChannelStatusCardProps {
 	description?: string;
 	actionText: string;
 	onAction: () => void;
-	actionVariant?: "primary" | "secondary" | "outline";
 	comingSoon?: boolean;
 }
 
@@ -24,9 +23,9 @@ export function ChannelStatusCard({
 	description,
 	actionText,
 	onAction,
-	actionVariant = "secondary",
 	comingSoon = false,
 }: ChannelStatusCardProps) {
+	const actionVariant = comingSoon ? "outline" : status === "disconnected" ? "primary" : "secondary";
 	return (
 		<Card className={cn("mb-4 group", status === "connected" && "group-hover:border-teal/50")}>
 			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -67,22 +66,13 @@ export function ChannelStatusCard({
 					</div>
 				</div>
 				<Button
-					variant={
-						status === "connected" && actionVariant !== "secondary"
-							? "primary"
-							: comingSoon
-								? "outline"
-								: actionVariant
-					}
+					variant={actionVariant}
 					size="sm"
 					onClick={onAction}
 					disabled={status === "loading" || comingSoon}
 					className={cn(
 						"w-full sm:w-auto shrink-0",
-						comingSoon &&
-							"border-dashed opacity-60 cursor-not-allowed hover:border-solid hover:bg-slate-100 hover:opacity-80",
-						!comingSoon && actionVariant !== "secondary" && "hover:bg-teal/90",
-						status === "connected" && actionVariant !== "secondary" && "hover:text-white"
+						comingSoon && "border-dashed opacity-60 cursor-not-allowed"
 					)}
 				>
 					{comingSoon ? "Coming soon" : actionText}

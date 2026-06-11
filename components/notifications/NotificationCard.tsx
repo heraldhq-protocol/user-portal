@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { cn, relativeTime, truncateAddress } from "@/lib/utils";
 import { type Notification, type NotificationStatus } from "@/types";
-import { Lock, CheckCircle2, XCircle, Clock, Ban, AlertTriangle, Flag } from "lucide-react";
+import { Lock, CheckCircle2, XCircle, Clock, Ban, AlertTriangle, Flag, Info } from "lucide-react";
 import {
 	Dialog,
 	DialogContent,
@@ -14,6 +14,11 @@ import {
 	DialogDescription,
 	DialogFooter,
 } from "@/components/ui/dialog";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import { fetchApi } from "@/lib/api";
 
 const statusConfig: Record<NotificationStatus, { dot: string; label: string; Icon: typeof CheckCircle2 }> = {
@@ -64,7 +69,15 @@ const REPORT_REASONS = [
 
 type ReportReason = (typeof REPORT_REASONS)[number]["value"];
 
-export function NotificationCard({ notification }: { notification: Notification }) {
+type ProtocolMeta = { name: string | null; logoUrl: string | null; websiteUrl: string | null };
+
+export function NotificationCard({
+	notification,
+	protocolMeta,
+}: {
+	notification: Notification;
+	protocolMeta?: ProtocolMeta;
+}) {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [reason, setReason] = useState<ReportReason | null>(null);
 	const [details, setDetails] = useState("");
@@ -115,6 +128,63 @@ export function NotificationCard({ notification }: { notification: Notification 
 		)}>
 			{/* Subtle shine effect on hover */}
 			<div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 pointer-events-none" />
+
+			{/* Attribution info button */}
+			<Popover>
+				<PopoverTrigger asChild>
+					<button
+						onClick={(e) => e.stopPropagation()}
+						className="absolute top-3 right-9 p-1 rounded opacity-0 group-hover:opacity-100 transition-all text-text-muted hover:text-teal hover:bg-teal/10"
+						title="Why did I get this?"
+					>
+						<Info className="size-3.5" />
+					</button>
+				</PopoverTrigger>
+				<PopoverContent align="end" className="w-64 text-xs space-y-2.5">
+					<p className="font-bold text-text-primary text-[11px] uppercase tracking-wide">
+						Why did I get this?
+					</p>
+					<div className="space-y-1.5">
+						<div className="flex justify-between gap-2">
+							<span className="text-text-muted">Protocol</span>
+							<span className="font-semibold text-text-secondary text-right truncate max-w-[140px]">
+								{protocolMeta?.name ?? notification.protocolId}
+							</span>
+						</div>
+						<div className="flex justify-between gap-2">
+							<span className="text-text-muted">Category</span>
+							<span className="font-semibold text-text-secondary capitalize">
+								{notification.category}
+							</span>
+						</div>
+						{notification.queuedAt && (
+							<div className="flex justify-between gap-2">
+								<span className="text-text-muted">Queued</span>
+								<span className="font-semibold text-text-secondary">
+									{new Date(notification.queuedAt).toLocaleString(undefined, {
+										month: "short", day: "numeric",
+										hour: "numeric", minute: "2-digit",
+									})}
+								</span>
+							</div>
+						)}
+						{notification.deliveredAt && (
+							<div className="flex justify-between gap-2">
+								<span className="text-text-muted">Delivered</span>
+								<span className="font-semibold text-text-secondary">
+									{new Date(notification.deliveredAt).toLocaleString(undefined, {
+										month: "short", day: "numeric",
+										hour: "numeric", minute: "2-digit",
+									})}
+								</span>
+							</div>
+						)}
+					</div>
+					<p className="text-[10px] text-text-muted border-t border-border pt-2">
+						You&apos;re subscribed to {protocolMeta?.name ?? notification.protocolId} on Herald.
+					</p>
+				</PopoverContent>
+			</Popover>
 
 			{/* Report abuse button — visible on hover (or permanently if reported) */}
 			<button

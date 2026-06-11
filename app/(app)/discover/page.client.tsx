@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Globe, Check, Plus, Loader2, Search, BadgeCheck } from "lucide-react";
+import { Globe, Check, Plus, Loader2, Search, BadgeCheck, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type DiscoverableProtocol, type NotificationCategory } from "@/types";
 import {
@@ -37,6 +37,15 @@ function ProtocolCard({ protocol }: { protocol: DiscoverableProtocol }) {
 	const subscribe = useSubscribeToProtocol();
 	const unsubscribe = useDiscoverUnsubscribe();
 	const isPending = subscribe.isPending || unsubscribe.isPending;
+	const [copied, setCopied] = useState(false);
+
+	const handleShare = () => {
+		const url = `https://notify.useherald.xyz/join/${protocol.protocolId}`;
+		navigator.clipboard.writeText(url).then(() => {
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		}).catch(() => {});
+	};
 
 	const handleToggle = () => {
 		if (isPending) return;
@@ -89,25 +98,34 @@ function ProtocolCard({ protocol }: { protocol: DiscoverableProtocol }) {
 						)}
 					</div>
 
-					<button
-						onClick={handleToggle}
-						disabled={isPending}
-						className={cn(
-							"flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 border shrink-0 cursor-pointer disabled:opacity-60",
-							protocol.isSubscribed
-								? "bg-teal/10 text-teal border-teal/30 hover:bg-herald-red/10 hover:text-[#EF4444] hover:border-herald-red/30"
-								: "bg-teal text-navy border-transparent hover:bg-teal-2"
-						)}
-					>
-						{isPending ? (
-							<Loader2 className="size-3 animate-spin" />
-						) : protocol.isSubscribed ? (
-							<Check className="size-3" />
-						) : (
-							<Plus className="size-3" />
-						)}
-						{protocol.isSubscribed ? "Subscribed" : "Subscribe"}
-					</button>
+					<div className="flex items-center gap-2 shrink-0">
+						<button
+							onClick={handleShare}
+							title="Copy join link"
+							className="p-1.5 rounded-lg text-text-muted border border-border-2 hover:text-teal hover:border-teal/40 transition-colors cursor-pointer"
+						>
+							{copied ? <Check className="size-3 text-teal" /> : <Share2 className="size-3" />}
+						</button>
+						<button
+							onClick={handleToggle}
+							disabled={isPending}
+							className={cn(
+								"flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 border shrink-0 cursor-pointer disabled:opacity-60",
+								protocol.isSubscribed
+									? "bg-teal/10 text-teal border-teal/30 hover:bg-herald-red/10 hover:text-[#EF4444] hover:border-herald-red/30"
+									: "bg-teal text-navy border-transparent hover:bg-teal-2"
+							)}
+						>
+							{isPending ? (
+								<Loader2 className="size-3 animate-spin" />
+							) : protocol.isSubscribed ? (
+								<Check className="size-3" />
+							) : (
+								<Plus className="size-3" />
+							)}
+							{protocol.isSubscribed ? "Subscribed" : "Subscribe"}
+						</button>
+					</div>
 				</div>
 
 				{/* Categories */}
