@@ -7,8 +7,11 @@ import { type Notification, type NotificationCategory } from "@/types";
 import { NotificationCard } from "./NotificationCard";
 import { Search, ChevronDown, ChevronRight } from "lucide-react";
 
+type ProtocolMeta = { name: string | null; logoUrl: string | null; websiteUrl: string | null };
+
 interface NotificationListProps {
 	notifications: Notification[];
+	protocols?: Record<string, ProtocolMeta>;
 	isLoading: boolean;
 }
 
@@ -22,10 +25,12 @@ const CATEGORIES: { value: "all" | NotificationCategory; label: string }[] = [
 
 function ProtocolGroup({
 	protocolId,
+	protocolMeta,
 	notifications,
 	defaultExpanded,
 }: {
 	protocolId: string;
+	protocolMeta?: ProtocolMeta;
 	notifications: Notification[];
 	defaultExpanded: boolean;
 }) {
@@ -45,7 +50,7 @@ function ProtocolGroup({
 					<ChevronRight className="size-4 text-text-muted group-hover:text-text-secondary transition-colors shrink-0" />
 				)}
 				<span className="text-sm font-bold text-text-secondary group-hover:text-white transition-colors">
-					{protocolId}
+					{protocolMeta?.name ?? protocolId}
 				</span>
 				<span className="text-[11px] font-medium text-text-muted">
 					{notifications.length}
@@ -79,7 +84,7 @@ function ProtocolGroup({
 	);
 }
 
-export function NotificationList({ notifications, isLoading }: NotificationListProps) {
+export function NotificationList({ notifications, protocols = {}, isLoading }: NotificationListProps) {
 	const [category, setCategory] = useState<"all" | NotificationCategory>("all");
 	const [timeRange, setTimeRange] = useState<"all" | "30d">("all");
 	const [searchQuery, setSearchQuery] = useState("");
@@ -98,8 +103,9 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 				const q = searchQuery.toLowerCase();
 				const inSubject = n.subject?.toLowerCase().includes(q);
 				const inMessage = n.message?.toLowerCase().includes(q);
-				const inProtocol = n.protocolId?.toLowerCase().includes(q);
-				if (!inSubject && !inMessage && !inProtocol) return false;
+				const inProtocolId = n.protocolId?.toLowerCase().includes(q);
+				const inProtocolName = n.protocolId ? (protocols[n.protocolId]?.name ?? "").toLowerCase().includes(q) : false;
+				if (!inSubject && !inMessage && !inProtocolId && !inProtocolName) return false;
 			}
 			return true;
 		});
@@ -277,6 +283,7 @@ export function NotificationList({ notifications, isLoading }: NotificationListP
 							<ProtocolGroup
 								key={protocolId}
 								protocolId={protocolId}
+								protocolMeta={protocols[protocolId]}
 								notifications={protocolNotifications}
 								defaultExpanded={gi < 3}
 							/>

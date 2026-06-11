@@ -149,6 +149,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 									>
 										Subscriptions
 									</Link>
+									<Link
+										href="/discover"
+										className={cn(
+											"text-xs sm:text-sm transition-all duration-200",
+											pathname.startsWith("/discover")
+												? "text-teal font-bold"
+												: "text-text-muted hover:text-text-primary font-semibold"
+										)}
+									>
+										Discover
+									</Link>
 								</nav>
 							)}
 						</div>

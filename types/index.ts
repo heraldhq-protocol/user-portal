@@ -46,6 +46,15 @@ export interface ProtocolSubscription {
 	};
 }
 
+export interface DiscoverableProtocol {
+	protocolId: string;
+	name: string;
+	logoUrl: string | null;
+	websiteUrl: string | null;
+	categories: string[];
+	isSubscribed: boolean;
+}
+
 export interface IdentityStatus {
 	registered: boolean;
 	optIns?: {

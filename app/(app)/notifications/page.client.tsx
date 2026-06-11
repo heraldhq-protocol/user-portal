@@ -29,6 +29,7 @@ function saveDecryptionCache(cache: Record<string, { message?: string; subject?:
 
 export default function NotificationsPage() {
 	const [notifications, setNotifications] = useState<Notification[]>([]);
+	const [protocols, setProtocols] = useState<Record<string, { name: string | null; logoUrl: string | null; websiteUrl: string | null }>>({});
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const { decryptNotifications, isDecrypting } = useDecryptNotifications();
@@ -42,8 +43,12 @@ export default function NotificationsPage() {
 		setIsLoading(true);
 		setError(null);
 		try {
-			const data = await fetchApi<{ notifications: Notification[] }>("/portal/notifications");
+			const data = await fetchApi<{
+				notifications: Notification[];
+				protocols: Record<string, { name: string | null; logoUrl: string | null; websiteUrl: string | null }>;
+			}>("/portal/notifications?limit=200");
 			const fresh = data.notifications;
+			setProtocols(data.protocols ?? {});
 
 			const cache = loadDecryptionCache();
 			const merged = fresh.map((n) => {
@@ -201,6 +206,7 @@ export default function NotificationsPage() {
 					<div className="flex-1 min-h-0 bg-transparent">
 						<NotificationList
 							notifications={notifications}
+							protocols={protocols}
 							isLoading={isLoading}
 						/>
 					</div>
