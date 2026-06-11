@@ -13,6 +13,8 @@ type RegistrationPhase = 0 | 1 | 2 | 3 | 4 | 5;
 type RegistrationState = {
 	step: RegistrationStep;
 	email: string;
+	maskedEmail: string;
+	emailVerifiedToken: string | null;
 	optIns: { optInAll: boolean; defi: boolean; governance: boolean; marketing: boolean };
 	digestMode: boolean;
 	txSignature: string | null;
@@ -25,6 +27,8 @@ type UseRegistrationReturn = {
 	isRegistered: boolean;
 	isCheckingStatus: boolean;
 	setEmail: (email: string) => void;
+	setMaskedEmail: (masked: string) => void;
+	setEmailVerifiedToken: (token: string) => void;
 	setOptIns: (optIns: RegistrationState["optIns"]) => void;
 	setDigestMode: (v: boolean) => void;
 	goToStep: (step: RegistrationStep) => void;
@@ -42,6 +46,8 @@ export function useRegistration(): UseRegistrationReturn {
 	const [state, setState] = useState<RegistrationState>({
 		step: "connect",
 		email: "",
+		maskedEmail: "",
+		emailVerifiedToken: null,
 		optIns: { optInAll: true, defi: true, governance: true, marketing: false },
 		digestMode: false,
 		txSignature: null,
@@ -58,6 +64,8 @@ export function useRegistration(): UseRegistrationReturn {
 
 	// ─── State helpers ─────────────────────────────────────────────────────────
 	const setEmail = (email: string) => setState((s) => ({ ...s, email }));
+	const setMaskedEmail = (masked: string) => setState((s) => ({ ...s, maskedEmail: masked }));
+	const setEmailVerifiedToken = (token: string) => setState((s) => ({ ...s, emailVerifiedToken: token }));
 	const setOptIns = (optIns: RegistrationState["optIns"]) => setState((s) => ({ ...s, optIns }));
 	const setDigestMode = (v: boolean) => setState((s) => ({ ...s, digestMode: v }));
 	const goToStep = (step: RegistrationStep) => setState((s) => ({ ...s, step, error: null }));
@@ -221,6 +229,8 @@ export function useRegistration(): UseRegistrationReturn {
 		isRegistered,
 		isCheckingStatus,
 		setEmail,
+		setMaskedEmail,
+		setEmailVerifiedToken,
 		setOptIns,
 		setDigestMode,
 		goToStep,

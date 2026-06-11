@@ -71,7 +71,7 @@ export function StepEnterEmail({ email: initialEmail, onBack, onSubmit }: StepEn
     <div>
       <h2 className="text-[26px] font-extrabold tracking-tight mb-2">Your email address</h2>
       <p className="text-text-muted text-sm mb-6 leading-relaxed">
-        Encrypted in your browser before it leaves your device.
+        We&rsquo;ll send a one-time code to confirm it works. Your email is then encrypted in your browser — Herald never stores it in plaintext.
       </p>
 
       {/* Email input */}

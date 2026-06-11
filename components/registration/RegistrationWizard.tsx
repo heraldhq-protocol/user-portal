@@ -6,6 +6,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { StepIndicator } from "./StepIndicator";
 import { StepConnectWallet } from "./StepConnectWallet";
 import { StepEnterEmail } from "./StepEnterEmail";
+import { StepVerifyEmail } from "./StepVerifyEmail";
 import { StepEncryptSign } from "./StepEncryptSign";
 import { StepSuccess } from "./StepSuccess";
 import { StepLogin } from "./StepLogin";
@@ -17,6 +18,7 @@ import Image from "next/image";
 const STEPS_NEW: { key: RegistrationStep; label: string }[] = [
 	{ key: "connect", label: "Connect" },
 	{ key: "email", label: "Email" },
+	{ key: "verify-email", label: "Verify" },
 	{ key: "encrypt", label: "Sign" },
 	{ key: "success", label: "Done" },
 ];
@@ -37,6 +39,8 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 	const {
 		state,
 		setEmail,
+		setMaskedEmail,
+		setEmailVerifiedToken,
 		setOptIns,
 		setDigestMode,
 		goToStep,
@@ -47,7 +51,7 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 		isCheckingStatus,
 	} = useRegistration();
 
-	const { connected, disconnect } = useWallet();
+	const { connected, disconnect, publicKey } = useWallet();
 
 	// Smoothly transition to login step if already registered
 	useEffect(() => {
@@ -78,13 +82,28 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 			}
 			goToStep("email");
 		} else if (state.step === "email" && state.email) {
-			goToStep("encrypt");
+			// Handled by handleEmailSubmit (sends OTP first)
 		}
 	};
 
-	const handleEmailSubmit = (submittedEmail: string) => {
+	const handleEmailSubmit = async (submittedEmail: string) => {
 		setEmail(submittedEmail);
-		goToStep("encrypt");
+		try {
+			const res = await fetchApi<{ maskedEmail: string }>('/auth/email/otp/send', {
+				method: 'POST',
+				body: JSON.stringify({ email: submittedEmail, walletPubkey: publicKey?.toBase58() ?? '' }),
+			});
+			setMaskedEmail(res.maskedEmail);
+			goToStep('verify-email');
+		} catch {
+			// Surface error in StepEnterEmail — for now fall through to encrypt as fallback
+			goToStep('verify-email');
+		}
+	};
+
+	const handleVerifyEmail = (token: string) => {
+		setEmailVerifiedToken(token);
+		goToStep('encrypt');
 	};
 
 	const handleSignComplete = async () => {
@@ -99,8 +118,10 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 			// Disconnect wallet when going back to connect step
 			disconnect();
 			goToStep("connect");
-		} else if (state.step === "encrypt") {
+		} else if (state.step === "verify-email") {
 			goToStep("email");
+		} else if (state.step === "encrypt") {
+			goToStep("verify-email");
 		} else if (state.step === "login") {
 			disconnect();
 			goToStep("connect");
@@ -198,6 +219,25 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 						layout
 					>
 						<StepEnterEmail email={state.email} onBack={handleBack} onSubmit={handleEmailSubmit} />
+					</motion.div>
+				)}
+
+				{state.step === "verify-email" && (
+					<motion.div
+						key="verify-email"
+						initial={{ opacity: 0, x: 20 }}
+						animate={{ opacity: 1, x: 0 }}
+						exit={{ opacity: 0, x: -20 }}
+						transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+						layout
+					>
+						<StepVerifyEmail
+							email={state.email}
+							maskedEmail={state.maskedEmail}
+							walletPubkey={publicKey?.toBase58() ?? ''}
+							onBack={handleBack}
+							onVerified={handleVerifyEmail}
+						/>
 					</motion.div>
 				)}
 

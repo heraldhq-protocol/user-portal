@@ -24,7 +24,7 @@ export interface Notification {
 }
 
 /** Registration wizard step identifiers */
-export type RegistrationStep = "connect" | "email" | "encrypt" | "login" | "success";
+export type RegistrationStep = "connect" | "email" | "verify-email" | "encrypt" | "login" | "success";
 
 /** Wallet info for display */
 export interface WalletInfo {
