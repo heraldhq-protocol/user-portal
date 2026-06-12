@@ -270,7 +270,6 @@ export default function LandingPage() {
 	);
 
 	const activeMockup = CHANNEL_MOCKUPS[activeChannel];
-	const MockupIcon = activeMockup.icon;
 
 	return (
 		<div className="relative overflow-hidden selection:bg-teal/30">
