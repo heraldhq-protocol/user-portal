@@ -176,7 +176,7 @@ export function ProtocolSubscriptionCard({
 					: "bg-bg-surface border-border opacity-60"
 			)}
 		>
-			<div className="flex items-start gap-4">
+			<div className="flex items-start gap-3">
 				{/* Logo / fallback */}
 				<div className="shrink-0 w-10 h-10 rounded-xl bg-bg-surface border border-border flex items-center justify-center overflow-hidden">
 					{protocol.logoUrl ? (
@@ -189,21 +189,48 @@ export function ProtocolSubscriptionCard({
 					)}
 				</div>
 
-				{/* Info */}
+				{/* Info + actions */}
 				<div className="flex-1 min-w-0">
-					<div className="flex items-center gap-2 flex-wrap mb-1">
-						<span className="font-semibold text-sm text-text-primary truncate">
-							{displayName}
-						</span>
-						{!isActive && (
-							<Badge variant="warning" className="text-[10px] px-1.5 py-0.5">
-								Unsubscribed
-							</Badge>
-						)}
+					<div className="flex items-start gap-2">
+						{/* Protocol name + badge */}
+						<div className="flex-1 min-w-0">
+							<div className="flex items-center gap-2 flex-wrap mb-1">
+								<span className="font-semibold text-sm text-text-primary truncate">
+									{displayName}
+								</span>
+								{!isActive && (
+									<Badge variant="warning" className="text-[10px] px-1.5 py-0.5 shrink-0">
+										Unsubscribed
+									</Badge>
+								)}
+							</div>
+						</div>
+
+						{/* Action buttons — right-aligned */}
+						<div className="shrink-0 flex items-center gap-2">
+							{isActive ? (
+								<Button
+									variant="secondary"
+									onClick={onUnsubscribe}
+									disabled={isPending}
+									className="text-xs px-3 h-7"
+								>
+									{isPending ? "…" : "Unsub"}
+								</Button>
+							) : (
+								<Button
+									onClick={onResubscribe}
+									disabled={isPending}
+									className="text-xs px-3 h-7"
+								>
+									{isPending ? "…" : "Resub"}
+								</Button>
+							)}
+						</div>
 					</div>
 
 					{/* Channels */}
-					<div className="flex items-center gap-2 mb-2">
+					<div className="flex items-center gap-2 mb-1.5">
 						{channels.map((ch) => {
 							const Icon = CHANNEL_ICONS[ch] ?? Globe;
 							return (
@@ -220,7 +247,7 @@ export function ProtocolSubscriptionCard({
 
 					{/* Categories */}
 					{categories.length > 0 && (
-						<div className="flex flex-wrap gap-1 mb-2">
+						<div className="flex flex-wrap gap-1 mb-1.5">
 							{categories.map((cat) => (
 								<Badge key={cat} variant="info" className="text-[10px] px-1.5 py-0.5 capitalize">
 									{cat}
@@ -229,8 +256,9 @@ export function ProtocolSubscriptionCard({
 						</div>
 					)}
 
-					<div className="flex items-center justify-between gap-3 flex-wrap">
-						<span className="text-[11px] text-text-muted">
+					{/* Footer: date + website + preferences + share */}
+					<div className="flex items-center gap-3 flex-wrap mt-1">
+						<span className="text-[11px] text-text-muted shrink-0">
 							{isActive ? "Subscribed" : "Unsubscribed"} · {date}
 						</span>
 						{protocol.websiteUrl && (
@@ -238,53 +266,30 @@ export function ProtocolSubscriptionCard({
 								href={protocol.websiteUrl}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="text-[11px] text-teal hover:underline flex items-center gap-1"
+								className="text-[11px] text-teal hover:underline flex items-center gap-1 shrink-0"
 							>
 								<Globe size={10} />
 								Website
 							</a>
 						)}
-					</div>
-				</div>
-
-				{/* Actions */}
-				<div className="shrink-0 flex flex-col items-end gap-2">
-					{isActive ? (
-						<Button
-							variant="secondary"
-							onClick={onUnsubscribe}
-							disabled={isPending}
-							className="text-xs px-3 h-8"
-						>
-							{isPending ? "…" : "Unsubscribe"}
-						</Button>
-					) : (
-						<Button
-							onClick={onResubscribe}
-							disabled={isPending}
-							className="text-xs px-3 h-8"
-						>
-							{isPending ? "…" : "Re-subscribe"}
-						</Button>
-					)}
-
-					{isActive && (
+						{isActive && (
+							<button
+								onClick={() => setShowPrefs((v) => !v)}
+								className="flex items-center gap-1 text-[10px] font-semibold text-text-muted hover:text-teal transition-colors cursor-pointer shrink-0"
+							>
+								{showPrefs ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
+								Preferences
+							</button>
+						)}
 						<button
-							onClick={() => setShowPrefs((v) => !v)}
-							className="flex items-center gap-1 text-[10px] font-semibold text-text-muted hover:text-teal transition-colors cursor-pointer"
+							onClick={handleShare}
+							title="Copy join link"
+							className="flex items-center gap-1 text-[10px] font-semibold text-text-muted hover:text-teal transition-colors cursor-pointer shrink-0"
 						>
-							{showPrefs ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-							Preferences
+							{copied ? <Check size={11} className="text-teal" /> : <Share2 size={11} />}
+							{copied ? "Copied!" : "Share"}
 						</button>
-					)}
-					<button
-						onClick={handleShare}
-						title="Copy join link"
-						className="flex items-center gap-1 text-[10px] font-semibold text-text-muted hover:text-teal transition-colors cursor-pointer"
-					>
-						{copied ? <Check size={11} className="text-teal" /> : <Share2 size={11} />}
-						{copied ? "Copied!" : "Share"}
-					</button>
+					</div>
 				</div>
 			</div>
 

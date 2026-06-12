@@ -133,8 +133,8 @@ export default function NotificationsPage() {
 				transition={{ duration: 0.4 }}
 				className="flex flex-col h-full"
 			>
-				<div className="flex items-center justify-between mb-6 shrink-0">
-					<h1 className="text-[28px] font-extrabold tracking-tight">
+				<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6 shrink-0">
+					<h1 className="text-[24px] sm:text-[28px] font-extrabold tracking-tight">
 						Notification history
 					</h1>
 					{encryptedCount > 0 && (
@@ -143,7 +143,7 @@ export default function NotificationsPage() {
 							variant="secondary"
 							onClick={handleDecrypt}
 							disabled={isDecrypting}
-							className="gap-2"
+							className="gap-2 self-start sm:self-auto shrink-0"
 						>
 							{isDecrypting ? <Lock className="size-4 animate-pulse" /> : <LockOpen className="size-4" />}
 							{isDecrypting ? "Decrypting..." : `Decrypt ${encryptedCount} message${encryptedCount !== 1 ? "s" : ""}`}

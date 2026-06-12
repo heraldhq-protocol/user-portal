@@ -134,7 +134,7 @@ export function NotificationCard({
 				<PopoverTrigger asChild>
 					<button
 						onClick={(e) => e.stopPropagation()}
-						className="absolute top-3 right-9 p-1 rounded opacity-0 group-hover:opacity-100 transition-all text-text-muted hover:text-teal hover:bg-teal/10"
+						className="absolute top-3 right-9 p-1 rounded opacity-40 sm:opacity-0 sm:group-hover:opacity-100 transition-all text-text-muted hover:text-teal hover:bg-teal/10"
 						title="Why did I get this?"
 					>
 						<Info className="size-3.5" />
@@ -193,7 +193,7 @@ export function NotificationCard({
 					"absolute top-3 right-3 p-1 rounded transition-all",
 					reported
 						? "opacity-100 text-[#EF4444]"
-						: "opacity-0 group-hover:opacity-100 text-text-muted hover:text-[#EF4444] hover:bg-herald-red/10",
+						: "opacity-40 sm:opacity-0 sm:group-hover:opacity-100 text-text-muted hover:text-[#EF4444] hover:bg-herald-red/10",
 				)}
 				title={reported ? "Reported" : "Report abuse"}
 			>
@@ -215,14 +215,14 @@ export function NotificationCard({
 
 			<div className="flex-1 min-w-0 flex flex-col h-full relative z-10">
 				{/* Badge + protocol + time + status */}
-				<div className="flex items-center gap-2.5 mb-2">
+				<div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 mb-2">
 					<Badge
 						variant={notification.category}
-						className="uppercase px-2.5 py-0.5 text-[10px] tracking-wider font-extrabold"
+						className="uppercase px-2.5 py-0.5 text-[10px] tracking-wider font-extrabold shrink-0"
 					>
 						{notification.category}
 					</Badge>
-					<span className="text-[13px] font-bold text-text-secondary truncate tracking-tight">
+					<span className="text-[13px] font-bold text-text-secondary truncate tracking-tight min-w-0 max-w-[120px] sm:max-w-none">
 						{notification.protocolId}
 					</span>
 					<div className="flex items-center gap-1.5 ml-auto shrink-0">

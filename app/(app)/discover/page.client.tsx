@@ -188,7 +188,7 @@ export default function DiscoverPageClient() {
 				</div>
 
 				{/* Filters */}
-				<div className="flex flex-col gap-3 mb-6">
+				<div className="flex flex-col gap-2 mb-6">
 					{/* Search */}
 					<div className="relative">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-muted pointer-events-none" />
@@ -201,7 +201,7 @@ export default function DiscoverPageClient() {
 						/>
 					</div>
 
-					{/* Category pills + right-side toggles */}
+					{/* Category pills */}
 					<div className="flex flex-wrap items-center gap-2">
 						{FILTER_CATEGORIES.map((c) => (
 							<button
@@ -217,38 +217,38 @@ export default function DiscoverPageClient() {
 								{c.label}
 							</button>
 						))}
+					</div>
 
-						{/* Verified + subscription status pushed to the right */}
-						<div className="ml-auto flex items-center gap-2">
-							<button
-								onClick={() => setVerifiedOnly((v) => !v)}
-								className={cn(
-									"flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer whitespace-nowrap",
-									verifiedOnly
-										? "bg-teal/10 text-teal border-teal/30"
-										: "bg-transparent text-text-muted border-border-2 hover:border-teal/40"
-								)}
-							>
-								<BadgeCheck className="size-3.5" />
-								Verified
-							</button>
+					{/* Verified + subscription status filters */}
+					<div className="flex items-center gap-2 flex-wrap">
+						<button
+							onClick={() => setVerifiedOnly((v) => !v)}
+							className={cn(
+								"flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer whitespace-nowrap",
+								verifiedOnly
+									? "bg-teal/10 text-teal border-teal/30"
+									: "bg-transparent text-text-muted border-border-2 hover:border-teal/40"
+							)}
+						>
+							<BadgeCheck className="size-3.5" />
+							Verified
+						</button>
 
-							<div className="flex items-center gap-1 bg-navy-2 p-1 rounded-lg border border-border">
-								{(["all", "subscribed", "unsubscribed"] as const).map((s) => (
-									<button
-										key={s}
-										onClick={() => setFilterStatus(s)}
-										className={cn(
-											"px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors capitalize cursor-pointer",
-											filterStatus === s
-												? "bg-card border border-border text-white"
-												: "text-text-muted border border-transparent hover:text-text-secondary"
-										)}
-									>
-										{s}
-									</button>
-								))}
-							</div>
+						<div className="flex items-center gap-1 bg-navy-2 p-1 rounded-lg border border-border">
+							{(["all", "subscribed", "unsubscribed"] as const).map((s) => (
+								<button
+									key={s}
+									onClick={() => setFilterStatus(s)}
+									className={cn(
+										"px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors capitalize cursor-pointer",
+										filterStatus === s
+											? "bg-card border border-border text-white"
+											: "text-text-muted border border-transparent hover:text-text-secondary"
+									)}
+								>
+									{s}
+								</button>
+							))}
 						</div>
 					</div>
 				</div>

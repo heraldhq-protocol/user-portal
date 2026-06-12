@@ -63,7 +63,7 @@ function ProtocolGroup({
 				<div className="flex-1 border-b border-border/30 ml-2" />
 			</button>
 			{expanded && (
-				<div className="flex flex-col gap-2.5 pl-6">
+				<div className="flex flex-col gap-2.5 pl-3 sm:pl-6">
 					{notifications.map((n, i) => (
 						<motion.div
 							key={n.id}
