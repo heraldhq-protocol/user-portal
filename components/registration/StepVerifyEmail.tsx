@@ -209,7 +209,7 @@ export function StepVerifyEmail({
             ref={(el) => { inputRefs.current[i] = el; }}
             type="text"
             inputMode="numeric"
-            maxLength={1}
+            maxLength={6}
             value={digit}
             onChange={(e) => handleDigitChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}

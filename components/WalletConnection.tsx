@@ -1,6 +1,7 @@
 "use client";
 
 import { WalletProvider, ConnectionProvider } from "@solana/wallet-adapter-react";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import {
 	CoinbaseWalletAdapter,
 	LedgerWalletAdapter,
@@ -13,6 +14,11 @@ import { type SolanaCluster } from "@herald-protocol/sdk";
 import { IframeWalletAdapter } from "@/lib/iframe-wallet-adapter";
 
 export function WalletConnection({ children }: Readonly<{ children: React.ReactNode }>) {
+	// Clean the environment variable (handle quotes or extra whitespace)
+	const customRpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
+	const rawCluster = process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet";
+	const cluster = rawCluster.replace(/['"]+/g, "").trim() as SolanaCluster;
+
 	const wallets = useMemo(
 		() => {
 			if (typeof window !== "undefined") {
@@ -21,20 +27,23 @@ export function WalletConnection({ children }: Readonly<{ children: React.ReactN
 					return [new IframeWalletAdapter()];
 				}
 			}
+
+			const rawClusterStr = (process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet").replace(/['"]+/g, "").trim().toLowerCase();
+			const network = rawClusterStr.includes("mainnet")
+				? WalletAdapterNetwork.Mainnet
+				: rawClusterStr.includes("testnet")
+					? WalletAdapterNetwork.Testnet
+					: WalletAdapterNetwork.Devnet;
+
 			return [
-				new PhantomWalletAdapter(),
-				new SolflareWalletAdapter(),
+				new PhantomWalletAdapter({ network }),
+				new SolflareWalletAdapter({ network }),
 				new CoinbaseWalletAdapter(),
 				new LedgerWalletAdapter(),
 			];
 		},
 		[]
 	);
-
-	// Clean the environment variable (handle quotes or extra whitespace)
-	const customRpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL;
-	const rawCluster = process.env.NEXT_PUBLIC_RPC_CLUSTER || "devnet";
-	const cluster = rawCluster.replace(/['"]+/g, "").trim() as SolanaCluster;
 
 	const endpoint = useMemo(() => {
 		if (customRpcUrl) {

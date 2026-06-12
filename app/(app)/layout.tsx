@@ -158,6 +158,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 						{/* Right: badges + theme + disconnect (desktop) + hamburger (mobile) */}
 						<div className="flex items-center gap-2 sm:gap-4">
 							<WalletStatusBadge />
+							{process.env.NEXT_PUBLIC_RPC_CLUSTER && process.env.NEXT_PUBLIC_RPC_CLUSTER.replace(/['"]+/g, "").trim() !== "mainnet-beta" && (
+								<span className="px-2 py-0.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-[9px] font-bold text-amber-500 uppercase tracking-wider shrink-0">
+									{process.env.NEXT_PUBLIC_RPC_CLUSTER.replace(/['"]+/g, "").trim()}
+								</span>
+							)}
 
 							{publicKey && (
 								<div className="hidden lg:block">
@@ -253,7 +258,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 								</div>
 							)}
 							<div className="flex items-center justify-between">
-								<WalletStatusBadge />
+								<div className="flex items-center gap-2">
+									<WalletStatusBadge />
+									{process.env.NEXT_PUBLIC_RPC_CLUSTER && process.env.NEXT_PUBLIC_RPC_CLUSTER.replace(/['"]+/g, "").trim() !== "mainnet-beta" && (
+										<span className="px-2 py-0.5 rounded-md border border-amber-500/30 bg-amber-500/10 text-[9px] font-bold text-amber-500 uppercase tracking-wider shrink-0">
+											{process.env.NEXT_PUBLIC_RPC_CLUSTER.replace(/['"]+/g, "").trim()}
+										</span>
+									)}
+								</div>
 								<div className="flex items-center gap-2">
 									<ThemeToggle />
 									<button
