@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { StepIndicator } from "./StepIndicator";
@@ -53,6 +53,9 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 
 	const { connected, disconnect, publicKey } = useWallet();
 
+	const [otpAlreadySent, setOtpAlreadySent] = useState(false);
+	const [otpMinutesRemaining, setOtpMinutesRemaining] = useState<number | undefined>();
+
 	// Smoothly transition to login step if already registered
 	useEffect(() => {
 		if (connected && isRegistered && !isCheckingStatus && state.step === "connect") {
@@ -89,14 +92,18 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 	const handleEmailSubmit = async (submittedEmail: string) => {
 		setEmail(submittedEmail);
 		try {
-			const res = await fetchApi<{ maskedEmail: string }>('/auth/email/otp/send', {
+			const res = await fetchApi<{ maskedEmail: string; alreadySent: boolean; minutesRemaining?: number }>('/auth/email/otp/send', {
 				method: 'POST',
 				body: JSON.stringify({ email: submittedEmail, walletPubkey: publicKey?.toBase58() ?? '' }),
 			});
 			setMaskedEmail(res.maskedEmail);
+			setOtpAlreadySent(res.alreadySent);
+			setOtpMinutesRemaining(res.minutesRemaining);
 			goToStep('verify-email');
 		} catch {
-			// Surface error in StepEnterEmail — for now fall through to encrypt as fallback
+			// Surface error in StepEnterEmail — for now fall through to verify as fallback
+			setOtpAlreadySent(false);
+			setOtpMinutesRemaining(undefined);
 			goToStep('verify-email');
 		}
 	};
@@ -237,6 +244,8 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 							walletPubkey={publicKey?.toBase58() ?? ''}
 							onBack={handleBack}
 							onVerified={handleVerifyEmail}
+							alreadySent={otpAlreadySent}
+							minutesRemaining={otpMinutesRemaining}
 						/>
 					</motion.div>
 				)}

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Loader2, Mail, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { fetchApi } from '@/lib/api';
+import { saveOtpSession, getValidOtpSession } from '@/lib/otpSession';
 
 interface StepVerifyEmailProps {
   email: string;
@@ -12,6 +13,8 @@ interface StepVerifyEmailProps {
   walletPubkey: string;
   onBack: () => void;
   onVerified: (emailVerifiedToken: string) => void;
+  alreadySent?: boolean;
+  minutesRemaining?: number;
 }
 
 const RESEND_COOLDOWN = 60; // seconds
@@ -22,13 +25,24 @@ export function StepVerifyEmail({
   walletPubkey,
   onBack,
   onVerified,
+  alreadySent = false,
+  minutesRemaining,
 }: StepVerifyEmailProps) {
   const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [error, setError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
-  const [cooldown, setCooldown] = useState(RESEND_COOLDOWN);
+  // If OTP was already sent (page refresh scenario), don't start the resend cooldown —
+  // the user can resend immediately if they want a fresh code.
+  const [cooldown, setCooldown] = useState(alreadySent ? 0 : RESEND_COOLDOWN);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Skip OTP entirely if this email was already verified recently (cached session)
+  useEffect(() => {
+    const cached = getValidOtpSession(email, walletPubkey);
+    if (cached) onVerified(cached);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Start cooldown timer immediately (OTP was just sent by the previous step)
   useEffect(() => {
@@ -103,6 +117,7 @@ export function StepVerifyEmail({
           },
         );
         if (res.verified && res.emailVerifiedToken) {
+          saveOtpSession(email, walletPubkey, res.emailVerifiedToken);
           onVerified(res.emailVerifiedToken);
         } else {
           setError(res.error ?? 'Verification failed. Please try again.');
@@ -134,7 +149,8 @@ export function StepVerifyEmail({
     try {
       await fetchApi('/auth/email/otp/send', {
         method: 'POST',
-        body: JSON.stringify({ email, walletPubkey }),
+        // force: true — bypass idempotency and send a fresh code
+        body: JSON.stringify({ email, walletPubkey, force: true }),
       });
       setCooldown(RESEND_COOLDOWN);
       inputRefs.current[0]?.focus();
@@ -157,7 +173,13 @@ export function StepVerifyEmail({
       <p className="text-text-muted text-sm mb-1 leading-relaxed">
         We sent a 6-digit code to
       </p>
-      <p className="text-sm font-bold text-text-primary mb-6">{maskedEmail}</p>
+      <p className="text-sm font-bold text-text-primary mb-4">{maskedEmail}</p>
+
+      {alreadySent && minutesRemaining !== undefined && (
+        <div className="bg-teal/10 border border-teal/20 rounded-xl px-4 py-3 text-xs text-teal text-center mb-4">
+          A code was already sent — it expires in {minutesRemaining} min. Enter it below, or click &ldquo;Resend code&rdquo; for a fresh one.
+        </div>
+      )}
 
       {/* OTP digit inputs */}
       <div className="flex gap-2 sm:gap-3 mb-5 justify-center" onPaste={handlePaste}>

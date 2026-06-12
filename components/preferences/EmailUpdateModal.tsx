@@ -14,6 +14,7 @@ import { Transaction } from "@solana/web3.js";
 import { fetchApi } from "@/lib/api";
 import { useSolBalance } from "@/hooks/useSolBalance";
 import { cn } from "@/lib/utils";
+import { saveOtpSession, getValidOtpSession } from "@/lib/otpSession";
 
 type Step = "email" | "otp" | "sign";
 
@@ -34,6 +35,8 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 	const [otpError, setOtpError] = useState<string | null>(null);
 	const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 	const [cooldown, setCooldown] = useState(0);
+	const [otpAlreadySent, setOtpAlreadySent] = useState(false);
+	const [otpMinutesRemaining, setOtpMinutesRemaining] = useState<number | undefined>();
 	const [isSending, setIsSending] = useState(false);
 	const [isVerifying, setIsVerifying] = useState(false);
 	const [isEncrypting, setIsEncrypting] = useState(false);
@@ -61,6 +64,8 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 		setMaskedEmail("");
 		setDigits(["", "", "", "", "", ""]);
 		setOtpError(null);
+		setOtpAlreadySent(false);
+		setOtpMinutesRemaining(undefined);
 		onClose();
 	};
 
@@ -105,21 +110,32 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 		if (pasted.length === 6) triggerVerify(pasted);
 	};
 
-	// Step 1 → 2: send OTP to the new email
+	// Step 1 → 2: send OTP, or skip to signing if already verified recently
 	const onEmailSubmit = async (data: EmailUpdateFormData) => {
 		if (!walletContext.publicKey) return;
+		const walletPubkey = walletContext.publicKey.toBase58();
+
+		// Skip OTP entirely if this email was verified in this session
+		const cached = getValidOtpSession(data.newEmail, walletPubkey);
+		if (cached) {
+			setPendingEmail(data.newEmail);
+			await runOnChainUpdate(data.newEmail);
+			return;
+		}
+
 		try {
 			setIsSending(true);
-			const result = await fetchApi<{ maskedEmail: string }>("/auth/email/otp/send", {
+			const result = await fetchApi<{ maskedEmail: string; alreadySent: boolean; minutesRemaining?: number }>("/auth/email/otp/send", {
 				method: "POST",
-				body: JSON.stringify({
-					email: data.newEmail,
-					walletPubkey: walletContext.publicKey.toBase58(),
-				}),
+				body: JSON.stringify({ email: data.newEmail, walletPubkey }),
 			});
 			setPendingEmail(data.newEmail);
 			setMaskedEmail(result.maskedEmail);
-			setCooldown(60);
+			setOtpAlreadySent(result.alreadySent);
+			setOtpMinutesRemaining(result.minutesRemaining);
+			// Only start 60s resend cooldown for a freshly sent OTP; if reusing an existing
+			// one the user can resend immediately.
+			if (!result.alreadySent) setCooldown(60);
 			setStep("otp");
 		} catch (err: unknown) {
 			toast.error((err as { message?: string }).message || "Failed to send verification code");
@@ -128,21 +144,24 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 		}
 	};
 
-	// Resend OTP
+	// Resend OTP — always force a fresh code
 	const handleResend = async () => {
 		if (!walletContext.publicKey || !pendingEmail || cooldown > 0 || isSending) return;
 		try {
 			setIsSending(true);
 			setDigits(["", "", "", "", "", ""]);
 			setOtpError(null);
-			const result = await fetchApi<{ maskedEmail: string }>("/auth/email/otp/send", {
+			const result = await fetchApi<{ maskedEmail: string; alreadySent: boolean }>("/auth/email/otp/send", {
 				method: "POST",
 				body: JSON.stringify({
 					email: pendingEmail,
 					walletPubkey: walletContext.publicKey.toBase58(),
+					force: true,
 				}),
 			});
 			setMaskedEmail(result.maskedEmail);
+			setOtpAlreadySent(false);
+			setOtpMinutesRemaining(undefined);
 			setCooldown(60);
 			inputRefs.current[0]?.focus();
 		} catch (err: unknown) {
@@ -152,39 +171,15 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 		}
 	};
 
-	// Step 2 → 3: verify OTP then run on-chain update
-	const triggerVerify = async (code: string) => {
+	// On-chain email update (runs after OTP verified or cache hit)
+	const runOnChainUpdate = async (email: string) => {
 		if (!walletContext.publicKey || !walletContext.signTransaction) return;
 		try {
-			setIsVerifying(true);
-			const verifyResult = await fetchApi<{ verified: boolean; error?: string }>(
-				"/auth/email/otp/verify",
-				{
-					method: "POST",
-					body: JSON.stringify({
-						email: pendingEmail,
-						code,
-						walletPubkey: walletContext.publicKey.toBase58(),
-					}),
-				},
-			);
-
-			if (!verifyResult.verified) {
-				setOtpError(verifyResult.error || "Incorrect code — please try again");
-				setDigits(["", "", "", "", "", ""]);
-				inputRefs.current[0]?.focus();
-				setIsVerifying(false);
-				return;
-			}
-
-			setIsVerifying(false);
 			setIsSubmitting(true);
-
-			// Check SOL balance before proceeding
 			await checkAndAirdrop(0.01);
 
 			setIsEncrypting(true);
-			const { encryptedEmail, nonce } = await encryptEmail(pendingEmail, walletContext.publicKey);
+			const { encryptedEmail, nonce } = await encryptEmail(email, walletContext.publicKey);
 			setIsEncrypting(false);
 
 			const encryptedEmailBase64 = Buffer.from(encryptedEmail).toString("base64");
@@ -194,11 +189,7 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 				"/portal/email/transaction",
 				{
 					method: "POST",
-					body: JSON.stringify({
-						newEmail: pendingEmail,
-						encryptedEmail: encryptedEmailBase64,
-						nonce: nonceBase64,
-					}),
+					body: JSON.stringify({ newEmail: email, encryptedEmail: encryptedEmailBase64, nonce: nonceBase64 }),
 				},
 			);
 
@@ -207,10 +198,7 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 				const tx = Transaction.from(Buffer.from(serializedTransaction, "base64"));
 				tx.recentBlockhash = blockhash;
 				const signedTx = await walletContext.signTransaction!(tx);
-				const signature = await connection.sendRawTransaction(signedTx.serialize(), {
-					skipPreflight: true,
-					maxRetries: 3,
-				});
+				const signature = await connection.sendRawTransaction(signedTx.serialize(), { skipPreflight: true, maxRetries: 3 });
 				try {
 					await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
 				} catch (err: unknown) {
@@ -224,20 +212,50 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 			};
 			await sendAndConfirmWithRetry();
 
-			await fetchApi("/portal/email", {
-				method: "PATCH",
-				body: JSON.stringify({ email: pendingEmail }),
-			});
-
+			await fetchApi("/portal/email", { method: "PATCH", body: JSON.stringify({ email }) });
 			toast.success("Email updated successfully");
 			handleClose();
 		} catch (err: unknown) {
 			console.error("Update email error:", err);
 			toast.error((err as { message?: string }).message || "Failed to update email");
 		} finally {
-			setIsVerifying(false);
 			setIsSubmitting(false);
 			setIsEncrypting(false);
+		}
+	};
+
+	// Step 2: verify OTP then proceed to on-chain update
+	const triggerVerify = async (code: string) => {
+		if (!walletContext.publicKey) return;
+		try {
+			setIsVerifying(true);
+			const verifyResult = await fetchApi<{ verified: boolean; emailVerifiedToken?: string; error?: string }>(
+				"/auth/email/otp/verify",
+				{
+					method: "POST",
+					body: JSON.stringify({ email: pendingEmail, code, walletPubkey: walletContext.publicKey.toBase58() }),
+				},
+			);
+
+			if (!verifyResult.verified) {
+				setOtpError(verifyResult.error || "Incorrect code — please try again");
+				setDigits(["", "", "", "", "", ""]);
+				inputRefs.current[0]?.focus();
+				setIsVerifying(false);
+				return;
+			}
+
+			if (verifyResult.emailVerifiedToken) {
+				saveOtpSession(pendingEmail, walletContext.publicKey.toBase58(), verifyResult.emailVerifiedToken);
+			}
+
+			setIsVerifying(false);
+			await runOnChainUpdate(pendingEmail);
+		} catch (err: unknown) {
+			console.error("Verify OTP error:", err);
+			toast.error((err as { message?: string }).message || "Verification failed");
+		} finally {
+			setIsVerifying(false);
 		}
 	};
 
@@ -307,10 +325,17 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 			{/* Step 2: OTP */}
 			{step === "otp" && (
 				<div className="flex flex-col gap-4">
-					<p className="text-sm text-text-muted">
-						A 6-digit code was sent to{" "}
-						<span className="font-semibold text-text-primary">{maskedEmail}</span>.
-					</p>
+					{otpAlreadySent && otpMinutesRemaining !== undefined ? (
+						<div className="bg-teal/10 border border-teal/20 rounded-xl px-4 py-3 text-xs text-teal text-center">
+							A code was already sent to{" "}
+							<span className="font-semibold">{maskedEmail}</span> — expires in {otpMinutesRemaining} min. Enter it below, or click &ldquo;Resend code&rdquo; for a fresh one.
+						</div>
+					) : (
+						<p className="text-sm text-text-muted">
+							A 6-digit code was sent to{" "}
+							<span className="font-semibold text-text-primary">{maskedEmail}</span>.
+						</p>
+					)}
 
 					{/* Pin boxes */}
 					<div className="flex gap-2 sm:gap-3 justify-center" onPaste={handlePaste}>
