@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AdtivityProvider } from "@/components/providers/AdtivityProvider";
 
 const syne = Syne({
 	variable: "--font-syne",
@@ -74,7 +75,9 @@ export default function RootLayout({
 
 					<WalletConnection>
 						<AuthProvider>
-							<QueryProvider>{children}</QueryProvider>
+							<QueryProvider>
+								<AdtivityProvider>{children}</AdtivityProvider>
+							</QueryProvider>
 						</AuthProvider>
 					</WalletConnection>
 

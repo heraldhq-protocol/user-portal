@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@adtivity/adtivity-sdk": "^1.0.0",
     "@coral-xyz/anchor": "^0.32.1",
     "@herald-protocol/sdk": "^1.8.1",
     "@hookform/resolvers": "^5.2.2",

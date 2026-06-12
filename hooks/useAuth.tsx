@@ -5,6 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import bs58 from "bs58";
 import { toast } from "sonner";
 import { safeStorage } from "@/lib/storage";
+import { identify } from "@adtivity/adtivity-sdk";
 
 /**
  * Basic JWT payload decoder.
@@ -85,6 +86,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			}
 		}
 	}, [token, publicKey]);
+
+	// Identify the connected wallet in Adtivity
+	useEffect(() => {
+		if (publicKey && process.env.NEXT_PUBLIC_ADTIVITY_API_KEY) {
+			try {
+				identify(publicKey.toBase58(), {
+					walletAddress: publicKey.toBase58(),
+				});
+			} catch (err) {
+				console.warn("Adtivity identify failed", err);
+			}
+		}
+	}, [publicKey]);
 
 	const login = async () => {
 		if (!publicKey || !signMessage) {
