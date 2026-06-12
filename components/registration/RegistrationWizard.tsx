@@ -100,9 +100,11 @@ export function RegistrationWizard({ protocolContext }: { protocolContext?: Prot
 			setOtpAlreadySent(res.alreadySent);
 			setOtpMinutesRemaining(res.minutesRemaining);
 			goToStep('verify-email');
-		} catch {
+		} catch (err: unknown) {
 			// Surface error in StepEnterEmail — for now fall through to verify as fallback
-			setOtpAlreadySent(false);
+			const msg = err instanceof Error ? err.message : "";
+			const isAlreadySent = msg.toLowerCase().includes("sent") || msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("too many");
+			setOtpAlreadySent(isAlreadySent);
 			setOtpMinutesRemaining(undefined);
 			goToStep('verify-email');
 		}

@@ -97,9 +97,9 @@ export function StepLogin({ onBack, onComplete }: StepLoginProps) {
 
 			{/* Connected Wallet Info */}
 			{publicKey && connectedWallet && (
-				<div className="mb-8 p-5 bg-card-2 border border-border-2 rounded-xl">
+				<div className="mb-8 p-4 sm:p-5 bg-card-2 border border-border-2 rounded-xl">
 					<div className="flex items-center gap-3">
-						<div className="relative w-10 h-10">
+						<div className="relative w-10 h-10 shrink-0">
 							<Image
 								src={connectedWallet.icon}
 								alt={connectedWallet.name}
@@ -107,15 +107,20 @@ export function StepLogin({ onBack, onComplete }: StepLoginProps) {
 								className="rounded-lg object-contain"
 							/>
 						</div>
-						<div className="flex-1">
-							<p className="font-bold text-text-secondary leading-tight">
+						<div className="flex-1 min-w-0">
+							<p className="font-bold text-text-secondary leading-tight truncate">
 								{connectedWallet.name}
 							</p>
-							<p className="text-[13px] font-mono text-text-muted mt-0.5">
-								{publicKey.toBase58().slice(0, 10)}...{publicKey.toBase58().slice(-10)}
+							<p className="text-[13px] font-mono text-text-muted mt-0.5 truncate">
+								<span className="hidden sm:inline">
+									{publicKey.toBase58().slice(0, 10)}...{publicKey.toBase58().slice(-10)}
+								</span>
+								<span className="inline sm:hidden">
+									{publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
+								</span>
 							</p>
 						</div>
-						<div className="flex flex-col items-end gap-1">
+						<div className="flex flex-col items-end gap-1 shrink-0">
 							<div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
 							<span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
 								Registered

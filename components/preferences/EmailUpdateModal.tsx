@@ -70,7 +70,27 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 	};
 
 	const handleDigitChange = (index: number, value: string) => {
-		const digit = value.replace(/\D/g, "").slice(-1);
+		const cleanValue = value.replace(/\D/g, "");
+
+		if (cleanValue.length > 1) {
+			const next = [...digits];
+			for (let i = 0; i < cleanValue.length && index + i < 6; i++) {
+				next[index + i] = cleanValue[i];
+			}
+			setDigits(next);
+			setOtpError(null);
+
+			const lastFilledIndex = Math.min(index + cleanValue.length - 1, 5);
+			inputRefs.current[lastFilledIndex]?.focus();
+
+			const code = next.join("");
+			if (code.length === 6) {
+				triggerVerify(code);
+			}
+			return;
+		}
+
+		const digit = cleanValue.slice(-1);
 		const next = [...digits];
 		next[index] = digit;
 		setDigits(next);
@@ -138,7 +158,18 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 			if (!result.alreadySent) setCooldown(60);
 			setStep("otp");
 		} catch (err: unknown) {
-			toast.error((err as { message?: string }).message || "Failed to send verification code");
+			const msg = err instanceof Error ? err.message : "";
+			const isAlreadySent = msg.toLowerCase().includes("sent") || msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("too many");
+			if (isAlreadySent) {
+				setPendingEmail(data.newEmail);
+				setMaskedEmail(data.newEmail.replace(/^(.)(.*)(@.*)$/, (_, f, m, e) => f + "*".repeat(m.length) + e));
+				setOtpAlreadySent(true);
+				setOtpMinutesRemaining(undefined);
+				setCooldown(0);
+				setStep("otp");
+			} else {
+				toast.error((err as { message?: string }).message || "Failed to send verification code");
+			}
 		} finally {
 			setIsSending(false);
 		}
@@ -325,10 +356,10 @@ export function EmailUpdateModal({ isOpen, onClose }: EmailUpdateModalProps) {
 			{/* Step 2: OTP */}
 			{step === "otp" && (
 				<div className="flex flex-col gap-4">
-					{otpAlreadySent && otpMinutesRemaining !== undefined ? (
+					{otpAlreadySent ? (
 						<div className="bg-teal/10 border border-teal/20 rounded-xl px-4 py-3 text-xs text-teal text-center">
 							A code was already sent to{" "}
-							<span className="font-semibold">{maskedEmail}</span> — expires in {otpMinutesRemaining} min. Enter it below, or click &ldquo;Resend code&rdquo; for a fresh one.
+							<span className="font-semibold">{maskedEmail}</span>{otpMinutesRemaining != null ? ` — expires in ${otpMinutesRemaining} min` : ''}. Enter it below, or click &ldquo;Resend code&rdquo; for a fresh one.
 						</div>
 					) : (
 						<p className="text-sm text-text-muted">

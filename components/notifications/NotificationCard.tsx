@@ -121,7 +121,7 @@ export function NotificationCard({
 
 	return (
 		<div className={cn(
-			"group relative flex gap-4 items-start p-5 rounded-2xl border backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.2)] h-full overflow-hidden",
+			"group relative flex gap-3 sm:gap-4 items-start p-4 sm:p-5 rounded-2xl border backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.2)] h-full overflow-hidden",
 			status === "failed"
 				? "border-herald-red/20 bg-herald-red/5 hover:border-herald-red/40 hover:bg-herald-red/10"
 				: "border-border bg-card/40 hover:bg-card-2 hover:border-teal/30",
@@ -215,14 +215,14 @@ export function NotificationCard({
 
 			<div className="flex-1 min-w-0 flex flex-col h-full relative z-10">
 				{/* Badge + protocol + time + status */}
-				<div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 mb-2">
+				<div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 mb-2 pr-12 sm:pr-0">
 					<Badge
 						variant={notification.category}
 						className="uppercase px-2.5 py-0.5 text-[10px] tracking-wider font-extrabold shrink-0"
 					>
 						{notification.category}
 					</Badge>
-					<span className="text-[13px] font-bold text-text-secondary truncate tracking-tight min-w-0 max-w-[120px] sm:max-w-none">
+					<span className="text-[13px] font-bold text-text-secondary inline-block truncate tracking-tight min-w-0 max-w-[100px] min-[375px]:max-w-[140px] sm:max-w-none">
 						{notification.protocolId}
 					</span>
 					<div className="flex items-center gap-1.5 ml-auto shrink-0">
@@ -273,7 +273,7 @@ export function NotificationCard({
 				<div className="mb-3">
 					{notification.message ? (
 						<div className="flex flex-col gap-1">
-							<p className="text-[13px] text-text-muted leading-relaxed line-clamp-3">
+							<p className="text-[13px] text-text-muted leading-relaxed line-clamp-3 break-words">
 								{notification.message}
 							</p>
 							{notification.actionUrl && (
@@ -297,7 +297,7 @@ export function NotificationCard({
 
 				{/* Receipt link */}
 				{notification.receiptTx && (
-					<div className="flex items-center gap-2 mt-auto pt-2 border-t border-border/50">
+					<div className="flex items-center flex-wrap gap-2 mt-auto pt-2 border-t border-border/50">
 						<span className="font-mono text-[11px] font-medium text-teal-dim bg-teal/5 px-2 py-0.5 rounded-md border border-teal/10">
 							{truncateAddress(tx, 4)}
 						</span>

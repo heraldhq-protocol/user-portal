@@ -52,8 +52,28 @@ export function StepVerifyEmail({
   }, [cooldown]);
 
   const handleDigitChange = (index: number, value: string) => {
-    // Only accept a single digit
-    const digit = value.replace(/\D/g, '').slice(-1);
+    const cleanValue = value.replace(/\D/g, '');
+    
+    // Support multi-digit pasting or autocomplete in single input box
+    if (cleanValue.length > 1) {
+      const next = [...digits];
+      for (let i = 0; i < cleanValue.length && index + i < 6; i++) {
+        next[index + i] = cleanValue[i];
+      }
+      setDigits(next);
+      setError(null);
+
+      const lastFilledIndex = Math.min(index + cleanValue.length - 1, 5);
+      inputRefs.current[lastFilledIndex]?.focus();
+
+      const code = next.join('');
+      if (code.length === 6) {
+        submitCode(code);
+      }
+      return;
+    }
+
+    const digit = cleanValue.slice(-1);
     const next = [...digits];
     next[index] = digit;
     setDigits(next);
@@ -175,9 +195,9 @@ export function StepVerifyEmail({
       </p>
       <p className="text-sm font-bold text-text-primary mb-4">{maskedEmail}</p>
 
-      {alreadySent && minutesRemaining !== undefined && (
+      {alreadySent && (
         <div className="bg-teal/10 border border-teal/20 rounded-xl px-4 py-3 text-xs text-teal text-center mb-4">
-          A code was already sent — it expires in {minutesRemaining} min. Enter it below, or click &ldquo;Resend code&rdquo; for a fresh one.
+          A code was already sent{minutesRemaining != null ? ` — it expires in ${minutesRemaining} min` : ''}. Enter it below, or click &ldquo;Resend code&rdquo; for a fresh one.
         </div>
       )}
 
