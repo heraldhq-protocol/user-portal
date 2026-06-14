@@ -32,12 +32,14 @@ export function WalletStatusBadge({ className }: WalletStatusBadgeProps) {
 	return (
 		<div
 			className={cn(
-				"inline-flex items-center gap-2.5 px-1 py-1 rounded-full border border-border bg-card",
+				"inline-flex items-center rounded-full transition-all duration-200",
+				"sm:px-2.5 sm:py-1 sm:border sm:border-border sm:bg-card sm:gap-2",
+				"px-0 py-0 border-transparent bg-transparent gap-0",
 				!connected && "opacity-70",
 				className
 			)}
 		>
-			<div className="relative flex h-2 w-2">
+			<div className="relative flex h-2 w-2 shrink-0">
 				{glow && (
 					<span
 						className={cn(
@@ -48,7 +50,7 @@ export function WalletStatusBadge({ className }: WalletStatusBadgeProps) {
 				)}
 				<span className={cn("relative inline-flex rounded-full h-2 w-2", color)} />
 			</div>
-			<span className="hidden xs:block text-xs font-bold text-text-primary tracking-wide">
+			<span className="hidden sm:block text-xs font-bold text-text-primary tracking-wide">
 				{label}
 			</span>
 		</div>
