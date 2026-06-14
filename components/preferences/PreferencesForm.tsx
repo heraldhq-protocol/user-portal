@@ -145,7 +145,7 @@ export function PreferencesForm({ initialValues, isEarlyBeliever }: PreferencesF
 				/>
 			</Card>
 
-			<Button type="submit" className="w-full justify-center mb-8" disabled={isSaving || !isDirty}>
+			<Button type="submit" className="w-full justify-center mb-8" data-adtivity-button-track="Save Preferences" disabled={isSaving || !isDirty}>
 				{isSaving ? "Awaiting Signature..." : "Save changes (requires signature)"}
 			</Button>
 		</form>

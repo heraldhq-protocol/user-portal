@@ -250,6 +250,7 @@ export function StepConnectWallet({
 							whileTap={{ scale: isDisabled ? 1 : 0.98 }}
 							onClick={() => !isDisabled && handleConnect(adapter.name)}
 							disabled={isDisabled}
+							data-adtivity-button-track={`Connect Wallet - ${adapter.name}`}
 							className={cn(
 								"flex items-center gap-2.5 border rounded-xl p-4 cursor-pointer transition-all duration-150",
 								isCurrentWallet
@@ -301,6 +302,7 @@ export function StepConnectWallet({
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
 					onClick={handleNext}
+					data-adtivity-button-track="Continue to Email"
 					className="w-full mt-6 py-3 bg-teal hover:bg-teal/90 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
 				>
 					Continue to Email →

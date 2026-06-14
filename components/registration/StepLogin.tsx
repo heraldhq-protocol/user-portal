@@ -156,6 +156,7 @@ export function StepLogin({ onBack, onComplete }: StepLoginProps) {
 					onClick={handleLogin}
 					disabled={isLoggingIn || isDeleting}
 					size="lg"
+					data-adtivity-button-track="Sign in to Herald"
 					className="w-full justify-center h-[52px] text-base font-bold shadow-lg shadow-teal/10"
 				>
 					{isLoggingIn ? (
