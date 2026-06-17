@@ -1,5 +1,18 @@
 import { Herald } from "@herald-protocol/sdk";
 import { NextResponse } from "next/server";
+import { createHash } from "crypto";
+
+/** Derive a deterministic UUID v4 from a wallet address for idempotency. */
+function walletToUuid(wallet: string): string {
+	const hash = createHash("sha256").update(`herald_welcome:${wallet}`).digest("hex");
+	return [
+		hash.slice(0, 8),
+		hash.slice(8, 12),
+		`4${hash.slice(13, 16)}`,
+		((parseInt(hash.slice(16, 18), 16) & 0x3f) | 0x80).toString(16) + hash.slice(18, 20),
+		hash.slice(20, 32),
+	].join("-");
+}
 
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
 	try {
@@ -54,7 +67,7 @@ export async function POST(req: Request) {
 				"Welcome aboard. Your inbox is private again.",
 			].join("\n"),
 			category: "system",
-			idempotencyKey: `welcome:${wallet}`,
+			idempotencyKey: walletToUuid(wallet),
 		});
 
 		return NextResponse.json({ ok: true });
