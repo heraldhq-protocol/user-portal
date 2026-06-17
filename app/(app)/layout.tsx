@@ -62,20 +62,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
 		const isRegisterPage = pathname.startsWith("/register");
 
+		const encodedRedirect = encodeURIComponent(pathname);
+
 		if (!connected && !isRegisterPage) {
-			router.replace("/");
+			// Not connected (logged out or first visit) — send to register with
+			// the intended destination so we can redirect back after login.
+			router.replace(`/register?redirect=${encodedRedirect}`);
 			return;
 		}
 
 		if (connected && status) {
 			if (!status.registered && !isRegisterPage) {
-				router.replace("/register");
+				// Wallet connected but never registered — preserve destination
+				// so after completing registration the user lands where they wanted.
+				router.replace(`/register?redirect=${encodedRedirect}`);
 				return;
 			}
 			if (status.registered && !isAuthenticated && !isRegisterPage) {
 				// Session expired — preserve the intended destination so we can
 				// redirect back after a successful login.
-				router.replace(`/register?redirect=${encodeURIComponent(pathname)}`);
+				router.replace(`/register?redirect=${encodedRedirect}`);
 				return;
 			}
 		}
