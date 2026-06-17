@@ -31,13 +31,13 @@ export function useWalletRegistrationStatus() {
 					return { registered: false };
 				}
 
-				const hasNotifKey = 
-					account.notificationKeyVersion && 
-					account.notificationKeyVersion > 0 && 
-					account.sealedX25519Pubkey && 
+				const hasNotifKey =
+					account.notificationKeyVersion &&
+					account.notificationKeyVersion > 0 &&
+					account.sealedX25519Pubkey &&
 					!account.sealedX25519Pubkey.every((b: number) => b === 0);
 
-				return { 
+				return {
 					registered: true,
 					notificationKey: hasNotifKey ? {
 						version: account.notificationKeyVersion,
@@ -46,11 +46,16 @@ export function useWalletRegistrationStatus() {
 					} : null
 				};
 			} catch (err) {
-				console.error("Failed to get registration status:", err);
-				throw err;
+				// A fetch error for a brand-new wallet (no on-chain account yet) must
+				// not block the wizard. Treat any RPC/SDK error as "not registered" so
+				// the user can proceed; re-registration on an existing wallet will
+				// fail on-chain with "already in use" which is already handled.
+				console.warn("Failed to get registration status — treating as unregistered:", err);
+				return { registered: false };
 			}
 		},
 		enabled: !!publicKey,
 		staleTime: 30000,
+		retry: false,
 	});
 }
