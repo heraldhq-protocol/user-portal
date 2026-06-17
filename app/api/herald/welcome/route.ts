@@ -55,16 +55,16 @@ export async function POST(req: Request) {
 
 		await herald.notify({
 			wallet,
-			subject: "Welcome to Herald — Your first notification 🔔",
+			subject: "Welcome to Herald, your first notification is here 🔔",
 			body: [
-				"You're all set! Herald will now deliver privacy-preserving notifications from DeFi protocols directly to your inbox — without any protocol ever seeing your email address.",
+				"You're all set! Herald will now deliver notifications from DeFi protocols straight to your inbox, without any protocol ever seeing your email address.",
 				"",
-				"**What's next?**",
+				"**What to do next**",
 				"- [Discover protocols](https://notify.useherald.xyz/discover) and subscribe to the ones you use",
-				"- [Manage your preferences](https://notify.useherald.xyz/preferences) — channels, quiet hours, and more",
-				"- Connect Telegram for instant real-time alerts",
+				"- [Set your preferences](https://notify.useherald.xyz/preferences), including channels, quiet hours and more",
+				"- Connect Telegram if you'd like real-time alerts sent straight to your phone",
 				"",
-				"Welcome aboard. Your inbox is private again.",
+				"Welcome aboard. Your inbox is yours again.",
 			].join("\n"),
 			category: "system",
 			idempotencyKey: walletToUuid(wallet),
