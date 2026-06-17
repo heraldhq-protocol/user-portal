@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/Button";
@@ -20,6 +21,13 @@ export function StepSuccess({
 	const [countdown, setCountdown] = useState(REDIRECT_SECONDS);
 	const [copied, setCopied] = useState(false);
 
+	const searchParams = useSearchParams();
+	const rawRedirect = searchParams.get("redirect");
+	// Sanitise: only allow internal paths (must start with "/" but not "//")
+	const redirectTo = rawRedirect?.startsWith("/") && !rawRedirect.startsWith("//")
+		? rawRedirect
+		: null;
+
 	const rpcCluster = process.env.NEXT_PUBLIC_RPC_CLUSTER?.replace(/['"]+/g, "").trim() || "devnet";
 	const cluster = rpcCluster === "localnet" ? "custom&customUrl=http://127.0.0.1:8899" : rpcCluster;
 	const solscanUrl = `https://solscan.io/tx/${txSignature}${rpcCluster !== "mainnet-beta" ? `?cluster=${cluster}` : ""}`;
@@ -29,11 +37,11 @@ export function StepSuccess({
 
 	const handleRedirect = useCallback(() => {
 		if (alreadyRegistered) {
-			window.location.href = "/notifications";
+			window.location.href = redirectTo ?? "/notifications";
 		} else {
 			window.location.reload();
 		}
-	}, [alreadyRegistered]);
+	}, [alreadyRegistered, redirectTo]);
 
 	const redirectRef = useRef(handleRedirect);
 	useEffect(() => {
@@ -154,16 +162,18 @@ export function StepSuccess({
 			{/* CTAs */}
 			{alreadyRegistered ? (
 				<div className="flex flex-col gap-3">
-					<Link href="/notifications" className="w-full">
+					<Link href={redirectTo ?? "/notifications"} className="w-full">
 						<Button className="w-full justify-center h-[52px] text-base font-bold shadow-lg shadow-teal/10">
-							View notification history →
+							{redirectTo ? "Continue →" : "View notification history →"}
 						</Button>
 					</Link>
-					<Link href="/preferences" className="w-full">
-						<button className="w-full py-3 text-sm font-semibold text-text-muted hover:text-text-secondary transition-colors underline underline-offset-4 decoration-border-2 hover:decoration-teal/50">
-							Update notification preferences
-						</button>
-					</Link>
+					{redirectTo !== "/preferences" && (
+						<Link href="/preferences" className="w-full">
+							<button className="w-full py-3 text-sm font-semibold text-text-muted hover:text-text-secondary transition-colors underline underline-offset-4 decoration-border-2 hover:decoration-teal/50">
+								Update notification preferences
+							</button>
+						</Link>
+					)}
 				</div>
 			) : (
 				<div className="flex flex-col gap-3">

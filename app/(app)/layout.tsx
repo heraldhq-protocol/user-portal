@@ -73,7 +73,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 				return;
 			}
 			if (status.registered && !isAuthenticated && !isRegisterPage) {
-				router.replace("/register");
+				// Session expired — preserve the intended destination so we can
+				// redirect back after a successful login.
+				router.replace(`/register?redirect=${encodeURIComponent(pathname)}`);
 				return;
 			}
 		}
