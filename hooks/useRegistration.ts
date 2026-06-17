@@ -6,7 +6,7 @@ import { encryptEmail, sealNotificationKey } from "@/lib/crypto";
 import { Transaction } from "@solana/web3.js";
 import type { RegistrationStep } from "@/types";
 import { useWalletRegistrationStatus } from "./useWalletRegistrationStatus";
-import { useSolBalance } from "./useSolBalance";
+import { useSolBalance, MIN_REGISTRATION_SOL } from "./useSolBalance";
 
 type RegistrationPhase = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -87,7 +87,12 @@ export function useRegistration(): UseRegistrationReturn {
 
 		try {
 			// 2. Check SOL balance before proceeding (airdrop on testnets if needed)
-			await checkAndAirdrop(0.01);
+			const funded = await checkAndAirdrop(MIN_REGISTRATION_SOL);
+			if (!funded) {
+				throw new Error(
+					`insufficient_balance: You don't have enough SOL to sign this transaction. You need at least ${MIN_REGISTRATION_SOL} SOL to cover account rent and fees.`
+				);
+			}
 
 			await runRegistration();
 		} catch (err: unknown) {
@@ -202,7 +207,9 @@ export function useRegistration(): UseRegistrationReturn {
 				err.name === "WalletSignTransactionError" ||
 				err.name === "WalletSignMessageError";
 
-			if (isRejection) {
+			if (err.message.startsWith("insufficient_balance:")) {
+				errorMsg = err.message.replace("insufficient_balance:", "");
+			} else if (isRejection) {
 				errorMsg = "You rejected the signature request. Please try again.";
 			} else if (err.message.includes("timeout")) {
 				errorMsg = "Transaction timed out. Please try again.";

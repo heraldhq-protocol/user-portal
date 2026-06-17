@@ -2,13 +2,32 @@
 
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+/** Minimum SOL required to cover account rent + transaction fees for registration. */
+export const MIN_REGISTRATION_SOL = 0.005;
+const MIN_REGISTRATION_LAMPORTS = MIN_REGISTRATION_SOL * 1e9;
 
 export function useSolBalance() {
 	const { connection } = useConnection();
 	const { publicKey } = useWallet();
 
+	const { data: balanceLamports, isLoading: isLoadingBalance } = useQuery({
+		queryKey: ["solBalance", publicKey?.toBase58()],
+		queryFn: () => connection.getBalance(publicKey!),
+		enabled: !!publicKey,
+		staleTime: 15_000,
+		refetchInterval: 30_000,
+	});
+
+	const balanceSol = balanceLamports != null ? balanceLamports / 1e9 : null;
+
+	// null while still loading, true/false once we have a reading
+	const hasSufficientBalance =
+		balanceLamports != null ? balanceLamports >= MIN_REGISTRATION_LAMPORTS : null;
+
 	const checkAndAirdrop = useCallback(
-		async (minBalance = 0.01) => {
+		async (minBalance = MIN_REGISTRATION_SOL) => {
 			if (!publicKey) return false;
 
 			const balance = await connection.getBalance(publicKey);
@@ -29,6 +48,7 @@ export function useSolBalance() {
 						return false;
 					}
 				}
+				// Mainnet — cannot airdrop, signal insufficient balance
 				return false;
 			}
 			return true;
@@ -36,5 +56,5 @@ export function useSolBalance() {
 		[connection, publicKey]
 	);
 
-	return { checkAndAirdrop };
+	return { checkAndAirdrop, balanceSol, isLoadingBalance, hasSufficientBalance };
 }

@@ -69,8 +69,13 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
 			// 2. Sign, send, and confirm — retries up to 3× if blockhash expires
 			await sendAndConfirmWithRetry(serializedTransaction);
 
-			// 3. Cleanup off-chain data
-			await fetchApi("/portal/account", { method: "DELETE" });
+			// 3. Best-effort off-chain cleanup — on-chain account is already gone so
+			//    a backend error here must not block logout or surface as a failure.
+			try {
+				await fetchApi("/portal/account", { method: "DELETE" });
+			} catch (cleanupErr) {
+				console.warn("[delete-account] Off-chain cleanup failed (non-fatal):", cleanupErr);
+			}
 
 			toast.success("Account permanently deleted");
 			logout();

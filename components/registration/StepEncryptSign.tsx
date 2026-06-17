@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback } from "react";
+import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
+import { useSolBalance, MIN_REGISTRATION_SOL } from "@/hooks/useSolBalance";
 
 interface Prefs {
 	optInAll: boolean;
@@ -46,8 +48,7 @@ export function StepEncryptSign({
 	encryptPhase,
 	isRegistering,
 }: StepEncryptSignProps) {
-	// const [encryptProgress, setEncryptProgress] = useState(0);
-	// const [isSigning, setIsSigning] = useState(false);
+	const { balanceSol, isLoadingBalance, hasSufficientBalance } = useSolBalance();
 
 	const handleSign = useCallback(() => {
 		// setIsSigning(true);
@@ -140,12 +141,32 @@ export function StepEncryptSign({
 				})}
 			</div>
 
+			{/* Insufficient SOL balance banner */}
+			{hasSufficientBalance === false && (
+				<div className="flex items-start gap-3 bg-herald-red/10 border border-herald-red/30 rounded-xl px-4 py-3 mb-4">
+					<AlertTriangle className="w-4 h-4 text-herald-red shrink-0 mt-0.5" />
+					<div className="text-sm">
+						<p className="font-semibold text-herald-red mb-0.5">Insufficient SOL balance</p>
+						<p className="text-text-muted leading-relaxed">
+							You need at least <span className="font-semibold text-text-secondary">{MIN_REGISTRATION_SOL} SOL</span> to cover account rent and transaction fees.{" "}
+							{balanceSol !== null && (
+								<>Your current balance is <span className="font-semibold text-text-secondary">{balanceSol.toFixed(4)} SOL</span>.</>
+							)}
+						</p>
+					</div>
+				</div>
+			)}
+
 			{/* Actions */}
 			<div className="flex gap-3">
 				<Button variant="secondary" onClick={onBack} disabled={isRegistering}>
 					← Back
 				</Button>
-				<Button className="flex-1" onClick={handleSign} disabled={isRegistering}>
+				<Button
+					className="flex-1"
+					onClick={handleSign}
+					disabled={isRegistering || isLoadingBalance || hasSufficientBalance === false}
+				>
 					{isRegistering ? "Signing..." : "Sign transaction →"}
 				</Button>
 			</div>
