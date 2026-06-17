@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Check, X, ChevronRight } from "lucide-react";
+import { Check, X, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { fetchApi } from "@/lib/api";
 import Link from "next/link";
+import { useWelcomeNotification, isWelcomeDone } from "@/hooks/useWelcomeNotification";
 
 interface OnboardingStep {
   id: string;
@@ -37,6 +38,7 @@ function setDismissed() {
 
 export function OnboardingChecklist() {
   const [dismissed, setDismissedState] = useState(() => isDismissed());
+  const [welcomeDone, setWelcomeDone] = useState(() => isWelcomeDone());
 
   const { data } = useQuery<OnboardingStatus>({
     queryKey: ["onboardingStatus"],
@@ -44,14 +46,34 @@ export function OnboardingChecklist() {
     staleTime: 60_000,
   });
 
+  const { mutate: triggerWelcome, isPending: isTriggeringWelcome } = useWelcomeNotification();
+
   const handleDismiss = () => {
     setDismissed();
     setDismissedState(true);
   };
 
-  if (dismissed || !data || data.allDone) return null;
+  const handleGetFirstNotification = () => {
+    triggerWelcome(undefined, {
+      onSuccess: () => setWelcomeDone(true),
+    });
+  };
 
-  const pct = Math.round((data.progress / data.steps.length) * 100);
+  if (dismissed || !data) return null;
+
+  // Compose server steps + local welcome step
+  const welcomeStep: OnboardingStep = {
+    id: "first_notification",
+    label: "Get your first notification",
+    done: welcomeDone,
+  };
+  const allSteps = [...data.steps, welcomeStep];
+  const completedCount = allSteps.filter((s) => s.done).length;
+  const effectiveAllDone = completedCount === allSteps.length;
+
+  if (effectiveAllDone) return null;
+
+  const pct = Math.round((completedCount / allSteps.length) * 100);
 
   return (
     <AnimatePresence>
@@ -69,7 +91,7 @@ export function OnboardingChecklist() {
               Get started with Herald
             </p>
             <p className="text-xs text-text-muted mt-0.5">
-              {data.progress} of {data.steps.length} steps complete
+              {completedCount} of {allSteps.length} steps complete
             </p>
           </div>
           <button
@@ -93,7 +115,53 @@ export function OnboardingChecklist() {
 
         {/* Steps */}
         <div className="flex flex-col gap-2">
-          {data.steps.map((step) => {
+          {allSteps.map((step) => {
+            if (step.id === "first_notification") {
+              return (
+                <div
+                  key={step.id}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-xl text-sm",
+                    step.done ? "cursor-default" : ""
+                  )}
+                >
+                  <div className={cn(
+                    "w-5 h-5 rounded-full border flex items-center justify-center shrink-0",
+                    step.done
+                      ? "bg-teal border-teal"
+                      : "border-border-2 bg-transparent"
+                  )}>
+                    {step.done && <Check className="size-3 text-navy" strokeWidth={3} />}
+                  </div>
+                  <span className={cn(
+                    "flex-1",
+                    step.done ? "text-text-muted line-through" : "text-text-secondary"
+                  )}>
+                    {step.label}
+                  </span>
+                  {!step.done && (
+                    <button
+                      onClick={handleGetFirstNotification}
+                      disabled={isTriggeringWelcome}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-teal hover:text-teal-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                    >
+                      {isTriggeringWelcome ? (
+                        <>
+                          <Loader2 className="size-3 animate-spin" />
+                          Sending…
+                        </>
+                      ) : (
+                        <>
+                          Send it
+                          <ChevronRight className="size-3" />
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              );
+            }
+
             const href = STEP_LINKS[step.id] ?? "/preferences";
             return (
               <Link

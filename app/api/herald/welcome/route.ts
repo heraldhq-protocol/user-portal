@@ -1,0 +1,75 @@
+import { Herald } from "@herald-protocol/sdk";
+import { NextResponse } from "next/server";
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+	try {
+		const base64Url = token.split(".")[1];
+		if (!base64Url) return null;
+		const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+		return JSON.parse(Buffer.from(base64, "base64").toString("utf-8"));
+	} catch {
+		return null;
+	}
+}
+
+export async function POST(req: Request) {
+	const authHeader = req.headers.get("authorization");
+	if (!authHeader?.startsWith("Bearer ")) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+
+	const token = authHeader.slice(7);
+	const payload = decodeJwtPayload(token);
+	const wallet = payload?.walletPubkey as string | undefined;
+
+	if (!wallet) {
+		return NextResponse.json({ error: "Invalid token — no walletPubkey claim" }, { status: 401 });
+	}
+
+	const apiKey = process.env.HERALD_API_KEY;
+	if (!apiKey) {
+		console.error("[herald/welcome] HERALD_API_KEY is not set");
+		return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+	}
+
+	try {
+		const herald = new Herald({
+			apiKey,
+			...(process.env.HERALD_GATEWAY_BASE_URL
+				? { baseUrl: process.env.HERALD_GATEWAY_BASE_URL }
+				: {}),
+		});
+
+		await herald.notify({
+			wallet,
+			subject: "Welcome to Herald — Your first notification 🔔",
+			body: [
+				"You're all set! Herald will now deliver privacy-preserving notifications from DeFi protocols directly to your inbox — without any protocol ever seeing your email address.",
+				"",
+				"**What's next?**",
+				"- [Discover protocols](https://notify.useherald.xyz/discover) and subscribe to the ones you use",
+				"- [Manage your preferences](https://notify.useherald.xyz/preferences) — channels, quiet hours, and more",
+				"- Connect Telegram for instant real-time alerts",
+				"",
+				"Welcome aboard. Your inbox is private again.",
+			].join("\n"),
+			category: "system",
+			idempotencyKey: `welcome:${wallet}`,
+		});
+
+		return NextResponse.json({ ok: true });
+	} catch (err: unknown) {
+		const errMsg = err instanceof Error ? err.message : String(err);
+
+		// opted_out and duplicate are acceptable — idempotency is working
+		if (
+			errMsg.toLowerCase().includes("opted_out") ||
+			errMsg.toLowerCase().includes("duplicate")
+		) {
+			return NextResponse.json({ ok: true });
+		}
+
+		console.error("[herald/welcome] Failed to send welcome notification:", err);
+		return NextResponse.json({ ok: false, error: errMsg }, { status: 500 });
+	}
+}

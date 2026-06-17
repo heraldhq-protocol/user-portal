@@ -5,9 +5,11 @@ import { cn } from "@/lib/utils";
 
 interface WalletStatusBadgeProps {
 	className?: string;
+	/** Show only the status dot — no pill border, background, or label. */
+	compact?: boolean;
 }
 
-export function WalletStatusBadge({ className }: WalletStatusBadgeProps) {
+export function WalletStatusBadge({ className, compact = false }: WalletStatusBadgeProps) {
 	const { connected, connecting } = useWallet();
 	const { data: status, isLoading } = useWalletRegistrationStatus();
 
@@ -33,8 +35,8 @@ export function WalletStatusBadge({ className }: WalletStatusBadgeProps) {
 		<div
 			className={cn(
 				"inline-flex items-center rounded-full transition-all duration-200",
-				"sm:px-2.5 sm:py-1 sm:border sm:border-border sm:bg-card sm:gap-2",
-				"px-0 py-0 border-transparent bg-transparent gap-0",
+				!compact && "px-2.5 py-1 border border-border bg-card gap-2",
+				compact && "px-0 py-0 border-transparent bg-transparent gap-0",
 				!connected && "opacity-70",
 				className
 			)}
@@ -50,9 +52,11 @@ export function WalletStatusBadge({ className }: WalletStatusBadgeProps) {
 				)}
 				<span className={cn("relative inline-flex rounded-full h-2 w-2", color)} />
 			</div>
-			<span className="hidden sm:block text-xs font-bold text-text-primary tracking-wide">
-				{label}
-			</span>
+			{!compact && (
+				<span className="text-xs font-bold text-text-primary tracking-wide">
+					{label}
+				</span>
+			)}
 		</div>
 	);
 }
